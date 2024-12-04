@@ -1,0 +1,23 @@
+[build-system]
+    requires = ["setuptools>=42", "wheel"]
+    build-backend = "setuptools.build_meta"
+
+    [tool.setuptools]
+    py-modules = ["crispy"]
+
+    [project]
+    name = "crispy"
+    version = "0.0.0"
+    description = "crispy - a CRystal population metric InSpector written in PYthon."
+    authors = [
+      { name = "{Axel Henningsson}", email = "{nilsaxelhenningsson@gmail.com}" }
+    ]
+    dependencies = ["numpy",
+                    "numba",
+                    "scipy",
+                    "matplotlib",
+                    "meshio",
+                    "hdf5plugin",
+                    "h5py",
+                    "ImageD11",
+                    ]
