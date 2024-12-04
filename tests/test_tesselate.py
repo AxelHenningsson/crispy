@@ -1,46 +1,35 @@
 import unittest
 
-import ImageD11.grain
-import ImageD11.unitcell
-import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 
 import crispy
 
 
 class TestTesselate(unittest.TestCase):
-
     def setUp(self):
         self.debug = False
+        np.random.seed(42)
 
     def test_tesselate(self):
         grains = crispy.assets.grainmap_id11()
+        mesh = crispy.tesselate.voronoi(grains)
+        self.assertEqual(np.max(mesh.cell_data["grain_id"]), len(grains) - 1)
+        self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)
 
-        x, y, z = np.array([g.translation for g in grains]).T
-        xg = np.linspace(x.min(), x.max(), 16)
-        yg = np.linspace(y.min(), y.max(), 16)
-        zg = np.linspace(z.min(), z.max(), 16)
-        tesselation = crispy.tesselate.voroni(grains, (xg, yg, zg))
+        points = np.random.rand(100, 3)
+        mesh = crispy.tesselate.voronoi(points)
+        self.assertEqual(np.max(mesh.cell_data["grain_id"]), points.shape[0] - 1)
+        self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)
+        self.assertEqual(np.min(mesh.cell_data["surface_grain"]), 0)
 
-        self.assertTrue(isinstance(tesselation, np.ndarray))
-        np.testing.assert_allclose(np.unique(tesselation), np.arange(0, len(grains)))
-        self.assertEqual(tesselation.shape[0], len(xg))
-        self.assertEqual(tesselation.shape[1], len(yg))
-        self.assertEqual(tesselation.shape[2], len(zg))
+        # print(mesh.points)
+        # mask = mesh.cell_data["grain_id"][0] == 1
+        # print(mesh.points.shape)
+        # print(np.array(mesh.cells_dict["polygon"]).shape)
+        # simplices = np.array(mesh.cells_dict["polygon"])[mask]
+        # faces = mesh.points[simplices]
+        # print(simplices.shape)
 
-        seeds = np.random.rand(10, 3)
-        x, y, z = seeds.T
-        xg = np.linspace(x.min(), x.max(), 16)
-        yg = np.linspace(y.min(), y.max(), 16)
-        zg = np.linspace(z.min(), z.max(), 16)
-        tesselation = crispy.tesselate.voroni(seeds, (xg, yg, zg))
-
-        self.assertTrue(isinstance(tesselation, np.ndarray))
-        np.testing.assert_allclose(np.unique(tesselation), np.arange(0, len(seeds)))
-        self.assertEqual(tesselation.shape[0], len(xg))
-        self.assertEqual(tesselation.shape[1], len(yg))
-        self.assertEqual(tesselation.shape[2], len(zg))
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,9 +11,9 @@ import crispy.read
 import ImageD11.unitcell
 import crispy.tesselate
 import crispy.vizualise
+
 _root_path = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", ".."))
 _asset_path = os.path.join(_root_path, "assets")
-
 
 def grainmap_id11():
     filename = os.path.join(_asset_path, "FeAu_0p5_tR_ff1_grains.h5")

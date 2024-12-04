@@ -1,36 +1,57 @@
-import warnings
-
-import ImageD11.grain
+import meshio
 import numpy as np
-from numba import njit
-
-def mesh_voronoi():
-    # TODO: this is a draft
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from scipy.spatial import ConvexHull, HalfspaceIntersection
-    import meshio
+from scipy.spatial import ConvexHull, HalfspaceIntersection
 
 
-    np.random.seed(42)  # For reproducibility
-    # points = np.array([[0.3,0.3,0.3], [-0.3,-0.3,-0.3]])
-    points = np.random.rand(10000, 3) - 0.5
-    points[:, 2] *= 2
+def _extract_bounds(seeds, bounds):
+    """Get bounding box for tesselation.
 
-    xmin, xmax = -0.5, 0.5
-    ymin, ymax = -0.5, 0.5
-    zmin, zmax = -1, 1
+    Args:
+        points (:obj:`numpy array`): Numpy array of shape=(N,3) specifying the seeds
+        bounds (:obj:`list` of :obj:`tuple`, optional): Bounds for the tesselation
 
-    import cProfile
-    import pstats
-    import time
+    Returns:
+        :obj:`tuple`: Tuple of the bounds in x, y, z dimensions
+    """
+    if bounds is None:
+        xmin, xmax = seeds[:, 0].min(), seeds[:, 0].max()
+        ymin, ymax = seeds[:, 1].min(), seeds[:, 1].max()
+        zmin, zmax = seeds[:, 2].min(), seeds[:, 2].max()
 
-    pr = cProfile.Profile()
-    pr.enable()
-    t1 = time.perf_counter()
+        epsilon = 1e-8
+        xmax += epsilon
+        xmin -= epsilon
+        ymax += epsilon
+        ymin -= epsilon
+        zmax += epsilon
+        zmin -= epsilon
 
-    dmap = []
-    nmap = []
+    else:
+        xmin, xmax = bounds[0]
+        ymin, ymax = bounds[1]
+        zmin, zmax = bounds[2]
+    print(xmin, xmax, ymin, ymax, zmin, zmax)
+    return xmin, xmax, ymin, ymax, zmin, zmax
+
+
+def _get_plane_maps(points):
+    """Get distance and normal maps for each point in the tesselation.
+
+    Args:
+        points (:obj:`numpy array`): Numpy array of shape=(N,3) specifying the seeds
+
+    Returns:
+        :obj:`tuple`: Tuple of the distance and normal maps for each point in the
+                tesselation,
+            dmap, nmap, of shapes (N, N-1) and (N, N-1, 3) respectively. The dmap
+                contains the
+            distances of each point to all other points in the tesselation, while the
+                nmap contains the normal vectors of the planes defined by each point and
+                all other points in the tesselation such that the normal vector is
+                pointing towards the other point.
+    """
+    dmap = np.zeros((points.shape[0], points.shape[0] - 1))
+    nmap = np.zeros((points.shape[0], points.shape[0] - 1, 3))
     for i in range(points.shape[0]):
         x1 = points[i]
         v = points - x1
@@ -38,267 +59,197 @@ def mesh_voronoi():
         m = norm != 0
         norm = norm[m]
         v = v[m]
-        dmap.append(norm)
-        nmap.append(v / norm[:, np.newaxis])
-    dmap = np.array(dmap)
-    nmap = np.array(nmap)
+        dmap[i] = norm
+        nmap[i] = v / norm[:, np.newaxis]
+    return dmap, nmap
 
-    t2 = time.perf_counter()
-    pr.disable()
-    pr.dump_stats("tmp_profile_dump")
-    ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
-    ps.print_stats(15)
-    print("\n\nCPU time is : ", t2 - t1, "s")
 
-    # Stacked Inequalities of the form Ax + b <= 0 in format [A; b]
+def _get_halfspaces(point, distance, normals, bounds):
+    """Get halfspaces for each point in the tesselation.
 
-    simplices = []
-    vertices = []
-    grain_id = []
-    surface_grain = []
-    ms = 0
-    for i in range(len(points)):
-        A = nmap[i]
-        b = dmap[i] / 2.0
-        x, y, z = points[i]
+    These are stacked inequalities of the form Ax - b >= 0, where A is the normal
+    and b is the distance to the origin of the plane.
 
-        limits = np.array(
-            [
-                [1, 0, 0, np.abs(xmax) - x],
-                [-1, 0, 0, np.abs(xmin) + x],
-                [0, 1, 0, np.abs(ymin) - y],
-                [0, -1, 0, np.abs(ymax) + y],
-                [0, 0, 1, np.abs(zmin) - z],
-                [0, 0, -1, np.abs(zmax) + z],
-            ]
-        )
+    Args:
+        point (:obj:`numpy array`): Numpy array of shape=(3,) specifying the seed
+        distance (:obj:`numpy array`): Numpy array of shape=(N-1,) specifying the
+            distances of each point to all other points in the tesselation
+        normals (:obj:`numpy array`): Numpy array of shape=(N-1,3) specifying the
+            normal vectors of the planes defined by each point and all other points
+            in the tesselation.
+        bounds (:obj:`tuple`): Tuple of the bounds in x, y, z dimensions
 
-        limits[:, -1] *= -1
-        halfspaces = np.hstack((A, -b.reshape(len(b), 1)))
-        halfspaces = np.vstack((halfspaces, limits))
-        interior_point = np.array([0, 0, 0])
+    Returns:
+        :obj:`numpy array`: Numpy array of shape=(N,4) specifying the halfspaces
+            i.e the [A; b] array.
+    """
+    A = normals
+    b = distance / 2.0
+    x, y, z = point
 
-        hs = HalfspaceIntersection(halfspaces, interior_point)
-        hull = ConvexHull(hs.intersections)
+    xmin, xmax, ymin, ymax, zmin, zmax = bounds
 
-        verts = hs.intersections + points[i]
-        vertices.append(verts)
-        simplices.append(hull.simplices + ms)
-        ms += np.max(hull.simplices) + 1
+    limits = np.array(
+        [
+            [1, 0, 0, np.abs(xmax) - x],
+            [-1, 0, 0, np.abs(xmin) + x],
+            [0, 1, 0, np.abs(ymax) - y],
+            [0, -1, 0, np.abs(ymin) + y],
+            [0, 0, 1, np.abs(zmax) - z],
+            [0, 0, -1, np.abs(zmin) + z],
+        ]
+    )
 
-        grain_id.extend([i] * len(hull.simplices))
+    limits[:, -1] *= -1
+    halfspaces = np.hstack((A, -b.reshape(len(b), 1)))
+    halfspaces = np.vstack((halfspaces, limits))
+    return halfspaces
 
-        if (
-            np.abs(verts.T[0].max() - xmax) < 1e-8
-            or np.abs(verts.T[1].max() - ymax) < 1e-8
-            or np.abs(verts.T[2].max() - zmax) < 1e-8
-            or np.abs(verts.T[0].min() - xmin) < 1e-8
-            or np.abs(verts.T[1].min() - ymin) < 1e-8
-            or np.abs(verts.T[2].min() - zmin) < 1e-8
-        ):
-            surface_grain.extend([1] * len(hull.simplices))
-        else:
-            surface_grain.extend([0] * len(hull.simplices))
 
+def _is_on_boundary(verts, bounds):
+    """Check if a polyhedron is on the boundary of the tesselation.
+
+    Args:
+        verts (:obj:`numpy array`): Numpy array of shape=(N,3) specifying the vertices
+            of the polyhedron
+        bounds (:obj:`tuple`): Tuple of the bounds in x, y, z dimensions
+
+    Returns:
+        :obj:`int`: 1 if the polyhedron is on the boundary of the tesselation,
+            0 otherwise.
+    """
+    xmin, xmax, ymin, ymax, zmin, zmax = bounds
+    return int(
+        np.abs(verts.T[0].max() - xmax) < 1e-8
+        or np.abs(verts.T[1].max() - ymax) < 1e-8
+        or np.abs(verts.T[2].max() - zmax) < 1e-8
+        or np.abs(verts.T[0].min() - xmin) < 1e-8
+        or np.abs(verts.T[1].min() - ymin) < 1e-8
+        or np.abs(verts.T[2].min() - zmin) < 1e-8
+    )
+
+
+def _build_mesh(vertices, simplices, grain_id, surface_grain):
+    """construct a mesh object from the vertices and simplices.
+
+    Args:
+        vertices (:obj:`list` of :obj:`numpy array`): List of numpy arrays
+            of shape=(N,3)
+            specifying the vertices of each polyhedron
+        simplices (:obj:`list` of :obj:`numpy array`): List of numpy arrays
+            of shape=(M,3)
+            specifying the simplices of each polyhedron
+        grain_id (:obj:`list` of :obj:`int`): List of integers specifying the
+            grain id of each polyhedron
+        surface_grain (:obj:`list` of :obj:`int`): List of integers specifying if
+            the polyhedron is on the boundary
+
+    Returns:
+        :obj:`meshio.Mesh`: Mesh object of the tesselation.
+    """
     vertices = np.concatenate(vertices)
     simplices = np.concatenate(simplices)
-
-    cells = [("polygon", simplices)]
     mesh = meshio.Mesh(
         vertices,
-        cells=cells,
+        cells=[("polygon", simplices)],
         cell_data={"grain_id": [grain_id], "surface_grain": [surface_grain]},
     )
-    mesh.write("myhull.vtk")
+    return mesh
 
 
-def voroni(seeds, coord):
-    """Voroni Tesselate a set of seeds into a 3D voxel volume.
+def _get_polyhedron(halfspaces, point):
+    """Get the polyhedron defined by the halfspaces.
+
+    Args:
+        halfspaces (:obj:`numpy array`): Numpy array of shape=(N,4) specifying the
+            halfspaces
+        point (:obj:`numpy array`): Numpy array of shape=(3,) specifying the seed
+
+    Returns:
+        :obj:`tuple` of :obj:`numpy array`: Tuple of the vertices and simplices
+            of the polyhedron
+    """
+    hs = HalfspaceIntersection(halfspaces, interior_point=np.array([0, 0, 0]))
+    hull = ConvexHull(hs.intersections)
+    vertices = hs.intersections + point
+    simplices = hull.simplices
+    return vertices, simplices
+
+
+def _extract_points(seeds):
+    """Extract the seed points from the input.
 
     Args:
         seeds (:obj:`numpy array` or :obj:`list` of :obj:`ImageD11.grain.grain`):
             List of grains or a numpy array of shape=(N,3) specifying the seed
             coordinates of the voroni tesselation.
-        coord (:obj:`tuple` of :obj:`numpy array`): tuple of x,y,z 1D numpy
-            coordinate arrays which define the mesh of voxels that will be
-            deployed during voroni tessselation.
 
     Returns:
-        :obj:`numpy array`: The tesselated voxel volume of shape=(len(x), len(y), len(z))
-            of type uint16. Each value in the array corresponds to the index in of the
-            corresponding seed.
+        :obj:`numpy array`: Numpy array of shape=(N,3) specifying the seeds
     """
-    if isinstance(seeds[0], ImageD11.grain.grain):
-        seed_points = np.array([g.translation for g in seeds])
-    elif isinstance(seeds, np.ndarray):
-        seed_points = seeds
+    if isinstance(seeds, np.ndarray):
+        return seeds
+    elif isinstance(seeds, list):
+        return np.array([g.translation for g in seeds])
     else:
-        raise ValueError("seeds must be ImageD11.grain.grain or nump.ndarray")
-
-    seed_labels = np.arange(0, seed_points.shape[0], dtype=np.int16)
-
-    X, Y, Z = np.meshgrid(*coord, indexing="ij")
-    tesselation = label_volume(X, Y, Z, seed_labels, seed_points)
-
-    if len(np.unique(tesselation)) != len(seed_labels):
-        warnings.warn("Tesselation resolution is too coase to capture all grains!")
-
-    return tesselation
-
-@njit
-def label_volume(X, Y, Z, seed_labels, seed_points):
-    """Do the actual tesselation."""
-    labeled_volume = np.ones(X.shape, dtype=np.uint16)
-    for i in range(X.shape[0]):
-        for j in range(X.shape[1]):
-            for k in range(X.shape[2]):
-                x = np.array([X[i, j, k], Y[i, j, k], Z[i, j, k]])
-                a = seed_points - x
-                labeled_volume[i, j, k] = seed_labels[np.argmin(np.sum(a * a, axis=1))]
-    return labeled_volume
-
-def _tesselate():
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from scipy.spatial import ConvexHull, HalfspaceIntersection
-    import meshio
-
-    if __name__ == "__main__":
-
-        np.random.seed(42)  # For reproducibility
-        # points = np.array([[0.3,0.3,0.3], [-0.3,-0.3,-0.3]])
-        points = np.random.rand(10000, 3) - 0.5
-        points[:, 2] *= 2
-
-        xmin, xmax = -0.5, 0.5
-        ymin, ymax = -0.5, 0.5
-        zmin, zmax = -1, 1
-
-        import cProfile
-        import pstats
-        import time
-
-        pr = cProfile.Profile()
-        pr.enable()
-        t1 = time.perf_counter()
-
-        dmap = []
-        nmap = []
-        for i in range(points.shape[0]):
-            x1 = points[i]
-            v = points - x1
-            norm = np.linalg.norm(v, axis=1)
-            m = norm != 0
-            norm = norm[m]
-            v = v[m]
-            dmap.append(norm)
-            nmap.append(v / norm[:, np.newaxis])
-        dmap = np.array(dmap)
-        nmap = np.array(nmap)
-
-        t2 = time.perf_counter()
-        pr.disable()
-        pr.dump_stats("tmp_profile_dump")
-        ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
-        ps.print_stats(15)
-        print("\n\nCPU time is : ", t2 - t1, "s")
-
-        # Stacked Inequalities of the form Ax + b <= 0 in format [A; b]
-
-        simplices = []
-        vertices = []
-        grain_id = []
-        surface_grain = []
-        ms = 0
-        for i in range(len(points)):
-            A = nmap[i]
-            b = dmap[i] / 2.0
-            x, y, z = points[i]
-
-            limits = np.array(
-                [
-                    [1, 0, 0, np.abs(xmax) - x],
-                    [-1, 0, 0, np.abs(xmin) + x],
-                    [0, 1, 0, np.abs(ymin) - y],
-                    [0, -1, 0, np.abs(ymax) + y],
-                    [0, 0, 1, np.abs(zmin) - z],
-                    [0, 0, -1, np.abs(zmax) + z],
-                ]
-            )
-
-            limits[:, -1] *= -1
-            halfspaces = np.hstack((A, -b.reshape(len(b), 1)))
-            halfspaces = np.vstack((halfspaces, limits))
-            interior_point = np.array([0, 0, 0])
-
-            hs = HalfspaceIntersection(halfspaces, interior_point)
-            hull = ConvexHull(hs.intersections)
-
-            verts = hs.intersections + points[i]
-            vertices.append(verts)
-            simplices.append(hull.simplices + ms)
-            ms += np.max(hull.simplices) + 1
-
-            grain_id.extend([i] * len(hull.simplices))
-
-            if (
-                np.abs(verts.T[0].max() - xmax) < 1e-8
-                or np.abs(verts.T[1].max() - ymax) < 1e-8
-                or np.abs(verts.T[2].max() - zmax) < 1e-8
-                or np.abs(verts.T[0].min() - xmin) < 1e-8
-                or np.abs(verts.T[1].min() - ymin) < 1e-8
-                or np.abs(verts.T[2].min() - zmin) < 1e-8
-            ):
-                surface_grain.extend([1] * len(hull.simplices))
-            else:
-                surface_grain.extend([0] * len(hull.simplices))
-
-        vertices = np.concatenate(vertices)
-        simplices = np.concatenate(simplices)
-
-        cells = [("polygon", simplices)]
-        mesh = meshio.Mesh(
-            vertices,
-            cells=cells,
-            cell_data={"grain_id": [grain_id], "surface_grain": [surface_grain]},
-        )
-        mesh.write("myhull.vtk")
+        raise ValueError("seeds must be a numpy array or a list of grains")
 
 
+def voronoi(seeds, bounds=None):
+    """Voroni Tesselate a set of seeds into a 3D voxel volume.
 
-        
+    The returned mesh is a 3D voxel volume of the voroni tesselation of the seeds.
+    It will contain a series of polyhedra, one for each seed.
+
+    Args:
+        seeds (:obj:`numpy array` or :obj:`list` of :obj:`ImageD11.grain.grain`):
+            List of grains or a numpy array of shape=(N,3) specifying the seed
+            coordinates of the voroni tesselation.
+        bounds (:obj:`list` of :obj:`tuple`, optional): Bounds for the tesselation
+            as a tuple of 3 numpy arrays specifying the limits of the tesselation in x, y, z
+            i.e bounds = [(xmin, xmax), (ymin, ymax), (zmin, zmax)]. Defaults to None, in which
+            case the bounds are inferred from the seeds as the minimum and maximum values in each
+            respective dimension padded by 1e-8 in each dimension.
+
+    Returns:
+        :obj:`meshio.Mesh`: Mesh object of the tesselation with cell data as grain_id and surface_grain.
+            see meshi documentation for more details: https://github.com/nschloe/meshio
+
+    """
+    points = _extract_points(seeds)
+    bounds = _extract_bounds(points, bounds)
+    dmap, nmap = _get_plane_maps(points)
+    vertices, simplices = [], []
+    grain_id, surface_grain = [], []
+    ms = 0
+    for i in range(len(points)):
+        halfspaces = _get_halfspaces(points[i], dmap[i], nmap[i], bounds)
+        verts, simps = _get_polyhedron(halfspaces, points[i])
+        vertices.append(verts)
+        simplices.append(simps + ms)
+        ms += np.max(simps) + 1
+        grain_id.extend([i] * len(simps))
+        surface_grain.extend([_is_on_boundary(verts, bounds)] * len(simps))
+    mesh = _build_mesh(vertices, simplices, grain_id, surface_grain)
+    return mesh
+
+
 if __name__ == "__main__":
-
-    seeds = np.random.rand(16, 3)
-    print(seeds)
-    # seeds = np.array([[0,0,0],[0.5,0.5,1]])
-    x, y, z = seeds.T
-    xg = np.linspace(0, 1, 32)
-    yg = np.linspace(0, 1, 32)
-    zg = np.linspace(0, 1, 32)
-
-    from scipy.spatial import Voronoi
-
-
-
     import cProfile
+    import os
     import pstats
     import time
 
     import crispy
 
+    np.random.seed(42)
+    points = np.random.rand(100, 3) - 0.5
+    points[:, 2] *= 2
+
     pr = cProfile.Profile()
     pr.enable()
     t1 = time.perf_counter()
-
-    #tessmap = crispy.tesselate.voroni(seeds, (xg, yg, zg))
-    vor = Voronoi(seeds)
-    vertices = vor.vertices
-
-    
-    print(vertices)
-
-
+    mesh = voronoi(points)
     t2 = time.perf_counter()
     pr.disable()
     pr.dump_stats("tmp_profile_dump")
@@ -306,4 +257,6 @@ if __name__ == "__main__":
     ps.print_stats(15)
     print("\n\nCPU time is : ", t2 - t1, "s")
 
-    crispy.vizualise.save_voxels("test", tessmap, (xg, yg, zg))
+    path = os.path.join(crispy.assets._root_path, "sandbox/test.vtk")
+    print(path)
+    mesh.write(path)
