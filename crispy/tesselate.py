@@ -90,15 +90,14 @@ def _get_halfspaces(point, distance, normals, bounds):
 
     limits = np.array(
         [
-            [1, 0, 0, np.abs(xmax) - x],
-            [-1, 0, 0, np.abs(xmin) + x],
-            [0, 1, 0, np.abs(ymax) - y],
-            [0, -1, 0, np.abs(ymin) + y],
-            [0, 0, 1, np.abs(zmax) - z],
-            [0, 0, -1, np.abs(zmin) + z],
+            [1, 0, 0, np.abs(xmax - x)],
+            [-1, 0, 0, np.abs(xmin - x)],
+            [0, 1, 0, np.abs(ymax - y)],
+            [0, -1, 0, np.abs(ymin - y)],
+            [0, 0, 1, np.abs(zmax - z)],
+            [0, 0, -1, np.abs(zmin - z)],
         ]
     )
-
     limits[:, -1] *= -1
     halfspaces = np.hstack((A, -b.reshape(len(b), 1)))
     halfspaces = np.vstack((halfspaces, limits))
@@ -118,13 +117,14 @@ def _is_on_boundary(verts, bounds):
             0 otherwise.
     """
     xmin, xmax, ymin, ymax, zmin, zmax = bounds
+    x, y, z = verts.T
     return int(
-        np.abs(verts.T[0].max() - xmax) < 1e-8
-        or np.abs(verts.T[1].max() - ymax) < 1e-8
-        or np.abs(verts.T[2].max() - zmax) < 1e-8
-        or np.abs(verts.T[0].min() - xmin) < 1e-8
-        or np.abs(verts.T[1].min() - ymin) < 1e-8
-        or np.abs(verts.T[2].min() - zmin) < 1e-8
+        np.abs(x.max() - xmax) < 1e-8
+        or np.abs(y.max() - ymax) < 1e-8
+        or np.abs(z.max() - zmax) < 1e-8
+        or np.abs(x.min() - xmin) < 1e-8
+        or np.abs(y.min() - ymin) < 1e-8
+        or np.abs(z.min() - zmin) < 1e-8
     )
 
 
@@ -175,10 +175,6 @@ def _extract_points(seeds):
         raise ValueError("seeds must be a numpy array or a list of grains")
 
 
-def prune(vertices, simplices):
-    pass
-
-
 def voronoi(seeds, bounds=None):
     """Voroni Tesselate a set of seeds into a 3D voxel volume.
 
@@ -202,6 +198,7 @@ def voronoi(seeds, bounds=None):
     """
     points = _extract_points(seeds)
     bounds = _extract_bounds(points, bounds)
+
     dmap, nmap = _get_plane_maps(points)
     vertices, simplices = [], []
     grain_id, surface_grain = [], []
@@ -228,6 +225,7 @@ def voronoi(seeds, bounds=None):
         surface_grain,
         neighbours,
     )
+
     return mesh
 
 
@@ -240,7 +238,7 @@ if __name__ == "__main__":
     import crispy
 
     np.random.seed(42)
-    points = np.random.rand(1000, 3) - 0.5
+    points = np.random.rand(1000, 3) + 1
     points[:, 2] *= 2
 
     pr = cProfile.Profile()
@@ -255,7 +253,4 @@ if __name__ == "__main__":
     print("\n\nCPU time is : ", t2 - t1, "s")
 
     path = os.path.join(crispy.assets._root_path, "sandbox/test.vtk")
-    print(path)
     mesh.write(path)
-
-    print(mesh.neighbours[0])
