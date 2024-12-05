@@ -1,4 +1,5 @@
-from . import assets
-from . import read
-from . import tesselate
-from . import vizualise
+from . import _polycrystal
+
+Polycrystal = _polycrystal.Polycrystal
+
+from . import assets, read, tesselate, vizualise

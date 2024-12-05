@@ -30,7 +30,6 @@ def _extract_bounds(seeds, bounds):
         xmin, xmax = bounds[0]
         ymin, ymax = bounds[1]
         zmin, zmax = bounds[2]
-    print(xmin, xmax, ymin, ymax, zmin, zmax)
     return xmin, xmax, ymin, ymax, zmin, zmax
 
 
@@ -129,51 +128,32 @@ def _is_on_boundary(verts, bounds):
     )
 
 
-def _build_mesh(vertices, simplices, grain_id, surface_grain):
+def _build_mesh(vertices, simplices, grain_id, surface_grain, neighbours=None):
     """construct a mesh object from the vertices and simplices.
 
     Args:
-        vertices (:obj:`list` of :obj:`numpy array`): List of numpy arrays
-            of shape=(N,3)
+        vertices (:obj:`numpy array`): numpy arrays of shape=(N,3)
             specifying the vertices of each polyhedron
-        simplices (:obj:`list` of :obj:`numpy array`): List of numpy arrays
-            of shape=(M,3)
+        simplices (:obj:`numpy array`): numpy arrays of shape=(M,3)
             specifying the simplices of each polyhedron
         grain_id (:obj:`list` of :obj:`int`): List of integers specifying the
             grain id of each polyhedron
         surface_grain (:obj:`list` of :obj:`int`): List of integers specifying if
             the polyhedron is on the boundary
+        neighbours (:obj:`numpy array`, optional): Numpy array of shape=(N,) specifying
+            the grain neighbours of each grain polyhedron. Defaults to None.
 
     Returns:
         :obj:`meshio.Mesh`: Mesh object of the tesselation.
     """
-    vertices = np.concatenate(vertices)
-    simplices = np.concatenate(simplices)
+
     mesh = meshio.Mesh(
         vertices,
         cells=[("polygon", simplices)],
         cell_data={"grain_id": [grain_id], "surface_grain": [surface_grain]},
     )
+    mesh.neighbours = neighbours
     return mesh
-
-
-def _get_polyhedron(halfspaces, point):
-    """Get the polyhedron defined by the halfspaces.
-
-    Args:
-        halfspaces (:obj:`numpy array`): Numpy array of shape=(N,4) specifying the
-            halfspaces
-        point (:obj:`numpy array`): Numpy array of shape=(3,) specifying the seed
-
-    Returns:
-        :obj:`tuple` of :obj:`numpy array`: Tuple of the vertices and simplices
-            of the polyhedron
-    """
-    hs = HalfspaceIntersection(halfspaces, interior_point=np.array([0, 0, 0]))
-    hull = ConvexHull(hs.intersections)
-    vertices = hs.intersections + point
-    simplices = hull.simplices
-    return vertices, simplices
 
 
 def _extract_points(seeds):
@@ -193,6 +173,10 @@ def _extract_points(seeds):
         return np.array([g.translation for g in seeds])
     else:
         raise ValueError("seeds must be a numpy array or a list of grains")
+
+
+def prune(vertices, simplices):
+    pass
 
 
 def voronoi(seeds, bounds=None):
@@ -221,16 +205,29 @@ def voronoi(seeds, bounds=None):
     dmap, nmap = _get_plane_maps(points)
     vertices, simplices = [], []
     grain_id, surface_grain = [], []
+    neighbours = np.empty(dtype=np.ndarray, shape=len(points))
     ms = 0
     for i in range(len(points)):
         halfspaces = _get_halfspaces(points[i], dmap[i], nmap[i], bounds)
-        verts, simps = _get_polyhedron(halfspaces, points[i])
+        hs = HalfspaceIntersection(halfspaces, interior_point=np.array([0, 0, 0]))
+        hull = ConvexHull(hs.intersections)
+        verts = hs.intersections + points[i]
+        simps = hull.simplices
+        neigh = hs.dual_vertices + (hs.dual_vertices >= i)
+        neigh = neigh[neigh < len(points)]
+        neighbours[i] = neigh
         vertices.append(verts)
         simplices.append(simps + ms)
         ms += np.max(simps) + 1
         grain_id.extend([i] * len(simps))
         surface_grain.extend([_is_on_boundary(verts, bounds)] * len(simps))
-    mesh = _build_mesh(vertices, simplices, grain_id, surface_grain)
+    mesh = _build_mesh(
+        np.concatenate(vertices),
+        np.concatenate(simplices),
+        grain_id,
+        surface_grain,
+        neighbours,
+    )
     return mesh
 
 
@@ -243,7 +240,7 @@ if __name__ == "__main__":
     import crispy
 
     np.random.seed(42)
-    points = np.random.rand(100, 3) - 0.5
+    points = np.random.rand(1000, 3) - 0.5
     points[:, 2] *= 2
 
     pr = cProfile.Profile()
@@ -260,3 +257,5 @@ if __name__ == "__main__":
     path = os.path.join(crispy.assets._root_path, "sandbox/test.vtk")
     print(path)
     mesh.write(path)
+
+    print(mesh.neighbours[0])

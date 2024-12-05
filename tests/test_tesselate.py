@@ -16,19 +16,16 @@ class TestTesselate(unittest.TestCase):
         self.assertEqual(np.max(mesh.cell_data["grain_id"]), len(grains) - 1)
         self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)
 
+        for n in mesh.neighbours:
+            self.assertLess(len(n), 16)  # verified by paraview
+
         points = np.random.rand(100, 3)
         mesh = crispy.tesselate.voronoi(points)
         self.assertEqual(np.max(mesh.cell_data["grain_id"]), points.shape[0] - 1)
         self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)
         self.assertEqual(np.min(mesh.cell_data["surface_grain"]), 0)
-
-        # print(mesh.points)
-        # mask = mesh.cell_data["grain_id"][0] == 1
-        # print(mesh.points.shape)
-        # print(np.array(mesh.cells_dict["polygon"]).shape)
-        # simplices = np.array(mesh.cells_dict["polygon"])[mask]
-        # faces = mesh.points[simplices]
-        # print(simplices.shape)
+        self.assertEqual(len(mesh.neighbours), points.shape[0])
+        self.assertLess(len(mesh.neighbours[0]), points.shape[0])
 
 
 if __name__ == "__main__":
