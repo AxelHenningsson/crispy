@@ -2,4 +2,5 @@ from . import _polycrystal
 
 Polycrystal = _polycrystal.Polycrystal
 
-from . import assets, read, tesselate, vizualise
+from . import _constants as CONSTANTS
+from . import assets, dfxm, laue, read, tesselate, vizualise
