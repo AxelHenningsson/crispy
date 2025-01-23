@@ -59,9 +59,6 @@ class Polycrystal:
         self._mesh = None
         self._misorientations = None
 
-        
-
-
     @property
     def neighbours(self):
         """Return the neighbours of each grain in the polycrystal."""

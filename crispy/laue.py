@@ -33,7 +33,7 @@ def get_lattice_normal(U, B, G_hkl):
         G_hkl (:obj:`numpy array`): Miller indices, i.e the h,k,l integers (``shape=(3,n)``).
 
     Returns:
-        G (:obj:`numpy array`): Sample coordinate system lattice normal. (``shape=(3,n)``)
+        n (:obj:`numpy array`): Sample coordinate system lattice normal. (``shape=(3,n)``)
     """
     G = get_G(U, B, G_hkl)
     return G / np.linalg.norm(G, axis=0)
