@@ -4,7 +4,9 @@ import xfab
 import xfab.symmetry
 from orix.plot import IPFColorKeyTSL
 from orix.vector.vector3d import Vector3d
+
 import crispy
+
 
 class Polycrystal:
     """Class to represent a polycrystal.
@@ -38,7 +40,7 @@ class Polycrystal:
         self, grainfile, group_name="grains", lattice_parameters=None, symmetry=None
     ):
         if isinstance(grainfile, list):
-            self.grains = grainfile
+            self.grains = np.array(grainfile)
         else:
             self.grains = crispy.read.grains(grainfile, group_name)
 
@@ -85,7 +87,9 @@ class Polycrystal:
             trigonal, hexagonal or cubic
 
         """
-        return crispy.CONSTANTS._SPACEGROUP_TO_CRYSTAL_SYSTEM[self.reference_cell.symmetry]
+        return crispy.CONSTANTS._SPACEGROUP_TO_CRYSTAL_SYSTEM[
+            self.reference_cell.symmetry
+        ]
 
     @property
     def bounding_box(self):
@@ -162,7 +166,7 @@ class Polycrystal:
 
         Generates the polycrystal mesh with one convex polyhedra per grain.
         """
-        self._mesh = crispy.tesselate.voronoi(self.grains)
+        self._mesh = crispy.tesselate.voronoi(list(self.grains))
 
     def texturize(self):
         """Compute the misorientation between all grain neighbours.
@@ -180,7 +184,9 @@ class Polycrystal:
             crystal_system (:obj:str): crystal_system must be one of triclinic,
                 monoclinic, orthorhombic, tetragonal, trigonal, hexagonal, cubic
         """
-        _crystal_system = crispy.CONSTANTS._CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
+        _crystal_system = crispy.CONSTANTS._CRYSTAL_SYSTEM_STR_TO_INT[
+            self.crystal_system
+        ]
         self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
         for gi in range(len(self.grains)):
             u = self.grains[gi].u
@@ -327,6 +333,8 @@ if __name__ == "__main__":
     pr.dump_stats("tmp_profile_dump")
     ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
     ps.print_stats(15)
+    print("\n\nCPU time is : ", t2 - t1, "s")
+    print("\n\nCPU time is : ", t2 - t1, "s")
     print("\n\nCPU time is : ", t2 - t1, "s")
     print("\n\nCPU time is : ", t2 - t1, "s")
     print("\n\nCPU time is : ", t2 - t1, "s")
