@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
+from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 from xfab import tools
-
-from crispy import laue
 
 
 class Goniometer:
@@ -11,242 +10,441 @@ class Goniometer:
     A class to represent a Diffraction X-ray Microscopy (DFXM) experiment setup.
 
     This class is designed to find the angular settings required of the microscope in order
-    to make a given set of Miller indices come into diffraction at some rotatin of the turntable.
+    to make a given set of Miller indices come into diffraction at some rotation of the turntable.
 
     This is usefull for situations when we want to reach several reflection in DFXM
     without re-mounitng the sample
 
     Attributes:
         polycrystal (:obj:`crispy.Polycrystal`): The polycrystal object mounted on the goniometer.
-        U (:obj:`numpy array`): Crystal orientation matrix of ``shape=(3,3)`` (unitary). the selected grain.
-        unit_cell (:obj:`numpy array`): Unit cell parameters [a, b, c, alpha, beta, gamma] of ``shape=(6,)``.
-        hkl (:obj:`numpy array`): Miller indices ``shape=(3,n)``.
         energy (:obj:`float`): Photon energy in keV.
-        B (:obj:`numpy array`): The B matrix. ``shape=(3,3)`
-        wavelength (:obj:`float`): wavelength in units of angstrom.
-
+        detector_distance (:obj:`float`): The detector distance in meters.
+        motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
+            keys are given in the below example dictionary:
+            e.g. {"mu": (0, 20),
+                "omega": (-22, 22),
+                "chi": (-5, 5),
+                "phi": (-5, 5),
+                "detector_z": (-0.04, 1.96),
+                "detector_y": (-0.169, 1.16),}
+            These are in units of degrees (sample stage)
+            and meters (for detector translations)
     """
 
-    def __init__(self, polycrystal, energy, detector_distance):
-        """
-        Initialize the DFXM class with the experiment setup parameters.
-
-        Args:
-            polycrystal (:obj:`crispy.Polycrystal`): The polycrystal object.
-            energy (:obj:`float`): Photon energy in keV.
-            detector_distance (:obj:`float`): Distance in meters to the detector rig measured from the sample.
-                if given, this number will be used to compute required detetor translations in y-lab. and z-lab.
-                Defaults to None.
-            motor_ranges (:obj:`dict`): Dictionary with the motor ranges for the experiment.
-        """
+    def __init__(self, polycrystal, energy, detector_distance, motor_bounds):
         self.polycrystal = polycrystal
-        self.unit_cell = polycrystal.reference_cell.lattice_parameters
         self.energy = energy
-        self.wavelength = laue.keV_to_angstrom(self.energy)
+        self.wavelength = 12.398419874273968 / self.energy
         self.detector_distance = detector_distance
-        self._ub = None  # orientation matrix of a selected grain
+        self.motor_bounds = motor_bounds
 
-    def select_grain(self, grain_id):
-        """
-        Select a grain from the polycrystal.
-
-        Args:
-            grain_id (:obj:`int`): The grain id to select.
-
-        Returns:
-            grain (:obj:`crispy.Grain`): The grain object.
-        """
-        self._ub = self.polycrystal.grains[grain_id].ub[:, :]
-
-    @property
-    def ub(self):
-        if self._ub is None:
-            raise ValueError(
-                "No grain has been selected. Use the select_grain method to select a grain."
-            )
-        return self._ub
-
-    def ezbragg(self, hkl):
-        """
-        Align the crystal orientation matrix (U) such that the provided Miller indices (hkl) is in
-        diffraction conditions forming a Bragg angle to the incident beam (assumed to propagate along x-lab).
-
-        This procedure will bring the diffraction vector into the x-z plane such that diffraction is at
-        the simplifed geometry of the Bragg condition, i.e when eta is zero.
-
-        The procedure is as follows:
-            (1) The hkl bourhgt to the x-z plane by a pure rotation in omega, i.e around the z-axis.
-            (2) The hkl is brought to Bragg by a pure rotation mu, i.e around the y-axis.
-
-        NOTE: the returned angles are omega, defined as positive around the z-axis, and mu, defined as
-            positive around the negative y-axis.
-
-        Args:
-            hkl (:obj:`numpy array`): Miller indices to align with, ``shape=(3,)``.
-
-        Returns:
-            omega (:obj:`float`): The omega angle in degrees.
-            mu (:obj:`float`): The mu angle in degrees
-
-        """
-
-        # Lattice normal in the sample
-        nhat = self.ub @ hkl
-        nhat /= np.linalg.norm(nhat)
-
-        xy_projection = nhat.copy()
-        xy_projection[2] = 0
-        xy_projection /= np.linalg.norm(xy_projection)
-
-        xhat, yhat, zhat = np.eye(3, 3)
-        if xy_projection[0] < 0:
-            omega = np.arccos(np.dot(-xhat, xy_projection))
-            if xy_projection[1] < 0:
-                omega = -omega
-        else:
-            omega = np.arccos(np.dot(xhat, xy_projection))
-            if xy_projection[1] > 0:
-                omega = -omega
-
-        Rom = Rotation.from_rotvec(omega * zhat).as_matrix()
-        nhat_xz = Rom @ nhat
-
-        wedge = np.arccos(np.dot(zhat, nhat_xz))
-        Q = self.ub @ hkl
-        d = 1 / np.linalg.norm(Q)
-        theta = np.arcsin(self.wavelength / (2 * d))
-
-        if nhat_xz[0] > 0:  # defined as positive around negative y
-            mu = wedge + theta
-        else:
-            mu = -(wedge - theta)
-
-        ## testing
-        Rmu = Rotation.from_rotvec(mu * (-yhat)).as_matrix()
-        trial = Rmu @ Rom @ nhat
-        assert np.allclose(trial[1], 0)
-        assert trial[0] < 0
-        assert trial[2] > 0
-        assert np.cos(theta) - np.dot(trial, zhat) < 1e-10
-        ##
-
-        return np.degrees(omega), np.degrees(mu), np.degrees(theta)
-
-    def get_reflections(self, omega_range, mu_range, theta_range):
-        # generate all hkls
-        # generate all G
-        # for all G within wedge, find omega, mu
-        # if omega, mu are within motor ranges, add to list
+    def _get_hkls(self):
+        th_min = 0
+        th_max = (
+            np.arctan(self.motor_bounds["detector_z"][1] / self.detector_distance) / 2.0
+        )
         unit_cell = self.polycrystal.reference_cell.lattice_parameters
         sgno = self.polycrystal.reference_cell.symmetry
-        sintlmin = np.sin(np.radians(theta_range[0])) / self.wavelength
-        sintlmax = np.sin(np.radians(theta_range[1])) / self.wavelength
-        hkls = tools.genhkl_all(unit_cell, sintlmin, sintlmax, sgno=sgno)
-        reflections = []
-        for hkl in hkls:
-            omega, mu, theta = self.ezbragg(hkl)
-            if (
-                omega_range[0] < omega < omega_range[1]
-                and mu_range[0] < mu < mu_range[1]
-            ):
-                h, k, l = hkl
-                reflections.append([h, k, l, omega, mu, theta])
-        return np.array(reflections)
+        sintlmin = np.sin(th_min) / self.wavelength
+        sintlmax = np.sin(th_max) / self.wavelength
+        hkls = tools.genhkl_all(unit_cell, sintlmin, sintlmax, sgno=sgno).T
+        return hkls
 
-    def compute_reflection_table(self, omega_range, mu_range, theta_range):
-        reflections = np.empty((self.polycrystal.number_of_grains,), dtype=object)
-        for grain_id in range(self.polycrystal.number_of_grains):
-            self.select_grain(grain_id)
-            refl = self.get_reflections(omega_range, mu_range, theta_range)
-            reflections[grain_id] = refl
-        return reflections
+    def find_reflections(self):
+        hkls = self._get_hkls()
+        bez = Braggez(self.energy, self.motor_bounds)
+        for i, g in enumerate(self.polycrystal.grains):
+            goni_angles, residual, success, theta = bez.align(
+                g.ub,
+                hkls,
+                mask_unreachable=True,
+            )
+            if np.sum(success) != 0:
+                g.dfxm = {
+                    "hkl": hkls[:, success],
+                    "mu": goni_angles[0, success],
+                    "omega": goni_angles[1, success],
+                    "chi": goni_angles[2, success],
+                    "phi": goni_angles[3, success],
+                    "residual": residual[success],
+                    "theta": theta[success],
+                }
+            else:
+                g.dfxm = None
 
-    def inspect(self, hkl, rotation_axis=np.array([0, 0, 1])):
-        """
-        Inspect the angular settings required at diffraction for the Miller indices (hkl).
-
-        Args:
-            hkl (:obj:`numpy array`): Array of Miller indices with shape `(3, n)`.
-            rotation_axis (:obj:`numpy array`): Axis of rotation ``shape=(3,)``. Defaults to
-                zhat=[0,0,1].
-
-        Returns:
-            df (:obj:`pandas.DataFrame`): DataFrame with Miller with columns: 'h', 'k', 'l' , 'omega', 'theta', 'eta'.
-        """
-        refl_labels = [f"reflection {i}" for i in range(hkl.shape[1])]
-        df = pd.DataFrame(
-            index=refl_labels,
+    def table_of_reflections(self):
+        if not hasattr(self.polycrystal.grains[0], "dfxm"):
+            raise ValueError("No reflections available. Run find_reflections() first.")
+        tab = pd.DataFrame(
             columns=[
+                "grain id",
                 "h",
                 "k",
                 "l",
-                "omega_1",
-                "omega_2",
-                "eta_1",
-                "eta_2",
-                "theta",
-                "2 theta",
-                "detector y_1",
-                "detector z_1",
-                "detector y_2",
-                "detector z_2",
+                "mu [dgr]",
+                "omega [dgr]",
+                "chi [dgr]",
+                "phi [dgr]",
+                "2 theta [dgr]",
+                "eta [dgr]",
+                "detector_z [mm]",
             ],
         )
+        i = 0
+        for gid, g in enumerate(self.polycrystal.grains):
+            if g.dfxm:
+                for n in range(len(g.dfxm["mu"])):
+                    h, k, l = g.dfxm["hkl"][:, n].astype(int)
+                    mu, omega, chi, phi = (
+                        g.dfxm["mu"][n],
+                        g.dfxm["omega"][n],
+                        g.dfxm["chi"][n],
+                        g.dfxm["phi"][n],
+                    )
+                    theta = g.dfxm["theta"][n]
+                    detector_z = (
+                        1000 * self.detector_distance * np.tan(2 * np.radians(theta))
+                    )
+                    tab.loc[i] = [
+                        int(gid),
+                        h,
+                        k,
+                        l,
+                        mu,
+                        omega,
+                        chi,
+                        phi,
+                        2 * theta,
+                        0,
+                        detector_z,
+                    ]
+                    i += 1
+        return tab
 
-        G = laue.get_G(self._U, self.B, hkl)
-        df.h, df.k, df.l = hkl
-        omega = laue.get_omega(self._U, self.unit_cell, hkl, self.energy, rotation_axis)
-        df.omega_1, df.omega_2 = np.degrees(omega)
-        theta = laue.get_bragg_angle(G, self.wavelength)
-        df.theta = np.degrees(theta)
-        df["2 theta"] = 2 * df.theta
 
-        eta_1, eta_2 = laue.get_eta_angle(G, omega, self.wavelength, rotation_axis)
-        df.eta_1, df.eta_2 = np.degrees(eta_1), np.degrees(eta_2)
+class Braggez(object):
+    """
+    Braggez is a class that performs optimization of the gonio angles to align the crystal
+    with the target reflection. The optimization is performed using the L-BFGS-B algorithm
 
-        if self.detector_distance is not None:
-            # Add the detector cartesian hit cooridnates for the reflecitons.
-            xhat, yhat, _ = np.eye(3, 3)
-            R_tth = Rotation.from_rotvec(
-                (-2 * theta * yhat[:, np.newaxis]).T
-            ).as_matrix()
-            R_eta1 = Rotation.from_rotvec((eta_1 * xhat[:, np.newaxis]).T).as_matrix()
-            R_eta2 = Rotation.from_rotvec((eta_2 * xhat[:, np.newaxis]).T).as_matrix()
+    This class is currently implemneted for the case of Dark Field X-ray Microscopy (DFXM) where
+    the gonimeter/hexapod has 4 degrees of freedom (mu, omega, chi, phi). Stacked as:
 
-            r1 = R_eta1 @ R_tth @ xhat
-            r2 = R_eta2 @ R_tth @ xhat
-            dy, dz = [], []
-            for r in r1:
-                # s * r[0] = self.detector_distance
-                s = self.detector_distance / r[0]
-                dy.append((s * r)[1])
-                dz.append((s * r)[2])
-            # TODO add the corresponding requirements on the x of the experiment table and y,z of the detector
-            df["detector y_1"] = np.array(dy)[:]
-            df["detector z_1"] = np.array(dz)[:]
+        (1) base : mu
+        (2) bottom : omega
+        (3) top 1    : chi
+        (4) top 2    : phi
 
-            dy, dz = [], []
-            for r in r2:
-                # s * r[0] = self.detector_distance
-                s = self.detector_distance / r[0]
-                dy.append((s * r)[1])
-                dz.append((s * r)[2])
-            # TODO add the corresponding requirements on the x of the experiment table and y,z of the detector
-            df["detector y_2"] = np.array(dy)[:]
-            df["detector z_2"] = np.array(dz)[:]
+    Here mu is a rotation about the negative y-axis, omega is a positive rotation about the
+    z-axis, chi is a positive rotation about the x-axis, and phi is a negative rotation about
+    the y-axis.
+
+    The target reflection is always defined as lying in the xz-plane, with eta=0 (ez).
+    This is also known as the simplified dfxm geometry.
+
+    The mathmatical problem is defined as follows:
+        Let nhat be a vector on the unit sphere representing the target reflection in its
+        current position (i.e ub @ hkl). Next let target be a vector on the unit sphere
+        such that target forms an angel of theta with the z-axis, where theta is the Bragg
+        angle. The goal is to find a set of angles mu, omega, chi, phi of the goniometer/
+        hexapod such that the reflection nhat is aligned with the target vector. Moreover,
+        this must be done while considering the motor bounds of the goniometer/hexapod.
+
+    NOTE: The solution is not unique. OptiBragg will find you one solution that satisfies these
+    conditions if existent using a gradient based optimization.
+
+    Args:
+        energy (float): Energy of the X-ray beam in keV
+        motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
+            e.g. {"mu": (0, 20), "omega": (-22, 22), "chi": (-5, 5), "phi": (-5, 5)}
+        epsilon (float): Small number used to compute the numerical derivatives during optimization
+        verbose (bool): If True, print the results and iteration of the optimization
+
+    Attributes:
+        energy (float): Energy of the X-ray beam in keV
+        motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
+            e.g. {"mu": (0, 20), "omega": (-22, 22), "chi": (-5, 5), "phi": (-5, 5)}
+        epsilon (float): Small number used to compute the numerical derivatives during optimization
+        verbose (bool): If True, print the results and iteration of the optimization
+
+    """
+
+    def __init__(self, energy, motor_bounds, epsilon=1e-6, verbose=False):
+        self.energy = energy
+        self.wavelength = 12.398419874273968 / energy
+        self.motor_bounds = motor_bounds
+
+        self._xhat = np.array([[1], [0], [0]])
+        self._yhat = np.array([[0], [1], [0]])
+        self._zhat = np.array([[0], [0], [1]])
+
+        self._set_rotational_increments(epsilon)
+        self.epsilon = epsilon
+        self.verbose = verbose
+
+    def _set_rotational_increments(self, epsilon):
+        """Set finite difference rotation for numerical derivatives"""
+        self.dR_mu = self.R_mu(epsilon)
+        self.dR_omega = self.R_omega(epsilon)
+        self.dR_chi = self.R_chi(epsilon)
+        self.dR_phi = self.R_phi(epsilon)
+
+        self.dR_muT = self.R_mu(-epsilon)
+        self.dR_omegaT = self.R_omega(-epsilon)
+        self.dR_chiT = self.R_chi(-epsilon)
+        self.dR_phiT = self.R_phi(-epsilon)
+
+    def R_mu(self, mu):
+        return Rotation.from_rotvec((mu * (-self._yhat)).T)
+
+    def R_omega(self, omega):
+        return Rotation.from_rotvec((omega * self._zhat).T)
+
+    def R_chi(self, chi):
+        return Rotation.from_rotvec((chi * self._xhat).T)
+
+    def R_phi(self, phi):
+        return Rotation.from_rotvec((phi * (-self._yhat)).T)
+
+    def R(self, x):
+        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
+        return self.R_mu(mu) * self.R_omega(omega) * self.R_chi(chi) * self.R_phi(phi)
+
+    def _arccos(self, ang, tol):
+        """Simply to supress the annoying rounding warnings from numpy"""
+        if np.abs(ang).max() >= 1 + tol:
+            return np.arccos(ang)
         else:
-            df = df.drop(
-                columns=["detector y_1", "detector z_1", "detector y_2", "detector z_2"]
-            )
+            return np.arccos(np.clip(ang, -1, 1, out=ang))
 
-        return df
+    def cost_vector(self, rotation, nhat, target):
+        """Array of misfits in radians for each reflection
+
+        Args:
+            rotation (:obj: scipy.spatial.transform.Rotation): The rotations, length N
+            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
+            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+
+        Returns:
+            :obj: `numpy.ndarray`: The cost vector in radians, shape (N,)
+                each instance represents the misalignment of the lattice normal
+                from the target vector.
+        """
+        return self._arccos(np.sum(rotation.apply(nhat.T).T * target, axis=0), tol=1e-6)
+
+    def cost(self, rotation, nhat, target):
+        """Aggregated cost function to fit many reflections simultaneously
+
+        This is simply the sum of the cost_vector
+
+        Args:
+            rotation (:obj: scipy.spatial.transform.Rotation): The rotations, length N
+            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
+            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+
+        Returns:
+            :obj: `float`: The aggregated cost.
+        """
+        return self.cost_vector(rotation, nhat, target).sum()
+
+    def cost_and_grad(self, x, nhat, target):
+        """Computes the cost and the gradient of the cost function
+
+        Uses a simple finite difference method to compute the gradient
+
+        Args:
+            x (:obj: `numpy.ndarray`): optimization variables flattened, shape (4*N,)
+            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
+            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+
+        Returns:
+            (:obj: `numpy.ndarray`): The aggregated cost.
+            (:obj: `numpy.ndarray`): The gradient of the cost function, shape (4*N,)
+        """
+        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
+        R1 = self.R_mu(mu)
+        R2 = self.R_omega(omega)
+        R3 = self.R_chi(chi)
+        R4 = self.R_phi(phi)
+
+        # for speed optimization
+        R12 = R1 * R2
+        R34 = R3 * R4
+        R234 = R2 * R34
+        R123 = R12 * R3
+        R1234 = R123 * R4
+        #
+
+        c0_vec = self.cost_vector(R1234, nhat, target)
+
+        # second order central difference scheme
+        N = nhat.shape[1]
+        jac = np.zeros((4 * N,))
+
+        jac[0:N] = self.cost_vector(
+            self.dR_mu * R1234, nhat, target
+        ) - self.cost_vector(self.dR_muT * R1234, nhat, target)
+
+        jac[N : 2 * N] = self.cost_vector(
+            R1 * self.dR_omega * R234, nhat, target
+        ) - self.cost_vector(R1 * self.dR_omegaT * R234, nhat, target)
+
+        jac[2 * N : 3 * N] = self.cost_vector(
+            R12 * self.dR_chi * R34, nhat, target
+        ) - self.cost_vector(R12 * self.dR_chiT * R34, nhat, target)
+
+        jac[3 * N :] = self.cost_vector(
+            R123 * self.dR_phi * R4, nhat, target
+        ) - self.cost_vector(R123 * self.dR_phiT * R4, nhat, target)
+
+        jac = jac / (2 * self.epsilon)
+
+        return c0_vec.sum(), jac
+
+    def _explode_bounds(self, N):
+        """Set the bounds for all N reflections in the problem, just repeat the bounds N times..."""
+        return np.repeat(
+            np.radians(
+                [
+                    [self.motor_bounds["mu"][0], self.motor_bounds["mu"][1]],
+                    [self.motor_bounds["omega"][0], self.motor_bounds["omega"][1]],
+                    [self.motor_bounds["chi"][0], self.motor_bounds["chi"][1]],
+                    [self.motor_bounds["phi"][0], self.motor_bounds["phi"][1]],
+                ]
+            ),
+            N,
+            axis=0,
+        )
+
+    def _minimize(self, x0, nhat, target, bounds):
+        """Scipy minimize wrapper of the L-BFGS-B algorithm"""
+        return minimize(
+            self.cost_and_grad,
+            x0=x0,
+            args=(nhat, target),
+            method="L-BFGS-B",
+            jac=True,
+            bounds=bounds,
+            options={
+                "maxls": 25,
+                "maxiter": 200 * nhat.shape[1],
+                "ftol": (1e-8) / nhat.shape[1],
+                "iprint": 2 if self.verbose else -1,
+            },
+        )
+
+    def get_unit_vectors(self, ub, hkls):
+        """Get the lattice plane normals, nhat, and the target vectors
+
+        Args:
+            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
+            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+
+        Returns:
+            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
+            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+            theta (:obj: `numpy.ndarray`): The Bragg angle in radians, shape (N,)
+        """
+        Q = ub @ hkls
+        nhat = Q / np.linalg.norm(Q, axis=0)
+        d = 1 / np.linalg.norm(Q, axis=0)
+        theta = np.arcsin(self.wavelength / (2 * d))
+        target = self.R_mu(theta).apply(self._zhat.T).T
+        return nhat, target, theta
+
+    def _print_results(self, sol, res, success):
+        print(
+            "\n==================================RESULTS==================================\n"
+        )
+        for m, title in zip(sol, ["mu", "omega", "chi", "phi"]):
+            print("   " + title + ": ", np.round(m, 4), " degrees")
+        print("   misalignments:", res, " degrees")
+        print("   success:", success)
+        print(
+            "\n===========================================================================\n"
+        )
+
+    def _mask_unreachable(self, nhat, target):
+        c0 = np.degrees(np.arccos(np.sum(nhat * target, axis=0)))
+        totrange = np.max(np.abs(self.motor_bounds["mu"]))
+        totrange += np.max(np.abs(self.motor_bounds["omega"]))
+        totrange += np.max(np.abs(self.motor_bounds["chi"]))
+        totrange += np.max(np.abs(self.motor_bounds["phi"]))
+        return c0 > totrange
+
+    def _fill_unreachable(self, result, nhat, target, unreachable):
+        _solution = result.x.reshape(4, len(result.x) // 4)
+        _residuals = self.cost_vector(self.R(result.x), nhat, target)
+        _success = _residuals < 1e-5
+
+        solution = np.full((4, len(unreachable)), fill_value=np.nan)
+        solution[:, ~unreachable] = _solution
+        residuals = np.full(len(unreachable), fill_value=np.nan)
+        residuals[~unreachable] = _residuals
+        success = np.zeros(len(unreachable), dtype=bool)
+        success[~unreachable] = _success
+
+        return np.degrees(solution), np.degrees(residuals), success
+
+    def align(self, ub, hkls, mask_unreachable=False):
+        """Align Q = ub @ hkls vectors with eta=0 plane to satisfy Bragg's law.
+
+        Runs an optimization to find the goniometer angles that align the lattice plane
+        normals to the target vectors. The target vectors are defined as the z-axis
+        rotated by the Bragg angle in the xz-plane into the reverse direction of the
+        beam which is assumed to propagate in the positive x-direction.
+
+        Args:
+
+            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
+            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+            mask_unreachable (bool): If True, mask reflections that are unreachable
+                by the goniometer/hexapod. A reflection is unreachable if the misalignment
+                of the lattice normal from the target vector is greater than the maximum sum
+                of the absolute values of the motor bounds. Default is False.
+                Maskin unreachable reflections speed up the optimization by simply not
+                considering them. When masking is enabled, the solution and residuals
+                success arrays will hold np.nan values for the unreachable reflections.
+
+        Returns:
+            sol (:obj: `numpy.ndarray`): The solution angles in degrees, shape (4, N)
+                solution angles are in the order [mu, omega, chi, phi] such that
+                solution[:, i] are the goniometer angles for the ith reflection.
+            residuals (:obj: `numpy.ndarray`): The residuals in degrees, shape (N,)
+                these are the misalignments of the lattice normal from the target
+                vector given that the solution angles are applied.
+            success (:obj: `numpy.ndarray`): The success of the optimization, shape (N,)
+                True if the optimization converged within a tolerance of 0.1 miliradian
+                i.e np.radians(residuals) < 1e-5
+            theta (:obj: `numpy.ndarray`): The Bragg angles in degrees, shape (N,)
+        """
+        nhat, target, theta = self.get_unit_vectors(ub, hkls)
+
+        if mask_unreachable:
+            unreachable = self._mask_unreachable(nhat, target)
+        else:
+            unreachable = np.zeros(hkls.shape[1], dtype=bool)
+
+        nhat = nhat[:, ~unreachable]
+        target = target[:, ~unreachable]
+        bounds = self._explode_bounds(nhat.shape[1])
+        result = self._minimize(np.zeros((4 * nhat.shape[1],)), nhat, target, bounds)
+
+        solution, residuals, success = self._fill_unreachable(
+            result,
+            nhat,
+            target,
+            unreachable,
+        )
+
+        if self.verbose:
+            self._print_results(solution, residuals, success)
+
+        return solution, residuals, success, np.degrees(theta)
 
 
 if __name__ == "__main__":
     import os
-
-    import numpy as np
-    from xfab import tools
 
     import crispy
 
@@ -257,58 +455,24 @@ if __name__ == "__main__":
         symmetry=225,
     )
 
+    motor_bounds = {
+        "mu": (0, 20),
+        "omega": (-22, 22),
+        "chi": (-5, 5),
+        "phi": (-5, 5),
+        "detector_z": (-0.04, 1.96),
+        "detector_y": (-0.169, 1.16),
+    }
+
     detector_distance = 4.0
-    goni = crispy.dfxm.Goniometer(pc, energy=19.1, detector_distance=detector_distance)
-    z_upper_bound = 1.96
-    th_max = np.degrees(np.arctan(1.91 / detector_distance)) / 2
+    energy = 19.1
 
-    unit_cell = goni.polycrystal.reference_cell.lattice_parameters
-    sgno = goni.polycrystal.reference_cell.symmetry
-    sintlmin = np.sin(np.radians(0)) / goni.wavelength
-    sintlmax = np.sin(np.radians(th_max)) / goni.wavelength
-    hkls = tools.genhkl_all(unit_cell, sintlmin, sintlmax, sgno=sgno)
-
-    import cProfile
-    import pstats
-    import time
-
-    pr = cProfile.Profile()
-    pr.enable()
-    t1 = time.perf_counter()
-
-    refl_table = goni.compute_reflection_table(
-        omega_range=[-22, 22], mu_range=[0, 20], theta_range=[0, th_max]
+    goni = crispy.dfxm.Goniometer(
+        pc,
+        energy,
+        detector_distance,
+        motor_bounds,
     )
-
-    t2 = time.perf_counter()
-    pr.disable()
-    pr.dump_stats("tmp_profile_dump")
-    ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
-    ps.print_stats(15)
-    print("\n\nCPU time is : ", t2 - t1, "s")
-
-    for gid, refl in enumerate(refl_table):
-        if len(refl) > 0:
-            print(f"Grain {gid} ", refl)
-
-            hkl = refl[0][:3]
-            nhat = goni.polycrystal.grains[gid].ub @ hkl
-            nhat /= np.linalg.norm(nhat)
-
-            xy_projection = nhat.copy()
-            xy_projection[2] = 0
-            xy_projection /= np.linalg.norm(xy_projection)
-            ang = np.arccos(
-                np.dot(xy_projection, np.array([np.sign(xy_projection[0]), 0, 0]))
-            )
-
-            Rang = Rotation.from_rotvec(ang * np.array([0, 0, 1])).as_matrix()
-            nhat_xz = Rang @ nhat
-
-            wedge = np.arccos(np.dot(np.array([0, 0, 1]), nhat_xz))
-            print(nhat_xz)
-
-            print(np.degrees(wedge), refl[0][5])
-
-            print(np.degrees(ang))
-            print(nhat)
+    goni.find_reflections()
+    goni.find_reflections()
+    goni.find_reflections()

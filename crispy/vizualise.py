@@ -2,7 +2,7 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-
+import numpy as np
 import crispy
 
 
@@ -81,18 +81,19 @@ def mesh(
     fig, ax = plt.subplots(subplot_kw=dict(projection="3d"), figsize=(9, 7))
 
     if neighbourhood is not None:
-        grains = polycrystal._select_grains(None, neighbourhood)
-        local_geometry = polycrystal._extract_geom(grains)
+        grains_index = polycrystal._select_grains(None, neighbourhood)
+        local_geometry = polycrystal._extract_geom(grains_index)
         mesh = crispy.tesselate._build_mesh(*local_geometry)
+        grains = np.array(polycrystal.grains)[grains_index]
     else:
         mesh = polycrystal._mesh
         grains = polycrystal.grains
 
-    if hasattr(polycrystal.grains[0], 'rgb'):
+    if hasattr(grains[0], 'rgb'):
         facecolors = []
         for i in range(len(mesh.cells_dict["polygon"])):
             gid = mesh.cell_data["grain_id"][0][i]
-            facecolors.append( tuple(grains[gid].rgb[:, 0]) + (1,) )
+            facecolors.append( tuple(polycrystal.grains[gid].rgb[:, 0]) + (1,) )
         axis = str(polycrystal._ipf_axes[0].round(3)).replace(" ", ",").replace("[", "").replace("]", "")
         coloring = "ipf (view-axis x,y,z = {})".format(axis)
     else:
