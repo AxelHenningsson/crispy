@@ -249,6 +249,23 @@ class Polycrystal:
                 written to file. Default is None.
 
         """
+
+        # Add all x,y,z ipf colors to the mesh before writing to disc.
+        rgb = self._ipf_colors()
+        self._mesh.cell_data["ipf-x"] = [
+            np.zeros((len(self._mesh.cell_data["grain_id"][0]), 3))
+        ]
+        self._mesh.cell_data["ipf-y"] = [
+            np.zeros((len(self._mesh.cell_data["grain_id"][0]), 3))
+        ]
+        self._mesh.cell_data["ipf-z"] = [
+            np.zeros((len(self._mesh.cell_data["grain_id"][0]), 3))
+        ]
+        for i, gid in enumerate(self._mesh.cell_data["grain_id"][0]):
+            self._mesh.cell_data["ipf-x"][0][i] = rgb[gid, :, 0]
+            self._mesh.cell_data["ipf-y"][0][i] = rgb[gid, :, 1]
+            self._mesh.cell_data["ipf-z"][0][i] = rgb[gid, :, 2]
+
         if self._mesh is None:
             raise ValueError(
                 "Mesh is None, did you forget to call the tesselate() method?"
@@ -276,6 +293,7 @@ class Polycrystal:
         simplices = []
         grain_id = []
         surface_grain = []
+        grain_volumes = []
 
         for i in grains:
             mask = self._mesh.cell_data["grain_id"][0] == i
@@ -290,8 +308,9 @@ class Polycrystal:
             simplices.extend(list(simp))
             grain_id.extend([i] * len(simp))
             surface_grain.extend(self._mesh.cell_data["surface_grain"][0][mask])
+            grain_volumes.extend(self._mesh.cell_data["grain_volumes"][0][mask])
 
-        return vertices, simplices, grain_id, surface_grain
+        return vertices, simplices, grain_id, grain_volumes, surface_grain
 
 
 if __name__ == "__main__":

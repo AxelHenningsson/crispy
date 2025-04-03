@@ -136,7 +136,7 @@ class Braggez(object):
         (4) top 2    : phi
 
     Here mu is a rotation about the negative y-axis, omega is a positive rotation about the
-    z-axis, chi is a positive rotation about the x-axis, and phi is a negative rotation about
+    z-axis, chi is a positive rotation about the x-axis, and phi is a positive rotation about
     the y-axis.
 
     The target reflection is always defined as lying in the xz-plane, with eta=0 (ez).
@@ -204,7 +204,7 @@ class Braggez(object):
         return Rotation.from_rotvec((chi * self._xhat).T)
 
     def R_phi(self, phi):
-        return Rotation.from_rotvec((phi * (-self._yhat)).T)
+        return Rotation.from_rotvec((phi * (self._yhat)).T)
 
     def R(self, x):
         mu, omega, chi, phi = x.reshape(4, len(x) // 4)

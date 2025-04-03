@@ -128,7 +128,9 @@ def _is_on_boundary(verts, bounds):
     )
 
 
-def _build_mesh(vertices, simplices, grain_id, surface_grain, neighbours=None):
+def _build_mesh(
+    vertices, simplices, grain_id, grain_volumes, surface_grain, neighbours=None
+):
     """construct a mesh object from the vertices and simplices.
 
     Args:
@@ -138,6 +140,8 @@ def _build_mesh(vertices, simplices, grain_id, surface_grain, neighbours=None):
             specifying the simplices of each polyhedron
         grain_id (:obj:`list` of :obj:`int`): List of integers specifying the
             grain id of each polyhedron
+        grain_volumes (:obj:`list` of :obj:`float`): List of floats specifying the
+            grain volume of each polyhedron
         surface_grain (:obj:`list` of :obj:`int`): List of integers specifying if
             the polyhedron is on the boundary
         neighbours (:obj:`numpy array`, optional): Numpy array of shape=(N,) specifying
@@ -150,7 +154,11 @@ def _build_mesh(vertices, simplices, grain_id, surface_grain, neighbours=None):
     mesh = meshio.Mesh(
         vertices,
         cells=[("polygon", simplices)],
-        cell_data={"grain_id": [grain_id], "surface_grain": [surface_grain]},
+        cell_data={
+            "grain_id": [grain_id],
+            "surface_grain": [surface_grain],
+            "grain_volumes": [grain_volumes],
+        },
     )
     mesh.neighbours = neighbours
     return mesh
@@ -203,6 +211,7 @@ def voronoi(seeds, bounds=None):
     vertices, simplices = [], []
     grain_id, surface_grain = [], []
     neighbours = np.empty(dtype=np.ndarray, shape=len(points))
+    grain_volumes = []
     ms = 0
     for i in range(len(points)):
         halfspaces = _get_halfspaces(points[i], dmap[i], nmap[i], bounds)
@@ -217,11 +226,13 @@ def voronoi(seeds, bounds=None):
         simplices.append(simps + ms)
         ms += np.max(simps) + 1
         grain_id.extend([i] * len(simps))
+        grain_volumes.extend([hull.volume] * len(simps))
         surface_grain.extend([_is_on_boundary(verts, bounds)] * len(simps))
     mesh = _build_mesh(
         np.concatenate(vertices),
         np.concatenate(simplices),
         grain_id,
+        grain_volumes,
         surface_grain,
         neighbours,
     )
