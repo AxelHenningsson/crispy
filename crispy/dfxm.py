@@ -425,10 +425,17 @@ class Braggez(object):
         else:
             unreachable = np.zeros(hkls.shape[1], dtype=bool)
 
+        if np.sum(~unreachable) == 0:
+            raise
+            return 0, 0, 0, 0
+
         nhat = nhat[:, ~unreachable]
         target = target[:, ~unreachable]
         bounds = self._explode_bounds(nhat.shape[1])
-        result = self._minimize(np.zeros((4 * nhat.shape[1],)), nhat, target, bounds)
+
+        x0 = (np.array(bounds)[:, 0] + np.array(bounds)[:, 1]) / 2.0
+
+        result = self._minimize(x0, nhat, target, bounds)
 
         solution, residuals, success = self._fill_unreachable(
             result,
