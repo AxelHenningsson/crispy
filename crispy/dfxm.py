@@ -102,15 +102,12 @@ class Goniometer:
         """
         hkls = self._get_hkls()
         bez = Braggez(self.energy, self.motor_bounds)
-        for i, g in enumerate(self.polycrystal.grains):
+
+        for g in self.polycrystal.grains:
             goni_angles, residual, success, theta = bez.align(
                 g.ub,
                 hkls,
-                alignment_tol=1e-5,
-                maxiter=None,
-                maxls=25,
-                ftol=None,
-                mask_unreachable=False,
+                mask_unreachable,
             )
             if np.sum(success) != 0:
                 g.dfxm = {
@@ -550,8 +547,8 @@ if __name__ == "__main__":
     )
 
     motor_bounds = {
-        "mu": (0, 20),
-        "omega": (-22, 22),
+        "mu": (-20, 20),
+        "omega": (-99, 99),
         "chi": (-5, 5),
         "phi": (-5, 5),
         "detector_z": (-0.04, 1.96),
@@ -576,9 +573,6 @@ if __name__ == "__main__":
     pr.enable()
     t1 = time.perf_counter()
 
-    goni.find_reflections()
-    goni.find_reflections()
-    goni.find_reflections()
     goni.find_reflections()
 
     t2 = time.perf_counter()
