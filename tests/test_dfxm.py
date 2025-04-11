@@ -183,7 +183,7 @@ class TestBraggez(unittest.TestCase):
             nhat,
             target,
             bounds,
-            maxiter=400,
+            maxiter=800,
             maxls=25,
             ftol=1e-8,
         )
@@ -193,10 +193,141 @@ class TestBraggez(unittest.TestCase):
             nhat,
             target,
             np.zeros(nhat.shape[1], dtype=bool),
-            alignment_tol=1e-3,
+            alignment_tol=0.01,
         )
 
         self.assertTrue(np.sum(success) == 12)  # with 99% probability
+
+    def test_find_reflections(self):
+        pc = crispy.Polycrystal(
+            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
+            group_name="Fe",
+            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
+            symmetry=225,
+        )
+
+        motor_bounds = {
+            "mu": (-9, 9),
+            "omega": (-9, 9),
+            "chi": (-5, 5),
+            "phi": (-5, 5),
+            "detector_z": (-0.04, 1.96),
+            "detector_y": (-0.169, 1.16),
+        }
+
+        detector_distance = 4.0
+        energy = 19.1
+
+        goni = crispy.dfxm.Goniometer(
+            pc,
+            energy,
+            detector_distance,
+            motor_bounds,
+        )
+
+        goni.find_reflections(
+            maxiter=800,
+            maxls=25,
+            ftol=1e-8,
+            alignment_tol=0.01,
+        )
+
+        has_reflection = False
+        for g in pc.grains:
+            if g.dfxm is not None:
+                has_reflection = True
+                break
+        self.assertTrue(has_reflection)
+
+    def test_symmetry_axis(self):
+        pc = crispy.Polycrystal(
+            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
+            group_name="Fe",
+            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
+            symmetry=225,
+        )
+
+        motor_bounds = {
+            "mu": (-9, 9),
+            "omega": (-9, 9),
+            "chi": (-5, 5),
+            "phi": (-5, 5),
+            "detector_z": (-0.04, 1.96),
+            "detector_y": (-0.169, 1.16),
+        }
+
+        detector_distance = 4.0
+        energy = 19.1
+
+        goni = crispy.dfxm.Goniometer(
+            pc,
+            energy,
+            detector_distance,
+            motor_bounds,
+        )
+
+        goni.find_symmetry_axis(
+            maxiter=800,
+            maxls=25,
+            ftol=1e-8,
+            alignment_tol=0.01,
+        )
+
+        has_symmetry_axis = False
+        for g in pc.grains:
+            if g.symmetry_axis is not None:
+                has_symmetry_axis = True
+                break
+        self.assertTrue(has_symmetry_axis)
+
+    def test_symmetry_axis(self):
+        pc = crispy.Polycrystal(
+            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
+            group_name="Fe",
+            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
+            symmetry=225,
+        )
+
+        g = pc.grains[0]
+        g.ubi = np.linalg.inv(
+            Rotation.from_rotvec(np.array([1, 1, 1]) * np.pi / 360).as_matrix() @ g.B
+        )
+
+        pc = crispy.Polycrystal(
+            [g],
+            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
+            symmetry=225,
+        )
+
+        motor_bounds = {
+            "mu": (-1, 1),
+            "omega": (-1, 1),
+            "chi": (-1, 1),
+            "phi": (-1, 1),
+            "detector_z": (-0.04, 1.96),
+            "detector_y": (-0.169, 1.16),
+        }
+
+        detector_distance = 4.0
+        energy = 19.1
+
+        goni = crispy.dfxm.Goniometer(
+            pc,
+            energy,
+            detector_distance,
+            motor_bounds,
+        )
+
+        goni.find_symmetry_axis(
+            maxiter=800,
+            maxls=25,
+            ftol=1e-8,
+            alignment_tol=0.01,
+        )
+
+        np.testing.assert_allclose(
+            pc.grains[0].symmetry_axis['hkl'], np.array([0.0, 0.0, 2.0]).reshape(3, 1) 
+        )
 
 
 if __name__ == "__main__":

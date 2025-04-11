@@ -52,7 +52,7 @@ class Goniometer:
 
     def find_reflections(
         self,
-        alignment_tol=1e-5,
+        alignment_tol=1e-4,
         maxiter=None,
         maxls=25,
         ftol=None,
@@ -68,22 +68,22 @@ class Goniometer:
         The reflections are stored in the polycrystal object as a dictionary with the keys
         "hkl", "mu", "omega", "chi", "phi", "residual", and "theta". The values are the
         corresponding values for each reflection. The reflections are stored in the order
-        they are found in the optimization. To access the reflections of a grain use:
+        they are found in the optimization. To access the reflections of a grain number i use:
 
-            grain.dfxm["hkl"] # hkl vectors that can diffract
-            grain.dfxm["mu"] # mu angles at which diffraction occurs
-            grain.dfxm["omega"] # omega angles at which diffraction occurs
-            grain.dfxm["chi"] # chi angles at which diffraction occurs
-            grain.dfxm["phi"] # phi angles at which diffraction occurs
-            grain.dfxm["residual"] # residuals, radians between the target vector Q-vector and the algined lattice normal.
-            grain.dfxm["theta"] # Bragg angles
+            polycrystal.grains[i].dfxm["hkl"] # hkl vectors that can diffract
+            polycrystal.grains[i].dfxm["mu"] # mu angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["omega"] # omega angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["chi"] # chi angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["phi"] # phi angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["residual"] # residuals, radians between the target vector Q-vector and the algined lattice normal.
+            polycrystal.grains[i].dfxm["theta"] # Bragg angles at which diffraction occurs
 
         Args:
 
             alignment_tol (float): The tolerance for determining if the optimization
-                managed to align the reflection for diffraction in unit of radians,
+                managed to align the reflection for diffraction in unit of degrees,
                 representing the misalignment of the lattice normal from the target vector.
-                Default is 1e-5.
+                Default is 1e-4.
             maxiter (int): The maximum number of iterations for the optimization performed
                 by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
                 number of reflections.
@@ -107,6 +107,10 @@ class Goniometer:
             goni_angles, residual, success, theta = bez.align(
                 g.ub,
                 hkls,
+                alignment_tol,
+                maxiter,
+                maxls,
+                ftol,
                 mask_unreachable,
             )
             if np.sum(success) != 0:
@@ -171,6 +175,77 @@ class Goniometer:
                     i += 1
         return tab
 
+    def find_symmetry_axis(
+        self,
+        alignment_tol=1e-4,
+        maxiter=None,
+        maxls=25,
+        ftol=None,
+        mask_unreachable=False,
+    ):
+        """Find all Miller indices that can be aligned with the z-axis within motor bounds.
+
+        Running this function will find all reflections in the polycrystal that are reachable
+        by the goniometer in DFXM. The reflections are found by running an optimization
+        algorithm that aligns the lattice normals with the target vectors. The target vectors
+        are statically defined as the z-axis. The reflections are stored in the polycrystal
+        grains objects as dictionaries with the keys "hkl", "mu", "omega", "chi", "phi",
+        and "residual". To access the reflections of a grain number i use:
+
+            polycrystal.grains[i].dfxm["hkl"] # hkl vectors that can diffract
+            polycrystal.grains[i].dfxm["mu"] # mu angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["omega"] # omega angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["chi"] # chi angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["phi"] # phi angles at which diffraction occurs
+            polycrystal.grains[i].dfxm["residual"] # residuals, radians between the target vector Q-vector and the algined lattice normal.
+
+        Args:
+
+            alignment_tol (float): The tolerance for determining if the optimization
+                managed to align the reflection for diffraction in unit of degrees,
+                representing the misalignment of the lattice normal from the target vector.
+                Default is 1e-4.
+            maxiter (int): The maximum number of iterations for the optimization performed
+                by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
+                number of reflections.
+            maxls (int): The maximum number of line search iterations for the optimization per
+                iteration of L-BFGS-B. Default is 25.
+            ftol (float): The tolerance for the optimization cost function before termination.
+                Default is None, which will be set to 1e-8 / N, where N is the number of
+                reflections.
+            mask_unreachable (bool): If True, mask reflections that are unreachable
+                by the goniometer/hexapod. A reflection is unreachable if the misalignment
+                of the lattice normal from the target vector is greater than the maximum sum
+                of the absolute values of the motor bounds. Default is False.
+                Maskin unreachable reflections speed up the optimization by simply not
+                considering them. When masking is enabled, the solution and residuals
+                success arrays will hold np.nan values for the unreachable reflections.
+        """
+        hkls = self._get_hkls()
+        bsym = BraggSym(self.energy, self.motor_bounds)
+
+        for g in self.polycrystal.grains:
+            goni_angles, residual, success = bsym.align(
+                g.ub,
+                hkls,
+                alignment_tol,
+                maxiter,
+                maxls,
+                ftol,
+                mask_unreachable,
+            )
+            if np.sum(success) != 0:
+                g.symmetry_axis = {
+                    "hkl": hkls[:, success],
+                    "mu": goni_angles[0, success],
+                    "omega": goni_angles[1, success],
+                    "chi": goni_angles[2, success],
+                    "phi": goni_angles[3, success],
+                    "residual": residual[success],
+                }
+            else:
+                g.symmetry_axis = None
+
 
 class Braggez(object):
     """
@@ -200,7 +275,7 @@ class Braggez(object):
         hexapod such that the reflection nhat is aligned with the target vector. Moreover,
         this must be done while considering the motor bounds of the goniometer/hexapod.
 
-    NOTE: The solution is not unique. OptiBragg will find you one solution that satisfies these
+    NOTE: The solution is not unique. Braggez will find you one solution that satisfies these
     conditions if existent using a gradient based optimization.
 
     Args:
@@ -426,7 +501,7 @@ class Braggez(object):
     def _fill_unreachable(self, result, nhat, target, unreachable, alignment_tol):
         _solution = result.x.reshape(4, len(result.x) // 4)
         _residuals = self.cost_vector(self.R(result.x), nhat, target)
-        _success = _residuals < alignment_tol
+        _success = _residuals < np.radians(alignment_tol)
 
         solution = np.full((4, len(unreachable)), fill_value=np.nan)
         solution[:, ~unreachable] = _solution
@@ -441,7 +516,7 @@ class Braggez(object):
         self,
         ub,
         hkls,
-        alignment_tol=1e-5,
+        alignment_tol=1e-4,
         maxiter=None,
         maxls=25,
         ftol=None,
@@ -459,9 +534,9 @@ class Braggez(object):
             ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
             hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
             alignment_tol (float): The tolerance for determining if the optimization
-                managed to align the reflection for diffraction in unit of radians,
+                managed to align the reflection for diffraction in unit of degrees,
                 representing the misalignment of the lattice normal from the target vector.
-                Default is 1e-5.
+                Default is 1e-4.
             maxiter (int): The maximum number of iterations for the optimization perfromed
                 by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
                 number of reflections.
@@ -532,6 +607,166 @@ class Braggez(object):
             self._print_results(solution, residuals, success)
 
         return solution, residuals, success, np.degrees(theta)
+
+
+class BraggSym(Braggez):
+    """BraggSym is a class that performs optimization of the gonio angles to align
+    crystal lattice normals with the lab-z axis.
+
+    This is usefull for oblique diffraction geometry in which several symmetry equivalent
+    reflections are to be imaged by rotating the sample around a symmetry axis.
+
+    This class is currently implemneted for the case of Dark Field X-ray Microscopy (DFXM) where
+    the gonimeter/hexapod has 4 degrees of freedom (mu, omega, chi, phi). Stacked as:
+
+        (1) base : mu
+        (2) bottom : omega
+        (3) top 1    : chi
+        (4) top 2    : phi
+
+    Here mu is a rotation about the negative y-axis, omega is a positive rotation about the
+    z-axis, chi is a positive rotation about the x-axis, and phi is a positive rotation about
+    the y-axis.
+
+    The target reflection is always defined as the z-axis.
+
+    The mathmatical problem is defined as follows:
+        Let nhat be a vector on the unit sphere representing the target reflection in its
+        current position (i.e ub @ hkl). Next let target be the z-axis. The goal is to
+        find a set of angles mu, omega, chi, phi of the goniometer/hexapod such that the
+        reflection nhat is aligned with the target vector. Moreover, this must be done
+        while considering the motor bounds of the goniometer/hexapod.
+
+    NOTE: The solution is not unique. BraggSym will find you one solution that
+        satisfies these conditions if existent using a gradient based optimization.
+
+    Args:
+        energy (float): Energy of the X-ray beam in keV
+        motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
+            e.g. {"mu": (0, 20), "omega": (-22, 22), "chi": (-5, 5), "phi": (-5, 5)}
+        epsilon (float): Small number used to compute the numerical derivatives during optimization
+        verbose (bool): If True, print the results and iteration of the optimization
+
+    Attributes:
+        energy (float): Energy of the X-ray beam in keV
+        motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
+            e.g. {"mu": (0, 20), "omega": (-22, 22), "chi": (-5, 5), "phi": (-5, 5)}
+        epsilon (float): Small number used to compute the numerical derivatives during optimization
+        verbose (bool): If True, print the results and iteration of the optimization
+
+    """
+
+    def get_unit_vectors(self, ub, hkls):
+        """Get the lattice plane normals, nhat, and the target vectors
+        which are statically defined as the z-axis in BraggSym.
+
+        Args:
+            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
+            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+
+        Returns:
+            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
+            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N), i.e.
+                the z-axis in lab frame.
+        """
+        Q = ub @ hkls
+        nhat = Q / np.linalg.norm(Q, axis=0)
+        target = np.tile(self._zhat, nhat.shape[1])
+        return nhat, target
+
+    def align(
+        self,
+        ub,
+        hkls,
+        alignment_tol=1e-4,
+        maxiter=None,
+        maxls=25,
+        ftol=None,
+        mask_unreachable=False,
+    ):
+        """Align Q = ub @ hkls vectors with the lab frame z-axis.
+
+        Runs an optimization to find the goniometer angles that align the lattice plane
+        normals to the target. The target vectors are defined statically as the z-axis
+        for the BraggSym class.
+
+        Args:
+
+            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
+            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+            alignment_tol (float): The tolerance for determining if the optimization
+                managed to align the reflection for diffraction in unit of degrees,
+                representing the misalignment of the lattice normal from the target vector.
+                Default is 1e-4.
+            maxiter (int): The maximum number of iterations for the optimization performed
+                by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
+                number of reflections.
+            maxls (int): The maximum number of line search iterations for the optimization per
+                iteration of L-BFGS-B. Default is 25.
+            ftol (float): The tolerance for the optimization cost function before termination.
+                Default is None, which will be set to 1e-8 / N, where N is the number of
+                reflections.
+            mask_unreachable (bool): If True, mask reflections that are unreachable
+                by the goniometer/hexapod. A reflection is unreachable if the misalignment
+                of the lattice normal from the target vector is greater than the maximum sum
+                of the absolute values of the motor bounds. Default is False.
+                Maskin unreachable reflections speed up the optimization by simply not
+                considering them. When masking is enabled, the solution and residuals
+                success arrays will hold np.nan values for the unreachable reflections.
+
+        Returns:
+            sol (:obj: `numpy.ndarray`): The solution angles in degrees, shape (4, N)
+                solution angles are in the order [mu, omega, chi, phi] such that
+                solution[:, i] are the goniometer angles for the ith reflection.
+            residuals (:obj: `numpy.ndarray`): The residuals in degrees, shape (N,)
+                these are the misalignments of the lattice normal from the target
+                vector given that the solution angles are applied.
+            success (:obj: `numpy.ndarray`): The success of the optimization, shape (N,)
+                True if the optimization converged within a tolerance of alignment_tol
+        """
+        nhat, target = self.get_unit_vectors(ub, hkls)
+
+        if mask_unreachable:
+            unreachable = self._mask_unreachable(nhat, target)
+        else:
+            unreachable = np.zeros(hkls.shape[1], dtype=bool)
+
+        if np.sum(~unreachable) == 0:
+            return 0, 0, 0, 0
+
+        nhat = nhat[:, ~unreachable]
+        target = target[:, ~unreachable]
+        bounds = self._explode_bounds(nhat.shape[1])
+
+        x0 = (np.array(bounds)[:, 0] + np.array(bounds)[:, 1]) / 2.0
+
+        if maxiter is None:
+            maxiter = 200 * nhat.shape[1]
+        if ftol is None:
+            ftol = (1e-8) / nhat.shape[1]
+
+        result = self._minimize(
+            x0,
+            nhat,
+            target,
+            bounds,
+            maxiter,
+            maxls,
+            ftol,
+        )
+
+        solution, residuals, success = self._fill_unreachable(
+            result,
+            nhat,
+            target,
+            unreachable,
+            alignment_tol,
+        )
+
+        if self.verbose:
+            self._print_results(solution, residuals, success)
+
+        return solution, residuals, success
 
 
 if __name__ == "__main__":
