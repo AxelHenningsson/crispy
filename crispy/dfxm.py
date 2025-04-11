@@ -50,14 +50,67 @@ class Goniometer:
         hkls = tools.genhkl_all(unit_cell, sintlmin, sintlmax, sgno=sgno).T
         return hkls
 
-    def find_reflections(self):
+    def find_reflections(
+        self,
+        alignment_tol=1e-5,
+        maxiter=None,
+        maxls=25,
+        ftol=None,
+        mask_unreachable=False,
+    ):
+        """Find all reflecitions in the polycrystal reachable by the goniometer in DFXM
+
+        Running this function will find all reflections in the polycrystal that are reachable
+        by the goniometer in DFXM. The reflections are found by running an optimization
+        algorithm that aligns the lattice normals with the target vectors. The target vectors
+        are defined as the z-axis rotated by the Bragg angle in the xz-plane into the reverse
+        direction of the beam which is assumed to propagate in the positive x-direction.
+        The reflections are stored in the polycrystal object as a dictionary with the keys
+        "hkl", "mu", "omega", "chi", "phi", "residual", and "theta". The values are the
+        corresponding values for each reflection. The reflections are stored in the order
+        they are found in the optimization. To access the reflections of a grain use:
+
+            grain.dfxm["hkl"] # hkl vectors that can diffract
+            grain.dfxm["mu"] # mu angles at which diffraction occurs
+            grain.dfxm["omega"] # omega angles at which diffraction occurs
+            grain.dfxm["chi"] # chi angles at which diffraction occurs
+            grain.dfxm["phi"] # phi angles at which diffraction occurs
+            grain.dfxm["residual"] # residuals, radians between the target vector Q-vector and the algined lattice normal.
+            grain.dfxm["theta"] # Bragg angles
+
+        Args:
+
+            alignment_tol (float): The tolerance for determining if the optimization
+                managed to align the reflection for diffraction in unit of radians,
+                representing the misalignment of the lattice normal from the target vector.
+                Default is 1e-5.
+            maxiter (int): The maximum number of iterations for the optimization performed
+                by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
+                number of reflections.
+            maxls (int): The maximum number of line search iterations for the optimization per
+                iteration of L-BFGS-B. Default is 25.
+            ftol (float): The tolerance for the optimization cost function before termination.
+                Default is None, which will be set to 1e-8 / N, where N is the number of
+                reflections.
+            mask_unreachable (bool): If True, mask reflections that are unreachable
+                by the goniometer/hexapod. A reflection is unreachable if the misalignment
+                of the lattice normal from the target vector is greater than the maximum sum
+                of the absolute values of the motor bounds. Default is False.
+                Maskin unreachable reflections speed up the optimization by simply not
+                considering them. When masking is enabled, the solution and residuals
+                success arrays will hold np.nan values for the unreachable reflections.
+        """
         hkls = self._get_hkls()
         bez = Braggez(self.energy, self.motor_bounds)
         for i, g in enumerate(self.polycrystal.grains):
             goni_angles, residual, success, theta = bez.align(
                 g.ub,
                 hkls,
-                mask_unreachable=True,
+                alignment_tol=1e-5,
+                maxiter=None,
+                maxls=25,
+                ftol=None,
+                mask_unreachable=False,
             )
             if np.sum(success) != 0:
                 g.dfxm = {
@@ -316,8 +369,9 @@ class Braggez(object):
             axis=0,
         )
 
-    def _minimize(self, x0, nhat, target, bounds):
+    def _minimize(self, x0, nhat, target, bounds, maxiter, maxls, ftol):
         """Scipy minimize wrapper of the L-BFGS-B algorithm"""
+
         return minimize(
             self.cost_and_grad,
             x0=x0,
@@ -326,9 +380,9 @@ class Braggez(object):
             jac=True,
             bounds=bounds,
             options={
-                "maxls": 25,
-                "maxiter": 200 * nhat.shape[1],
-                "ftol": (1e-8) / nhat.shape[1],
+                "maxls": maxls,
+                "maxiter": maxiter,
+                "ftol": ftol,
                 "iprint": 2 if self.verbose else -1,
             },
         )
@@ -372,10 +426,10 @@ class Braggez(object):
         totrange += np.max(np.abs(self.motor_bounds["phi"]))
         return c0 > totrange
 
-    def _fill_unreachable(self, result, nhat, target, unreachable):
+    def _fill_unreachable(self, result, nhat, target, unreachable, alignment_tol):
         _solution = result.x.reshape(4, len(result.x) // 4)
         _residuals = self.cost_vector(self.R(result.x), nhat, target)
-        _success = _residuals < 1e-5
+        _success = _residuals < alignment_tol
 
         solution = np.full((4, len(unreachable)), fill_value=np.nan)
         solution[:, ~unreachable] = _solution
@@ -386,7 +440,16 @@ class Braggez(object):
 
         return np.degrees(solution), np.degrees(residuals), success
 
-    def align(self, ub, hkls, mask_unreachable=False):
+    def align(
+        self,
+        ub,
+        hkls,
+        alignment_tol=1e-5,
+        maxiter=None,
+        maxls=25,
+        ftol=None,
+        mask_unreachable=False,
+    ):
         """Align Q = ub @ hkls vectors with eta=0 plane to satisfy Bragg's law.
 
         Runs an optimization to find the goniometer angles that align the lattice plane
@@ -398,6 +461,18 @@ class Braggez(object):
 
             ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
             hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+            alignment_tol (float): The tolerance for determining if the optimization
+                managed to align the reflection for diffraction in unit of radians,
+                representing the misalignment of the lattice normal from the target vector.
+                Default is 1e-5.
+            maxiter (int): The maximum number of iterations for the optimization perfromed
+                by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
+                number of reflections.
+            maxls (int): The maximum number of line search iterations for the optimization per
+                iteration of L-BFGS-B. Default is 25.
+            ftol (float): The tolerance for the optimization cost function before termination.
+                Default is None, which will be set to 1e-8 / N, where N is the number of
+                reflections.
             mask_unreachable (bool): If True, mask reflections that are unreachable
                 by the goniometer/hexapod. A reflection is unreachable if the misalignment
                 of the lattice normal from the target vector is greater than the maximum sum
@@ -414,8 +489,7 @@ class Braggez(object):
                 these are the misalignments of the lattice normal from the target
                 vector given that the solution angles are applied.
             success (:obj: `numpy.ndarray`): The success of the optimization, shape (N,)
-                True if the optimization converged within a tolerance of 0.1 miliradian
-                i.e np.radians(residuals) < 1e-5
+                True if the optimization converged within a tolerance of alignment_tol
             theta (:obj: `numpy.ndarray`): The Bragg angles in degrees, shape (N,)
         """
         nhat, target, theta = self.get_unit_vectors(ub, hkls)
@@ -434,13 +508,27 @@ class Braggez(object):
 
         x0 = (np.array(bounds)[:, 0] + np.array(bounds)[:, 1]) / 2.0
 
-        result = self._minimize(x0, nhat, target, bounds)
+        if maxiter is None:
+            maxiter = 200 * nhat.shape[1]
+        if ftol is None:
+            ftol = (1e-8) / nhat.shape[1]
+
+        result = self._minimize(
+            x0,
+            nhat,
+            target,
+            bounds,
+            maxiter,
+            maxls,
+            ftol,
+        )
 
         solution, residuals, success = self._fill_unreachable(
             result,
             nhat,
             target,
             unreachable,
+            alignment_tol,
         )
 
         if self.verbose:
@@ -479,7 +567,23 @@ if __name__ == "__main__":
         detector_distance,
         motor_bounds,
     )
+
+    import cProfile
+    import pstats
+    import time
+
+    pr = cProfile.Profile()
+    pr.enable()
+    t1 = time.perf_counter()
+
     goni.find_reflections()
     goni.find_reflections()
     goni.find_reflections()
     goni.find_reflections()
+
+    t2 = time.perf_counter()
+    pr.disable()
+    pr.dump_stats("tmp_profile_dump")
+    ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
+    ps.print_stats(15)
+    print("\n\nCPU time is : ", t2 - t1, "s")

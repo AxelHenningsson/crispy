@@ -79,8 +79,15 @@ class TestBraggez(unittest.TestCase):
         nhat = zhat
         optimizer = crispy.dfxm.Braggez(22, self.motor_bounds)
         bounds = optimizer._explode_bounds(1)
+
         res = optimizer._minimize(
-            np.zeros(4), nhat.reshape(3, 1), target.reshape(3, 1), bounds
+            np.zeros(4),
+            nhat.reshape(3, 1),
+            target.reshape(3, 1),
+            bounds,
+            maxiter=200,
+            maxls=25,
+            ftol=1e-8,
         )
 
         c, jac = optimizer.cost_and_grad(
@@ -172,11 +179,21 @@ class TestBraggez(unittest.TestCase):
         bounds = optimizer._explode_bounds(nhat.shape[1])
 
         result = optimizer._minimize(
-            np.zeros((4 * nhat.shape[1],)), nhat, target, bounds
+            np.zeros((4 * nhat.shape[1],)),
+            nhat,
+            target,
+            bounds,
+            maxiter=400,
+            maxls=25,
+            ftol=1e-8,
         )
 
         solution, residuals, success = optimizer._fill_unreachable(
-            result, nhat, target, np.zeros(nhat.shape[1], dtype=bool)
+            result,
+            nhat,
+            target,
+            np.zeros(nhat.shape[1], dtype=bool),
+            alignment_tol=1e-3,
         )
 
         self.assertTrue(np.sum(success) == 12)  # with 99% probability
