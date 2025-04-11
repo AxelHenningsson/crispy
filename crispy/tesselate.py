@@ -1,3 +1,4 @@
+import ImageD11
 import meshio
 import numpy as np
 from scipy.spatial import ConvexHull, HalfspaceIntersection
@@ -175,10 +176,10 @@ def _extract_points(seeds):
     Returns:
         :obj:`numpy array`: Numpy array of shape=(N,3) specifying the seeds
     """
-    if isinstance(seeds, np.ndarray):
-        return seeds
-    elif isinstance(seeds, list):
+    if isinstance(seeds[0], ImageD11.grain.grain):
         return np.array([g.translation for g in seeds])
+    elif isinstance(seeds, np.ndarray) and seeds.ndim == 2 and seeds.shape[1] == 3:
+        return seeds
     else:
         raise ValueError("seeds must be a numpy array or a list of grains")
 
@@ -264,4 +265,5 @@ if __name__ == "__main__":
     print("\n\nCPU time is : ", t2 - t1, "s")
 
     path = os.path.join(crispy.assets._root_path, "sandbox/test.vtk")
+    mesh.write(path)
     mesh.write(path)

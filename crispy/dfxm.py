@@ -426,7 +426,6 @@ class Braggez(object):
             unreachable = np.zeros(hkls.shape[1], dtype=bool)
 
         if np.sum(~unreachable) == 0:
-            raise
             return 0, 0, 0, 0
 
         nhat = nhat[:, ~unreachable]
@@ -480,6 +479,7 @@ if __name__ == "__main__":
         detector_distance,
         motor_bounds,
     )
+    goni.find_reflections()
     goni.find_reflections()
     goni.find_reflections()
     goni.find_reflections()

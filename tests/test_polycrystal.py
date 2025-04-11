@@ -12,10 +12,16 @@ class TestPolycrystal(unittest.TestCase):
         np.random.seed(42)
 
     def test_polycrystal(self):
+        lattice_parameters = [2.866, 2.866, 2.866, 90.0, 90.0, 90.0]
+
         pc = crispy.Polycrystal(
             os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
             group_name="Fe",
+            lattice_parameters=lattice_parameters,
+            symmetry=225,
         )
+
+        pc.tesselate()
 
         path = os.path.join(
             crispy.assets._root_path, "tests/saves/FeAu_0p5_tR_ff1_grains.vtk"
@@ -28,4 +34,5 @@ class TestPolycrystal(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    unittest.main()
     unittest.main()

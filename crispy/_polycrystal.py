@@ -53,7 +53,7 @@ class Polycrystal:
                 self.reference_cell = self.grains[0].ref_cell
             except:
                 raise ValueError(
-                    "No reference cell parameters passed and the grains do not contain a ref_cell attribute"
+                    "No reference cell parameters and/or symmetry passed and the grains do not contain a ref_cell attribute"
                 )
 
         self.number_of_grains = len(self.grains)
@@ -249,6 +249,11 @@ class Polycrystal:
                 written to file. Default is None.
 
         """
+
+        if self._mesh is None:
+            raise ValueError(
+                "Mesh is None, did you forget to call the tesselate() method?"
+            )
 
         # Add all x,y,z ipf colors to the mesh before writing to disc.
         rgb = self._ipf_colors()
