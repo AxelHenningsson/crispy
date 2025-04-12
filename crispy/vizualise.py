@@ -13,8 +13,6 @@ def _crispy_styling():
     plt.rcParams["font.size"] = fontsize
     plt.rcParams["xtick.labelsize"] = ticksize
     plt.rcParams["ytick.labelsize"] = ticksize
-    plt.rcParams["font.family"] = "Times New Roman"
-
 
 def _snap_to_bounds(ax, polycrystal):
     """Set the aspect ratio of the plot to be equal to the extent of the polycrystal + 10% padding."""

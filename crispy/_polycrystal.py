@@ -168,6 +168,31 @@ class Polycrystal:
         """
         self._mesh = crispy.tesselate.voronoi(list(self.grains))
 
+        # propagate polygon mesh data to the grain objects for easy access.
+        grain_volumes = self._mesh.cell_data['grain_volumes'][0]
+        grain_id = self._mesh.cell_data['grain_id'][0]
+        is_on_boundary = self._mesh.cell_data['surface_grain'][0]
+        triangle_nodes = self._mesh.cells[0].data
+        nodes = self._mesh.points
+        for g in self.grains:
+    
+            m = g.id == grain_id
+    
+            g.volume = grain_volumes[m][0]
+            g.equivalent_sphere_radii = (3 * g.volume / (4 * np.pi))**(1/3)
+            g.is_on_boundary = is_on_boundary[m][0]==1
+
+            high = nodes[triangle_nodes[m, :].flatten()].max(axis=0)
+            low = nodes[triangle_nodes[m, :].flatten()].min(axis=0)
+            width = high - low
+
+            g.bounding_box_lower_corner_x = low[0]
+            g.bounding_box_width_x  = width[0]
+            g.bounding_box_lower_corner_y = low[1]
+            g.bounding_box_width_y  = width[1]
+            g.bounding_box_lower_corner_z = low[2]
+            g.bounding_box_width_z  = width[2]
+    
     def texturize(self):
         """Compute the misorientation between all grain neighbours.
 
