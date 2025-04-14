@@ -149,6 +149,31 @@ class Polycrystal:
         return np.array([g.u for g in self.grains])
 
     @property
+    def median_peak_intensity(self):
+        """Return the median peak intensity for all grains. shape=(N,)"""
+        return np.array([g.median_peak_intensity for g in self.grains])
+
+    @property
+    def mean_peak_intensity(self):
+        """Return the mean peak intensity for all grains. shape=(N,)"""
+        return np.array([g.mean_peak_intensity for g in self.grains])
+
+    @property
+    def min_peak_intensity(self):
+        """Return the minimum peak intensity for all grains. shape=(N,)"""
+        return np.array([g.min_peak_intensity for g in self.grains])
+
+    @property
+    def max_peak_intensity(self):
+        """Return the maximum peak intensity for all grains. shape=(N,)"""
+        return np.array([g.max_peak_intensity for g in self.grains])
+
+    @property
+    def std_peak_intensity(self):
+        """Return the standard deviation of peak intensities for all grains. shape=(N,)"""
+        return np.array([g.std_peak_intensity for g in self.grains])
+
+    @property
     def orientation(self):  # alias for u
         return self.u
 
