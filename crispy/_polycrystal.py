@@ -149,6 +149,11 @@ class Polycrystal:
         return np.array([g.u for g in self.grains])
 
     @property
+    def number_of_peaks(self):
+        """Return number of indexed peaks for each grain. shape=(N,)"""
+        return np.array([g.number_of_peaks for g in self.grains])
+
+    @property
     def median_peak_intensity(self):
         """Return the median peak intensity for all grains. shape=(N,)"""
         return np.array([g.median_peak_intensity for g in self.grains])
