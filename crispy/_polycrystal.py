@@ -1,3 +1,5 @@
+import re
+
 import ImageD11.grain
 import numpy as np
 import xfab
@@ -49,9 +51,9 @@ class Polycrystal:
                 lattice_parameters, symmetry
             )
         else:
-            try:
+            if not hasattr(self.grains[0], "ref_cell"):
                 self.reference_cell = self.grains[0].ref_cell
-            except:
+            else:
                 raise ValueError(
                     "No reference cell parameters and/or symmetry passed and the grains do not contain a ref_cell attribute"
                 )
@@ -60,6 +62,24 @@ class Polycrystal:
 
         self._mesh = None
         self._misorientations = None
+
+        self.add_grain_attr(self.grains)
+
+    def add_grain_attr(self, grains):
+        for grain_id, g in enumerate(grains):
+            if not hasattr(g, "id"):
+                g.id = grain_id
+
+            if hasattr(g, "intensity_info"):
+                pattern = r"sum_of_all = (?P<sum_of_all>[\d.]+).*?median = (?P<median>[\d.]+) , min = (?P<min>[\d.]+) , max = (?P<max>[\d.]+) , mean = (?P<mean>[\d.]+) , std = (?P<std>[\d.]+) , n = (?P<n>\d+)"
+                vars = re.search(pattern, g.intensity_info).groupdict()
+                g.sum_peak_intensity = float(vars["sum_of_all"])
+                g.median_peak_intensity = float(vars["median"])
+                g.mean_peak_intensity = float(vars["median"])
+                g.min_peak_intensity = float(vars["min"])
+                g.max_peak_intensity = float(vars["max"])
+                g.std_peak_intensity = float(vars["std"])
+                g.number_of_peaks = int(vars["n"])
 
     @property
     def neighbours(self):
@@ -119,7 +139,7 @@ class Polycrystal:
         return np.array([g.translation for g in self.grains])
 
     @property
-    def ubis(self):
+    def ubi(self):
         """Return all the UBI matrices of the grains in the polycrystal. shape=(N, 3, 3)"""
         return np.array([g.ubi for g in self.grains])
 
@@ -129,13 +149,19 @@ class Polycrystal:
         return np.array([g.u for g in self.grains])
 
     @property
-    def orientations(self):  # alias for u
+    def orientation(self):  # alias for u
         return self.u
 
     @property
     def b(self):
         """Return all the B matrices of the grains in the polycrystal. shape=(N, 3, 3)"""
         return np.array([g.b for g in self.grains])
+
+    @property
+    def strain(self):
+        """Return all the sample strain tensors of the grains in the polycrystal. shape=(N, 3, 3)"""
+        dzero_cell = self.reference_cell.lattice_parameters
+        return np.array([g.eps_sample_matrix(dzero_cell) for g in self.grains])
 
     @classmethod
     def from_array(
@@ -169,30 +195,29 @@ class Polycrystal:
         self._mesh = crispy.tesselate.voronoi(list(self.grains))
 
         # propagate polygon mesh data to the grain objects for easy access.
-        grain_volumes = self._mesh.cell_data['grain_volumes'][0]
-        grain_id = self._mesh.cell_data['grain_id'][0]
-        is_on_boundary = self._mesh.cell_data['surface_grain'][0]
+        grain_volumes = self._mesh.cell_data["grain_volumes"][0]
+        grain_id = self._mesh.cell_data["grain_id"][0]
+        is_on_boundary = self._mesh.cell_data["surface_grain"][0]
         triangle_nodes = self._mesh.cells[0].data
         nodes = self._mesh.points
         for g in self.grains:
-    
             m = g.id == grain_id
-    
+
             g.volume = grain_volumes[m][0]
-            g.equivalent_sphere_radii = (3 * g.volume / (4 * np.pi))**(1/3)
-            g.is_on_boundary = is_on_boundary[m][0]==1
+            g.equivalent_sphere_radii = (3 * g.volume / (4 * np.pi)) ** (1 / 3)
+            g.is_on_boundary = is_on_boundary[m][0] == 1
 
             high = nodes[triangle_nodes[m, :].flatten()].max(axis=0)
             low = nodes[triangle_nodes[m, :].flatten()].min(axis=0)
             width = high - low
 
             g.bounding_box_lower_corner_x = low[0]
-            g.bounding_box_width_x  = width[0]
+            g.bounding_box_width_x = width[0]
             g.bounding_box_lower_corner_y = low[1]
-            g.bounding_box_width_y  = width[1]
+            g.bounding_box_width_y = width[1]
             g.bounding_box_lower_corner_z = low[2]
-            g.bounding_box_width_z  = width[2]
-    
+            g.bounding_box_width_z = width[2]
+
     def texturize(self):
         """Compute the misorientation between all grain neighbours.
 
@@ -382,6 +407,8 @@ if __name__ == "__main__":
     pr.dump_stats("tmp_profile_dump")
     ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
     ps.print_stats(15)
+    print("\n\nCPU time is : ", t2 - t1, "s")
+    print("\n\nCPU time is : ", t2 - t1, "s")
     print("\n\nCPU time is : ", t2 - t1, "s")
     print("\n\nCPU time is : ", t2 - t1, "s")
     print("\n\nCPU time is : ", t2 - t1, "s")
