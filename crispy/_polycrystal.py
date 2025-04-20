@@ -149,6 +149,11 @@ class Polycrystal:
         return np.array([g.u for g in self.grains])
 
     @property
+    def sum_peak_intensity(self):
+        """Return sum intensity of all indexed peaks for each grain. shape=(N,)"""
+        return np.array([g.sum_peak_intensity for g in self.grains])
+
+    @property
     def number_of_peaks(self):
         """Return number of indexed peaks for each grain. shape=(N,)"""
         return np.array([g.number_of_peaks for g in self.grains])
@@ -330,38 +335,44 @@ class Polycrystal:
 
         """
 
-        if self._mesh is None:
-            raise ValueError(
-                "Mesh is None, did you forget to call the tesselate() method?"
-            )
+    def write(self, path, grains="all", neighbourhood=None):
+        """Write the polycrystal to a file readable by Paraview.
 
-        # Add all x,y,z ipf colors to the mesh before writing to disc.
-        rgb = self._ipf_colors()
-        self._mesh.cell_data["ipf-x"] = [
-            np.zeros((len(self._mesh.cell_data["grain_id"][0]), 3))
-        ]
-        self._mesh.cell_data["ipf-y"] = [
-            np.zeros((len(self._mesh.cell_data["grain_id"][0]), 3))
-        ]
-        self._mesh.cell_data["ipf-z"] = [
-            np.zeros((len(self._mesh.cell_data["grain_id"][0]), 3))
-        ]
-        for i, gid in enumerate(self._mesh.cell_data["grain_id"][0]):
-            self._mesh.cell_data["ipf-x"][0][i] = rgb[gid, :, 0]
-            self._mesh.cell_data["ipf-y"][0][i] = rgb[gid, :, 1]
-            self._mesh.cell_data["ipf-z"][0][i] = rgb[gid, :, 2]
+        Args:
+            path (:obj:`str`): Absolute path to the file to write the polycrystal
+                to, must end in .vtk.
+            grains (:obj:`list` of :obj:`int` or :obj:`int` or :obj:`str`): The
+                grain ids to write. Defaults to "all" in which case all grains
+                in the polycrystal are written.
+            neighbourhood (:obj:`int`): When not None, the grains argument is overwritten
+                such that the grain number -neighbourhood- and all of its neighbours are
+                written to file. Default is None.
+
+        """
 
         if self._mesh is None:
             raise ValueError(
                 "Mesh is None, did you forget to call the tesselate() method?"
             )
-        if neighbourhood is None and isinstance(grains, str) and grains == "all":
-            self._mesh.write(path)
+        elif neighbourhood is None and isinstance(grains, str) and grains == "all":
+            mesh = self._mesh
         else:
             grains = self._select_grains(grains, neighbourhood)
             local_geometry = self._extract_geom(grains)
             mesh = crispy.tesselate._build_mesh(*local_geometry)
-            mesh.write(path)
+
+        # Add all x,y,z ipf colors to the mesh before writing to disc.
+        rgb = self._ipf_colors()
+
+        mesh.cell_data["ipf-x"] = [np.zeros((len(mesh.cell_data["grain_id"][0]), 3))]
+        mesh.cell_data["ipf-y"] = [np.zeros((len(mesh.cell_data["grain_id"][0]), 3))]
+        mesh.cell_data["ipf-z"] = [np.zeros((len(mesh.cell_data["grain_id"][0]), 3))]
+        for i, gid in enumerate(mesh.cell_data["grain_id"][0]):
+            mesh.cell_data["ipf-x"][0][i] = rgb[gid, :, 0]
+            mesh.cell_data["ipf-y"][0][i] = rgb[gid, :, 1]
+            mesh.cell_data["ipf-z"][0][i] = rgb[gid, :, 2]
+
+        mesh.write(path)
 
     def _select_grains(self, grains, neighbourhood):
         """Patch the grain index list to include neighbours, handle int, etc."""
