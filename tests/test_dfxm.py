@@ -44,7 +44,7 @@ class TestBraggez(unittest.TestCase):
         self.assertTrue(np.allclose(jac, np.array([0, 0, -1, 0])))
 
     def test_mask(self):
-        pc = crispy.Polycrystal(
+        pc = crispy.GrainMap(
             os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
             group_name="Fe",
             lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
@@ -112,7 +112,7 @@ class TestBraggez(unittest.TestCase):
         )
 
     def test_good_and_bad_reflection(self):
-        pc = crispy.Polycrystal(
+        pc = crispy.GrainMap(
             os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
             group_name="Fe",
             lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
@@ -199,7 +199,7 @@ class TestBraggez(unittest.TestCase):
         self.assertTrue(np.sum(success) == 12)  # with 99% probability
 
     def test_find_reflections(self):
-        pc = crispy.Polycrystal(
+        pc = crispy.GrainMap(
             os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
             group_name="Fe",
             lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
@@ -240,7 +240,7 @@ class TestBraggez(unittest.TestCase):
         self.assertTrue(has_reflection)
 
     def test_symmetry_axis(self):
-        pc = crispy.Polycrystal(
+        pc = crispy.GrainMap(
             os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
             group_name="Fe",
             lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
@@ -281,7 +281,7 @@ class TestBraggez(unittest.TestCase):
         self.assertTrue(has_symmetry_axis)
 
     def test_symmetry_axis(self):
-        pc = crispy.Polycrystal(
+        pc = crispy.GrainMap(
             os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
             group_name="Fe",
             lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
@@ -293,7 +293,7 @@ class TestBraggez(unittest.TestCase):
             Rotation.from_rotvec(np.array([1, 1, 1]) * np.pi / 360).as_matrix() @ g.B
         )
 
-        pc = crispy.Polycrystal(
+        pc = crispy.GrainMap(
             [g],
             lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
             symmetry=225,

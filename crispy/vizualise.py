@@ -14,6 +14,7 @@ def _crispy_styling():
     plt.rcParams["xtick.labelsize"] = ticksize
     plt.rcParams["ytick.labelsize"] = ticksize
 
+
 def _snap_to_bounds(ax, polycrystal):
     """Set the aspect ratio of the plot to be equal to the extent of the polycrystal + 10% padding."""
     bounds = polycrystal.bounding_box
@@ -66,7 +67,7 @@ def mesh(
     """Plot the Voronoi tesselation of the polycrystal.
 
     Args:
-        polycrystal (:obj:`crispy.Polycrystal`): The polycrystal object.
+        polycrystal (:obj:`crispy.TDXRDMap`): The polycrystal object.
         neighbourhood (:obj:`int`, optional): When not None, the grain
             with number -neighbourhood- and all of its neighbours are
             plotted. Default is None, in which case the entire polycrystal
@@ -146,7 +147,7 @@ if __name__ == "__main__":
 
     import crispy
 
-    pc = crispy.Polycrystal(
+    pc = crispy.GrainMap(
         os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
         group_name="Fe",
         lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],

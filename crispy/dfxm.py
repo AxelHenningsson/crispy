@@ -16,7 +16,7 @@ class Goniometer:
     without re-mounitng the sample
 
     Attributes:
-        polycrystal (:obj:`crispy.Polycrystal`): The polycrystal object mounted on the goniometer.
+        polycrystal (:obj:`crispy._polycrystal.Polycrystal`): The polycrystal object mounted on the goniometer.
         energy (:obj:`float`): Photon energy in keV.
         detector_distance (:obj:`float`): The detector distance in meters.
         motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
@@ -774,7 +774,7 @@ if __name__ == "__main__":
 
     import crispy
 
-    pc = crispy.Polycrystal(
+    pc = crispy.GrainMap(
         os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
         group_name="Fe",
         lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
