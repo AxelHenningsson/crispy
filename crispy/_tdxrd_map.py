@@ -50,8 +50,8 @@ class TDXRDMap(Polycrystal):
                 lattice_parameters, symmetry
             )
         else:
-            if not hasattr(self.grains[0], "ref_cell"):
-                self.reference_cell = self.grains[0].ref_cell
+            if hasattr(self.grains[0], "ref_unitcell"):
+                self.reference_cell = self.grains[0].ref_unitcell
             else:
                 raise ValueError(
                     "No reference cell parameters and/or symmetry passed and the grains do not contain a ref_cell attribute"
