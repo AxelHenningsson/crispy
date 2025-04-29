@@ -1,4 +1,4 @@
-import ImageD11
+import ImageD11.grain
 import meshio
 import numpy as np
 from scipy.spatial import ConvexHull, HalfspaceIntersection

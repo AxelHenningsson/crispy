@@ -1,7 +1,8 @@
 import os
 
 import h5py
-import ImageD11
+import ImageD11.grain
+import ImageD11.unitcell
 import meshio
 import numba
 import numpy as np
@@ -87,9 +88,17 @@ class LabDCTVolume(Polycrystal):
         reflect the new label etc.
         """
         self._reset_labels()
+        self._check_labels()
+
         self.orientations = self._get_orientations(self.voxel_rotations, self.labels)
         self.grains = self._get_grains(self.B0, self.orientations, self.reference_cell)
         self.number_of_grains = len(self.grains)
+
+        if np.max(self.labels) != self.number_of_grains - 1:
+            raise ValueError(
+                "Number of grains is not consistent with the maximum label"
+            )
+
         self.bounding_box = self._get_bounding_box(self.X, self.Y, self.Z)
         self.neighbours, self.interface_areas, self.grain_sizes = self._spatial_search(
             self.labels, self.number_of_grains
@@ -97,6 +106,27 @@ class LabDCTVolume(Polycrystal):
         self.centroids = self._get_centroids(self.grain_sizes)
         if self._misorientations is not None:
             self.texturize()
+
+    def _check_labels(self):
+        """Check that labels are sequential with no gaps starting from -1 or 0.
+
+        Raises:
+            ValueError: If labels are not sequential or have gaps.
+        """
+
+        unique_labels = np.unique(self.labels)
+        min_label = np.min(unique_labels)
+
+        if not min_label == -1 or min_label == 0:
+            raise ValueError("Labels must start from -1 or 0")
+
+        expected_labels = np.arange(len(unique_labels)) + np.min(unique_labels)
+        if not np.all(unique_labels == expected_labels):
+            print("unique_labels", unique_labels)
+            print("expected_labels", expected_labels)
+            raise ValueError(
+                "Labels are not sequential in the range [-1, number_of_grains-1] with -1 for void"
+            )
 
     def _spatial_search(self, labels, number_of_grains, struct=DEFAULT_STRUCT):
         """Compute spatial properties of grains in the voxel volume.
@@ -194,6 +224,7 @@ class LabDCTVolume(Polycrystal):
         interface_areas = np.empty((number_of_grains,), dtype=np.ndarray)
         for i in range(structure_matrix.shape[0]):
             mask = structure_matrix[i, :] > 0
+            mask[i] = False
             neighbours[i] = np.where(mask)[0][1:].astype(np.uint32)
             interface_areas[i] = structure_matrix[i, neighbours[i]]
         return neighbours, interface_areas, grain_sizes
@@ -914,5 +945,7 @@ LabDCTVolume._coord_sum.compile(
     )
 )
 
+if __name__ == "__main__":
+    pass
 if __name__ == "__main__":
     pass
