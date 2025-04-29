@@ -65,6 +65,28 @@ class TestLabDCTVolume(unittest.TestCase):
         np.testing.assert_allclose(neighbours[2], np.array([0, 1, 3], dtype=np.uint32))
         np.testing.assert_allclose(neighbours[3], np.array([2], dtype=np.uint32))
 
+    def test__filter(self):
+        labels = np.zeros((10, 10, 10), dtype=np.int32) - 1
+        labels[1:4, 1:-1, 1:-1] = 0
+        labels[5:-1, 1:-1, 1:-1] = 1
+        labels[1:-1, 1:5, 1:-1] = 2
+        labels[2, 2, 2] = 3
+        number_of_voids = np.sum(labels == -1)
+
+        sizes = np.array(
+            [np.sum(labels == i) for i in range(np.max(labels) + 1)], dtype=np.uint32
+        )
+
+        min_grain_size_in_voxels = 2
+        crispy.LabDCTVolume._filter(labels, sizes, min_grain_size_in_voxels)
+
+        self.assertEqual(labels[2, 2, 2], -1)
+
+        min_grain_size_in_voxels = sizes[0] + 1
+        crispy.LabDCTVolume._filter(labels, sizes, min_grain_size_in_voxels)
+
+        self.assertEqual(np.sum(labels == -1), number_of_voids + sizes[-1] + sizes[0])
+
 
 if __name__ == "__main__":
     unittest.main()
