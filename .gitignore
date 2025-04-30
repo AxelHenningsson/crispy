@@ -28,8 +28,6 @@ MANIFEST
 
 
 sandbox/
-*.xdmf
-*.vtk
 .vscode/
 
 tmp_profile_dump
