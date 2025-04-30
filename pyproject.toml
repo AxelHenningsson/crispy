@@ -7,7 +7,7 @@
 
     [project]
     name = "crispy"
-    version = "0.0.0"
+    version = "0.0.1"
     description = "crispy - a CRystal population metric InSpector written in PYthon."
     authors = [
       { name = "{Axel Henningsson}", email = "{nilsaxelhenningsson@gmail.com}" }
@@ -20,4 +20,7 @@
                     "hdf5plugin",
                     "h5py",
                     "ImageD11",
+                    "xfab",
+                    "orix",
+                    "pandas",
                     ]
