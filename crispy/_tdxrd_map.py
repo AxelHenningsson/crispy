@@ -6,6 +6,7 @@ import xfab
 import xfab.symmetry
 
 from crispy import read, tesselate
+from crispy._constants import _CRYSTAL_SYSTEM_STR_TO_INT
 from crispy._polycrystal import Polycrystal
 
 
@@ -219,9 +220,7 @@ class TDXRDMap(Polycrystal):
         into account the crystal system symmetry.
 
         """
-        _crystal_system = crispy.CONSTANTS._CRYSTAL_SYSTEM_STR_TO_INT[
-            self.crystal_system
-        ]
+        _crystal_system = _CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
         self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
         for gi in range(len(self.grains)):
             u = self.grains[gi].u
