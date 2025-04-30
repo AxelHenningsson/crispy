@@ -1,5 +1,6 @@
 import numpy as np
 
+# to easily interface with xfab for misorientation calculations
 _CRYSTAL_SYSTEM_STR_TO_INT = {
     "triclinic": 1,
     "monoclinic": 2,
@@ -19,6 +20,8 @@ _SPACEGROUP_TO_CRYSTAL_SYSTEM[143:168] = "trigonal"
 _SPACEGROUP_TO_CRYSTAL_SYSTEM[168:195] = "hexagonal"
 _SPACEGROUP_TO_CRYSTAL_SYSTEM[195:] = "cubic"
 
+
+# structuring element for 3D binary image processing
 DEFAULT_STRUCT = np.array(
     [
         [[0, 0, 0], [0, 1, 0], [0, 0, 0]],

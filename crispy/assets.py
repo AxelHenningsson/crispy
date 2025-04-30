@@ -5,8 +5,8 @@ import os
 import numpy as np
 
 import crispy
-import crispy.read
-import crispy.tesselate
+import crispy._read
+import crispy._tesselate
 import crispy.vizualise
 
 # path to the root directory of the repository
@@ -23,7 +23,7 @@ def grainmap_id11():
         :obj:`list` of :obj:`ImageD11.grain.grain`: List of grains in the grain map.
     """
     filename = os.path.join(_asset_path, "FeAu_0p5_tR_ff1_grains.h5")
-    return crispy.read.grains(filename, group_name="Fe")
+    return crispy._read.grains(filename, group_name="Fe")
 
 
 if __name__ == "__main__":

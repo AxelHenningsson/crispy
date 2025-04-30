@@ -1,4 +1,4 @@
-from . import _constants as CONSTANTS
+from . import _constants as CONSTANTS, _read, _tesselate
 from . import (
     _grain_map,
     _lab_dct_volume,
@@ -6,8 +6,6 @@ from . import (
     _tdxrd_map,
     assets,
     dfxm,
-    read,
-    tesselate,
     vizualise,
 )
 

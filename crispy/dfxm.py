@@ -16,19 +16,24 @@ class Goniometer:
     without re-mounitng the sample
 
     Attributes:
-        polycrystal (:obj:`crispy._polycrystal.Polycrystal`): The polycrystal object mounted on the goniometer.
+        polycrystal (:obj:`crispy._polycrystal.Polycrystal`): The polycrystal object
+            mounted on the goniometer.
         energy (:obj:`float`): Photon energy in keV.
         detector_distance (:obj:`float`): The detector distance in meters.
-        motor_bounds (dict): Dictionary containing the motor bounds of the goniometer/hexapod
-            keys are given in the below example dictionary:
-            e.g. {"mu": (0, 20),
-                "omega": (-22, 22),
-                "chi": (-5, 5),
-                "phi": (-5, 5),
-                "detector_z": (-0.04, 1.96),
-                "detector_y": (-0.169, 1.16),}
-            These are in units of degrees (sample stage)
-            and meters (for detector translations)
+        motor_bounds (:obj:`dict`): Dictionary containing the motor bounds of the
+            goniometer/hexapod in units of degrees (sample stage) and meters
+            (for detector translations). Keys are given in the example dictionary below:
+
+           .. code-block:: python
+
+              {
+              "mu": (0, 20), # degrees
+              "omega": (-22, 22), # degrees
+              "chi": (-5, 5), # degrees
+              "phi": (-5, 5), # degrees
+              "detector_z": (-0.04, 1.96), # meters
+              "detector_y": (-0.169, 1.16) # meters
+              }
     """
 
     def __init__(self, polycrystal, energy, detector_distance, motor_bounds):
@@ -347,11 +352,11 @@ class Braggez(object):
 
         Args:
             rotation (:obj: scipy.spatial.transform.Rotation): The rotations, length N
-            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
-            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+            nhat (:obj:`numpy array`): The lattice plane normals, shape (3, N)
+            target (:obj:`numpy array`): The target vectors, shape (3, N)
 
         Returns:
-            :obj: `numpy.ndarray`: The cost vector in radians, shape (N,)
+            :obj:`numpy array`: The cost vector in radians, shape (N,)
                 each instance represents the misalignment of the lattice normal
                 from the target vector.
         """
@@ -364,11 +369,11 @@ class Braggez(object):
 
         Args:
             rotation (:obj: scipy.spatial.transform.Rotation): The rotations, length N
-            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
-            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+            nhat (:obj:`numpy array`): The lattice plane normals, shape (3, N)
+            target (:obj:`numpy array`): The target vectors, shape (3, N)
 
         Returns:
-            :obj: `float`: The aggregated cost.
+            :obj:`float`: The aggregated cost.
         """
         return self.cost_vector(rotation, nhat, target).sum()
 
@@ -378,13 +383,13 @@ class Braggez(object):
         Uses a simple finite difference method to compute the gradient
 
         Args:
-            x (:obj: `numpy.ndarray`): optimization variables flattened, shape (4*N,)
-            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
-            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
+            x (:obj:`numpy array`): optimization variables flattened, shape (4*N,)
+            nhat (:obj:`numpy array`): The lattice plane normals, shape (3, N)
+            target (:obj:`numpy array`): The target vectors, shape (3, N)
 
         Returns:
-            (:obj: `numpy.ndarray`): The aggregated cost.
-            (:obj: `numpy.ndarray`): The gradient of the cost function, shape (4*N,)
+            (:obj:`numpy array`): The aggregated cost.
+            (:obj:`numpy array`): The gradient of the cost function, shape (4*N,)
         """
         mu, omega, chi, phi = x.reshape(4, len(x) // 4)
         R1 = self.R_mu(mu)
@@ -463,13 +468,13 @@ class Braggez(object):
         """Get the lattice plane normals, nhat, and the target vectors
 
         Args:
-            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
-            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+            ub (:obj:`numpy array`): The UB matrix, shape (3, 3)
+            hkls (:obj:`numpy array`): The hkl vectors, shape (3, N)
 
         Returns:
-            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
-            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N)
-            theta (:obj: `numpy.ndarray`): The Bragg angle in radians, shape (N,)
+            nhat (:obj:`numpy array`): The lattice plane normals, shape (3, N)
+            target (:obj:`numpy array`): The target vectors, shape (3, N)
+            theta (:obj:`numpy array`): The Bragg angle in radians, shape (N,)
         """
         Q = ub @ hkls
         nhat = Q / np.linalg.norm(Q, axis=0)
@@ -530,39 +535,47 @@ class Braggez(object):
         beam which is assumed to propagate in the positive x-direction.
 
         Args:
-
-            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
-            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
-            alignment_tol (float): The tolerance for determining if the optimization
+            ub (:obj:`numpy array`): The UB matrix, shape (3, 3)
+            hkls (:obj:`numpy array`): The hkl vectors, shape (3, N)
+            alignment_tol (:obj:`float`): The tolerance for determining if the optimization
                 managed to align the reflection for diffraction in unit of degrees,
                 representing the misalignment of the lattice normal from the target vector.
                 Default is 1e-4.
-            maxiter (int): The maximum number of iterations for the optimization perfromed
+            maxiter (:obj:`int`): The maximum number of iterations for the optimization performed
                 by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
                 number of reflections.
-            maxls (int): The maximum number of line search iterations for the optimization per
+            maxls (:obj:`int`): The maximum number of line search iterations for the optimization per
                 iteration of L-BFGS-B. Default is 25.
-            ftol (float): The tolerance for the optimization cost function before termination.
+            ftol (:obj:`float`): The tolerance for the optimization cost function before termination.
                 Default is None, which will be set to 1e-8 / N, where N is the number of
                 reflections.
-            mask_unreachable (bool): If True, mask reflections that are unreachable
+            mask_unreachable (:obj:`bool`): If True, mask reflections that are unreachable
                 by the goniometer/hexapod. A reflection is unreachable if the misalignment
                 of the lattice normal from the target vector is greater than the maximum sum
-                of the absolute values of the motor bounds. Default is False.
-                Maskin unreachable reflections speed up the optimization by simply not
+                of the absolute values of the motor bounds. Default is False. Masking
+                unreachable reflections speed up the optimization by simply not
                 considering them. When masking is enabled, the solution and residuals
                 success arrays will hold np.nan values for the unreachable reflections.
 
         Returns:
-            sol (:obj: `numpy.ndarray`): The solution angles in degrees, shape (4, N)
-                solution angles are in the order [mu, omega, chi, phi] such that
-                solution[:, i] are the goniometer angles for the ith reflection.
-            residuals (:obj: `numpy.ndarray`): The residuals in degrees, shape (N,)
-                these are the misalignments of the lattice normal from the target
-                vector given that the solution angles are applied.
-            success (:obj: `numpy.ndarray`): The success of the optimization, shape (N,)
-                True if the optimization converged within a tolerance of alignment_tol
-            theta (:obj: `numpy.ndarray`): The Bragg angles in degrees, shape (N,)
+            (:obj:`tuple`): tuple containing:
+
+                - **sol** (:obj:`numpy array`): The solution angles in degrees,
+                        shape (4, N) solution angles are in the order
+                        [mu, omega, chi, phi] such that solution[:, i] are the
+                        goniometer angles for the ith reflection.
+
+                - **residuals** (:obj:`numpy array`): The residuals in degrees,
+                        shape (N,) these are the misalignments of the lattice
+                        normal from the target vector given that the solution
+                        angles are applied.
+
+                - **success** (:obj:`numpy array`): The success of the optimization,
+                        shape (N,) True if the optimization converged within a
+                        tolerance of alignment_tol
+
+                - **theta** (:obj:`numpy array`): The Bragg angles,
+                        in degrees for each reflection, shape (N,)
         """
         nhat, target, theta = self.get_unit_vectors(ub, hkls)
 
@@ -657,17 +670,21 @@ class BraggSym(Braggez):
     """
 
     def get_unit_vectors(self, ub, hkls):
-        """Get the lattice plane normals, nhat, and the target vectors
+        """
+        Get the lattice plane normals and the target vectors,
         which are statically defined as the z-axis in BraggSym.
 
         Args:
-            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
-            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
+            ub (:obj:`numpy array`): The UB matrix, shape (3, 3)
+            hkls (:obj:`numpy array`): The hkl vectors, shape (3, N)
 
         Returns:
-            nhat (:obj: `numpy.ndarray`): The lattice plane normals, shape (3, N)
-            target (:obj: `numpy.ndarray`): The target vectors, shape (3, N), i.e.
-                the z-axis in lab frame.
+            (:obj:`tuple`): tuple containing:
+
+                - **nhat** (:obj:`numpy array`):  The lattice plane
+                        normals, shape (3, N)
+                - **target** (:obj:`numpy array`): The target vectors, i.e.,
+                        the z-axis in the lab frame, shape (3, N)
         """
         Q = ub @ hkls
         nhat = Q / np.linalg.norm(Q, axis=0)
@@ -691,38 +708,44 @@ class BraggSym(Braggez):
         for the BraggSym class.
 
         Args:
-
-            ub (:obj: `numpy.ndarray`): The UB matrix, shape (3, 3)
-            hkls (:obj: `numpy.ndarray`): The hkl vectors, shape (3, N)
-            alignment_tol (float): The tolerance for determining if the optimization
+            ub (:obj:`numpy array`): The UB matrix, shape (3, 3)
+            hkls (:obj:`numpy array`): The hkl vectors, shape (3, N)
+            alignment_tol (:obj:`float`): The tolerance for determining if the optimization
                 managed to align the reflection for diffraction in unit of degrees,
                 representing the misalignment of the lattice normal from the target vector.
                 Default is 1e-4.
-            maxiter (int): The maximum number of iterations for the optimization performed
+            maxiter (:obj:`int`): The maximum number of iterations for the optimization performed
                 by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
                 number of reflections.
-            maxls (int): The maximum number of line search iterations for the optimization per
+            maxls (:obj:`int`): The maximum number of line search iterations for the optimization per
                 iteration of L-BFGS-B. Default is 25.
-            ftol (float): The tolerance for the optimization cost function before termination.
+            ftol (:obj:`float`): The tolerance for the optimization cost function before termination.
                 Default is None, which will be set to 1e-8 / N, where N is the number of
                 reflections.
-            mask_unreachable (bool): If True, mask reflections that are unreachable
+            mask_unreachable (:obj:`bool`): If True, mask reflections that are unreachable
                 by the goniometer/hexapod. A reflection is unreachable if the misalignment
                 of the lattice normal from the target vector is greater than the maximum sum
-                of the absolute values of the motor bounds. Default is False.
-                Maskin unreachable reflections speed up the optimization by simply not
+                of the absolute values of the motor bounds. Default is False. Masking
+                unreachable reflections speed up the optimization by simply not
                 considering them. When masking is enabled, the solution and residuals
                 success arrays will hold np.nan values for the unreachable reflections.
 
         Returns:
-            sol (:obj: `numpy.ndarray`): The solution angles in degrees, shape (4, N)
-                solution angles are in the order [mu, omega, chi, phi] such that
-                solution[:, i] are the goniometer angles for the ith reflection.
-            residuals (:obj: `numpy.ndarray`): The residuals in degrees, shape (N,)
-                these are the misalignments of the lattice normal from the target
-                vector given that the solution angles are applied.
-            success (:obj: `numpy.ndarray`): The success of the optimization, shape (N,)
-                True if the optimization converged within a tolerance of alignment_tol
+            (:obj:`tuple`): tuple containing:
+
+                - **sol** (:obj:`numpy array`): The solution angles in degrees,
+                        shape (4, N) solution angles are in the order
+                        [mu, omega, chi, phi] such that solution[:, i] are the
+                        goniometer angles for the ith reflection.
+
+                - **residuals** (:obj:`numpy array`): The residuals in degrees,
+                        shape (N,) these are the misalignments of the lattice
+                        normal from the target vector given that the solution
+                        angles are applied.
+
+                - **success** (:obj:`numpy array`): The success of the optimization,
+                        shape (N,) True if the optimization converged within a
+                        tolerance of alignment_tol
         """
         nhat, target = self.get_unit_vectors(ub, hkls)
 
@@ -767,7 +790,6 @@ class BraggSym(Braggez):
             self._print_results(solution, residuals, success)
 
         return solution, residuals, success
-
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import numpy as np
 import xfab
 import xfab.symmetry
 
-from crispy import read, tesselate
+from crispy import _read, _tesselate
 from crispy._constants import _CRYSTAL_SYSTEM_STR_TO_INT
 from crispy._polycrystal import Polycrystal
 
@@ -44,7 +44,7 @@ class TDXRDMap(Polycrystal):
         if isinstance(grainfile, list):
             self.grains = np.array(grainfile)
         else:
-            self.grains = read.grains(grainfile, group_name)
+            self.grains = _read.grains(grainfile, group_name)
 
         if lattice_parameters and symmetry:
             self.reference_cell = ImageD11.unitcell.unitcell(
@@ -163,8 +163,8 @@ class TDXRDMap(Polycrystal):
         This circumvents the need to read a grain file and ImageD11.grain.grain objects.
 
         Args:
-            translations (:obj: `iterable` of :obj:`numpy.ndarray`): 3D grain center translations each of shape=(3,).
-            ubi_matrices (:obj: `iterable` of :obj:`numpy.ndarray`): ubi matrices each of shape=(3, 3).
+            translations (:obj:`iterable` of :obj:`numpy array`): 3D grain center translations each of shape=(3,).
+            ubi_matrices (:obj:`iterable` of :obj:`numpy array`): ubi matrices each of shape=(3, 3).
 
         Returns:
             :obj:`crispy._tdxrd_map.TDXRDMAP`: The polycrystal object.
@@ -181,7 +181,7 @@ class TDXRDMap(Polycrystal):
 
         Generates the polycrystal mesh with one convex polyhedra per grain.
         """
-        self._mesh = tesselate.voronoi(list(self.grains))
+        self._mesh = _tesselate.voronoi(list(self.grains))
 
         # propagate polygon mesh data to the grain objects for easy access.
         grain_volumes = self._mesh.cell_data["grain_volumes"][0]
@@ -253,7 +253,7 @@ class TDXRDMap(Polycrystal):
         else:
             grains = self._select_grains(grains, neighbourhood)
             local_geometry = self._extract_geom(grains)
-            mesh = tesselate._build_mesh(*local_geometry)
+            mesh = _tesselate._build_mesh(*local_geometry)
 
         # Add all x,y,z ipf colors to the mesh before writing to disc.
         rgb = self._ipf_colors()

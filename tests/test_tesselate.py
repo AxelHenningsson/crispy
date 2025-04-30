@@ -12,7 +12,7 @@ class TestTesselate(unittest.TestCase):
 
     def test_tesselate(self):
         grains = crispy.assets.grainmap_id11()
-        mesh = crispy.tesselate.voronoi(grains)
+        mesh = crispy._tesselate.voronoi(grains)
         self.assertEqual(np.max(mesh.cell_data["grain_id"]), len(grains) - 1)
         self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)
 
@@ -20,7 +20,7 @@ class TestTesselate(unittest.TestCase):
             self.assertLess(len(n), 16)  # verified by paraview
 
         points = np.random.rand(100, 3)
-        mesh = crispy.tesselate.voronoi(points)
+        mesh = crispy._tesselate.voronoi(points)
         self.assertEqual(np.max(mesh.cell_data["grain_id"]), points.shape[0] - 1)
         self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)
         self.assertEqual(np.min(mesh.cell_data["surface_grain"]), 0)

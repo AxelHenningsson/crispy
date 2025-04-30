@@ -89,12 +89,12 @@ def mesh(
     if neighbourhood is not None:
         grains_index = polycrystal._select_grains(None, neighbourhood)
         local_geometry = polycrystal._extract_geom(grains_index)
-        mesh = crispy.tesselate._build_mesh(*local_geometry)
+        mesh = crispy._tesselate._build_mesh(*local_geometry)
         grains = polycrystal.grains[grains_index]
     elif select is not None:
         grains_index = select
         local_geometry = polycrystal._extract_geom(grains_index)
-        mesh = crispy.tesselate._build_mesh(*local_geometry)
+        mesh = crispy._tesselate._build_mesh(*local_geometry)
         grains = polycrystal.grains[grains_index]
     else:
         mesh = polycrystal._mesh
