@@ -87,7 +87,7 @@ class LabDCTVolume(Polycrystal):
         -1 is the void label. The orientations will be updated to
         reflect the new label etc.
         """
-        self._reset_labels()
+        self._reset_labels(self.labels)
         self._check_labels()
 
         self.orientations = self._get_orientations(self.voxel_rotations, self.labels)
@@ -545,14 +545,14 @@ class LabDCTVolume(Polycrystal):
                             # part of the labels array, i.e we have that i,j,k are unique.
                             labels[i, j, k] = -1
 
-    def _reset_labels(self):
+    def _reset_labels(self, labels):
         """Decrement labels to start from -1,0,1,2,...,n where -1 is the void label."""
-        mask = self.labels > -1
-        unique_labels = np.unique(self.labels[mask])
+        mask = labels > -1
+        unique_labels = np.unique(labels[mask])
         mapping = np.zeros((unique_labels.max() + 1,), dtype=np.int32)
         for new_label, old_label in enumerate(unique_labels):
             mapping[old_label] = new_label
-        LabDCTVolume._relabel(self.labels, mapping, mask)
+        LabDCTVolume._relabel(labels, mapping, mask)
 
     @staticmethod
     @numba.njit(parallel=True, cache=True)
@@ -612,15 +612,15 @@ class LabDCTVolume(Polycrystal):
 
         k1, k2 = (
             np.argmin(np.abs(self.X[0, 0, :] - xmin)),
-            np.argmin(np.abs(self.X[0, 0, :] - xmax)),
+            np.argmin(np.abs(self.X[0, 0, :] - xmax)) + 1,
         )
         j1, j2 = (
             np.argmin(np.abs(self.Y[0, :, 0] - ymin)),
-            np.argmin(np.abs(self.Y[0, :, 0] - ymax)),
+            np.argmin(np.abs(self.Y[0, :, 0] - ymax)) + 1,
         )
         i1, i2 = (
             np.argmin(np.abs(self.Z[:, 0, 0] - zmin)),
-            np.argmin(np.abs(self.Z[:, 0, 0] - zmax)),
+            np.argmin(np.abs(self.Z[:, 0, 0] - zmax)) + 1,
         )
 
         old_labels = self.labels.copy()
