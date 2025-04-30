@@ -679,7 +679,11 @@ class LabDCTVolume(Polycrystal):
         """Rotate the voxel volume by the specified rotation.
 
         The voxel volume will be rotated by the specified rotation.
-        The attributes will be updated accordingly.
+        The attributes will be updated accordingly. Note that the
+        frame of reference is the lab frame which is initally
+        aligned with the voxel volume grid. After subsequent
+        rotations, the frame of reference may not be aligned with
+        the voxel volume grid.
 
         This will update both voxel coordinates and grain orientations.
 
