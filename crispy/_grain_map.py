@@ -56,3 +56,6 @@ class GrainMap:
             raise ValueError(
                 "grain_data must be an array of ImageD11.grain.grain objects or a path to an HDF5 file."
             )
+
+if __name__ == "__main__":
+    pass

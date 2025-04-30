@@ -241,29 +241,6 @@ def voronoi(seeds, bounds=None):
     return mesh
 
 
+
 if __name__ == "__main__":
-    import cProfile
-    import os
-    import pstats
-    import time
-
-    import crispy
-
-    np.random.seed(42)
-    points = np.random.rand(1000, 3) + 1
-    points[:, 2] *= 2
-
-    pr = cProfile.Profile()
-    pr.enable()
-    t1 = time.perf_counter()
-    mesh = voronoi(points)
-    t2 = time.perf_counter()
-    pr.disable()
-    pr.dump_stats("tmp_profile_dump")
-    ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
-    ps.print_stats(15)
-    print("\n\nCPU time is : ", t2 - t1, "s")
-
-    path = os.path.join(crispy.assets._root_path, "sandbox/test.vtk")
-    mesh.write(path)
-    mesh.write(path)
+    pass

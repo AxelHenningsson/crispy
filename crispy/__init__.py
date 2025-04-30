@@ -1,6 +1,7 @@
-from . import _constants as CONSTANTS, _lab_dct_volume
+from . import _constants as CONSTANTS
 from . import (
     _grain_map,
+    _lab_dct_volume,
     _polycrystal,
     _tdxrd_map,
     assets,

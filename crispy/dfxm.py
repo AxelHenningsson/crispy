@@ -769,50 +769,6 @@ class BraggSym(Braggez):
         return solution, residuals, success
 
 
+
 if __name__ == "__main__":
-    import os
-
-    import crispy
-
-    pc = crispy.GrainMap(
-        os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
-        group_name="Fe",
-        lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
-        symmetry=225,
-    )
-
-    motor_bounds = {
-        "mu": (-20, 20),
-        "omega": (-99, 99),
-        "chi": (-5, 5),
-        "phi": (-5, 5),
-        "detector_z": (-0.04, 1.96),
-        "detector_y": (-0.169, 1.16),
-    }
-
-    detector_distance = 4.0
-    energy = 19.1
-
-    goni = crispy.dfxm.Goniometer(
-        pc,
-        energy,
-        detector_distance,
-        motor_bounds,
-    )
-
-    import cProfile
-    import pstats
-    import time
-
-    pr = cProfile.Profile()
-    pr.enable()
-    t1 = time.perf_counter()
-
-    goni.find_reflections()
-
-    t2 = time.perf_counter()
-    pr.disable()
-    pr.dump_stats("tmp_profile_dump")
-    ps = pstats.Stats("tmp_profile_dump").strip_dirs().sort_stats("cumtime")
-    ps.print_stats(15)
-    print("\n\nCPU time is : ", t2 - t1, "s")
+    pass

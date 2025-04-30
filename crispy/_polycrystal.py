@@ -141,3 +141,7 @@ class Polycrystal:
         self._ipf_axes = ipf_axes
         for i in range(self.number_of_grains):
             self.grains[i].rgb = rgb[i]
+
+
+if __name__ == "__main__":
+    pass

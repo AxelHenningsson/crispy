@@ -142,26 +142,6 @@ def mesh(
     return fig, ax
 
 
+
 if __name__ == "__main__":
-    import os
-
-    import crispy
-
-    pc = crispy.GrainMap(
-        os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
-        group_name="Fe",
-        lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
-        symmetry=225,
-    )
-
-    pc.tesselate()
-
-    fig, ax = mesh(pc, neighbourhood=2)
-    plt.show()
-
-    fig, ax = centroids(pc)
-    plt.show()
-    fig, ax = centroids(pc)
-    plt.show()
-    plt.show()
-    plt.show()
+    pass
