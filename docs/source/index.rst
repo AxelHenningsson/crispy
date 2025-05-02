@@ -11,7 +11,6 @@ GrainMap
 
 .. autoclass:: crispy._grain_map.GrainMap 
     :members:
-    :show-inheritance:
 
 ======================================
 Polycrystal
@@ -19,7 +18,6 @@ Polycrystal
 
 .. autoclass:: crispy._polycrystal.Polycrystal
     :members:
-    :show-inheritance:
 
 ======================================
 TDXRDMap
@@ -43,7 +41,6 @@ dfxm
 
 .. automodule:: crispy.dfxm
     :members:
-    :show-inheritance:
 
 ======================================
 vizualise
@@ -51,7 +48,6 @@ vizualise
 
 .. automodule:: crispy.vizualise
     :members:
-    :show-inheritance:
 
 ======================================
 assets
@@ -59,4 +55,3 @@ assets
 
 .. automodule:: crispy.assets
     :members:
-    :show-inheritance:

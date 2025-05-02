@@ -21,10 +21,10 @@ _asset_path = os.path.join(_root_path, "assets")
 class path:
     """Absolute paths to various assets.
 
-    Currently availabel example datasets are:
-        - .../crispy/assets/FeAu_0p5_tR_ff1_grains.h5
-        - .../crispy/assets/lab_dct_silicon.h5
-        - .../crispy/assets/lab_dct_Al1050.h5
+    Attributes:
+        FEAU: Path to the 3DXRD grain map of a FeAu sample. :no-index:
+        SILICON: Path to the lab-DCT grain volume of three silicon single crystals shards. :no-index:
+        AL1050: Path to the lab-DCT grain volume of a small polycrystalline Al1050 sample. :no-index:
 
     """
 

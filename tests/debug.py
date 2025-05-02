@@ -4,6 +4,11 @@ import crispy
 # this could be a 3DXRD grain map or a lab-DCT grain volume
 path_to_my_grain_map = crispy.assets.path.AL1050
 grain_map = crispy.GrainMap( path_to_my_grain_map )
+# %%
+
+import crispy
+crispy.assets.path.FEAU
+
 
 # %%
 grain_map.filter( min_grain_size_in_voxels = 200 )
