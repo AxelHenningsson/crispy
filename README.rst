@@ -2,25 +2,31 @@ crispy
 =====================================================================
 **a CRystal population metric InSpector written in PYthon.**
 
+
 .. image:: https://img.shields.io/badge/platform-cross--platform-brightgreen.svg
    :target: https://www.python.org/
    :alt: cross-platform
+
 
 .. image:: https://img.shields.io/badge/code-pure%20python-blue.svg
    :target: https://www.python.org/
    :alt: pure python
 
+
 .. image:: https://github.com/AxelHenningsson/crispy/actions/workflows/pytest-linux-py310.yml/badge.svg
    :target: https://github.com/AxelHenningsson/crispy/actions/workflows/pytest-linux-py310.yml
    :alt: tests ubuntu-linux
+
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
    :alt: code style black
 
+
 .. image:: https://img.shields.io/badge/docs-sphinx-blue.svg
    :target: https://axelhenningsson.github.io/darling/
    :alt: Sphinx documentation
+
 
 crispy is a Python package for analyzing crystal population metrics from 3DXRD and
 lab-DCT data targeting interfacing between diffraction contrast modalities.
@@ -72,7 +78,7 @@ We can now write the grain map to a file to  visualize in paraview
     grain_map.write("grain_map.xdmf")
 
 
-.. image:: https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_grains.png?raw=true
+.. image:: https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_grains.png?raw=true
    :align: center
 
 To search for accessible reflections in DFXM mode for ``eta=0``, we can use the :obj:`crispy.dfxm.Goniometer` class as
@@ -122,7 +128,7 @@ Alternatively, we can generate a :obj:`pandas.DataFrame` with reflection informa
     df = goniometer.table_of_reflections()
 
 
-.. image:: https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_df.png?raw=true
+.. image:: https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_df.png?raw=true
 
 
 It is also possible to load a 3DXRD grain map from a file tesselate and visualize.
@@ -135,7 +141,7 @@ It is also possible to load a 3DXRD grain map from a file tesselate and visualiz
     grain_map.colorize( np.eye(3) )
     crispy.visualize.mesh( grain_map )
 
-.. image:: https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_tdxrd.png?raw=true
+.. image:: https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_tdxrd.png?raw=true
 
 
 Installation
