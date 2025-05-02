@@ -24,16 +24,10 @@ class TDXRDMap(Polycrystal):
     Attributes:
         grains (:obj:`list` of :obj:`ImageD11.grain.grain`): List of grains in the polycrystal.
         number_of_grains (:obj:`int`): Number of grains in the polycrystal.
-        bounding_box (:obj:`numpy array`): The bounding box of the polycrystal. Shape=(3,2).
-        extent (:obj:`numpy array`): The extent of the polycrystal. Shape=(3,).
-        centroids (:obj:`numpy array`): All the grain centroid postions in the polycrystal. Shape=(N, 3).
-        u (:obj:`numpy array`): All the U matrices of the grains in the polycrystal. Shape=(N, 3, 3).
-        orientations (:obj:`numpy array`): Alias for u.
-        b (:obj:`numpy array`): All the B matrices of the grains in the polycrystal. Shape=(N, 3, 3).
-        neighbours (:obj:`numpy array`): The neighbours of each grain in the polycrystal. shape=(N,).
-            each sub-array contains the indices of the neighbours of the corresponding grain.
-            is None before calling the tesselate() method.
-        misorientations (:obj:`numpy array`): The misorientations between all grain neighbours. shape=(N,).
+        u (:obj:`numpy.ndarray`): All the U matrices of the grains in the polycrystal. Shape=(N, 3, 3).
+        orientations (:obj:`numpy.ndarray`): Alias for u.
+        b (:obj:`numpy.ndarray`): All the B matrices of the grains in the polycrystal. Shape=(N, 3, 3).
+        misorientations (:obj:`numpy.ndarray`): The misorientations between all grain neighbours. shape=(N,).
             each sub-array contains the misorientations between the corresponding grain and its neighbours.
             is None before calling the texturize() method.
     """
@@ -163,8 +157,8 @@ class TDXRDMap(Polycrystal):
         This circumvents the need to read a grain file and ImageD11.grain.grain objects.
 
         Args:
-            translations (:obj:`iterable` of :obj:`numpy array`): 3D grain center translations each of shape=(3,).
-            ubi_matrices (:obj:`iterable` of :obj:`numpy array`): ubi matrices each of shape=(3, 3).
+            translations (:obj:`iterable` of :obj:`numpy.ndarray`): 3D grain center translations each of shape=(3,).
+            ubi_matrices (:obj:`iterable` of :obj:`numpy.ndarray`): ubi matrices each of shape=(3, 3).
 
         Returns:
             :obj:`crispy._tdxrd_map.TDXRDMAP`: The polycrystal object.
@@ -220,7 +214,7 @@ class TDXRDMap(Polycrystal):
         into account the crystal system symmetry.
 
         """
-        _crystal_system = CONSTANTS._CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
+        _crystal_system = CONSTANTS.CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
         self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
         for gi in range(len(self.grains)):
             u = self.grains[gi].u

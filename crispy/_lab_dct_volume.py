@@ -21,8 +21,8 @@ class LabDCTVolume(Polycrystal):
     frame. The class is used to read the grain volume data from a h5
     file in the lab-dct format and to provide methods to manipulate the
     grain volume data. This class is a specific implementation of the
-    Polycrystal class and can be interfaced with the crispy.dfxm.Goniometer
-    to search for dfxm reflections. This may be usefull in
+    :obj:`Polycrystal` class and can be interfaced with the
+    :obj:`dfxm.Goniometer` to search for dfxm reflections. This may be usefull in
     preperation for synchrotron measurements to determine what type of
     reflections and orientation that will be available in the sample.
 
@@ -30,8 +30,8 @@ class LabDCTVolume(Polycrystal):
     with the ESR ID11 and ID03 coordinate systems in that the z axis is
     pointing towards the ceiling, the x axis is pointing along the beam
     photon propagation direction and the y axis is pointing to the left
-    as seen by a traveling photon. Loading a lab dct map with LabDCTVolume
-    will unify the coordinate system to be the same as that of crispy.TDXRDMap.
+    as seen by a traveling photon. Loading a lab dct map with :obj:`LabDCTVolume`
+    will unify the coordinate system to be the same as that of :obj:`TDXRDMap`.
 
     Args:
         file_path (str): The path to the h5 file containing the grain
@@ -44,7 +44,7 @@ class LabDCTVolume(Polycrystal):
             - PhaseInfo/Phase01/SpaceGroup: The space group of the phase.
 
     Attributes:
-        reference_cell (ImageD11.unitcell): The reference cell of the
+        reference_cell (:obj:`ImageD11.unitcell`): The reference cell of the
             grain volume.
         voxel_size (float): The voxel size in microns.
         labels (np.ndarray): The grain id for each voxel shape=(m,n,o)
@@ -389,7 +389,7 @@ class LabDCTVolume(Polycrystal):
         into account the crystal system symmetry.
 
         """
-        _crystal_system = CONSTANTS._CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
+        _crystal_system = CONSTANTS.CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
         self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
         for gi in range(len(self.grains)):
             u = self.grains[gi].u

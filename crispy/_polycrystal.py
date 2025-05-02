@@ -32,13 +32,13 @@ class Polycrystal:
             polycrystal.
         number_of_grains (:obj:`int`): The number of grains in the
             polycrystal.
-        _misorientations (:obj:`numpy array`): The misorientations between
+        _misorientations (:obj:`numpy.ndarray`): The misorientations between
             all grain neighbours. This is a 2D array of shape (N, ...) where N
             is the number of grains in the polycrystal. i.e the misorientations
             between grain i and all of its neighbours are stored in
             misorientations[i]. The shape of the second dimension depends
             on the number of neighbours of grain i.
-        neighbours (:obj:`numpy array`): The neighbours of each grain in the
+        neighbours (:obj:`numpy.ndarray`): The neighbours of each grain in the
             polycrystal. This is a 2D array of shape (N, M) where N is the
             number of grains in the polycrystal and M is the number of
             neighbours of each grain. i.e the neighbours of grain i are stored
@@ -100,7 +100,7 @@ class Polycrystal:
             trigonal, hexagonal or cubic
 
         """
-        return CONSTANTS._SPACEGROUP_TO_CRYSTAL_SYSTEM[self.reference_cell.symmetry]
+        return CONSTANTS.SPACEGROUP_TO_CRYSTAL_SYSTEM[self.reference_cell.symmetry]
 
     def _ipf_colors(self, axes=np.eye(3)):
         """Compute the IPF colors for the polycrystal using orix (https://github.com/pyxem/orix)
@@ -108,12 +108,12 @@ class Polycrystal:
         The implementation is based on the ImageD11 interpretation of orix.
 
         Args:
-            axes (:obj:`numpy array`): The viewing axes to compute the IPF colors for, default is the
+            axes (:obj:`numpy.ndarray`): The viewing axes to compute the IPF colors for, default is the
                 x, y, and z axes, i.e np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]). axes[i] is the i-th
                 viewing axis.
 
         Returns:
-            :obj:`numpy array`: The RGB values for each grain in the polycrystal. Shape=(N, 3, 3).
+            :obj:`numpy.ndarray`: The RGB values for each grain in the polycrystal. Shape=(N, 3, 3).
                 RGB[i, :, k] is the RGB value of grain i when viewed along the k-th axis.
         """
         rgb = np.zeros((self.number_of_grains, 3, axes.shape[0]))
@@ -129,11 +129,11 @@ class Polycrystal:
 
         The implementation is based on the ImageD11 interpretation of orix.
 
-        sets a :obj:`numpy array`: of RGB values for each grain in the polycrystal. Shape=(3, k).
+        sets a :obj:`numpy.ndarray`: of RGB values for each grain in the polycrystal. Shape=(3, k).
             self.grain.rgb[:, k] is the RGB value of grain when viewed along the k-th axis.
 
         Args:
-            axes (:obj:`numpy array`): The viewing axes to compute the IPF colors for, default is the
+            axes (:obj:`numpy.ndarray`): The viewing axes to compute the IPF colors for, default is the
                 x, y, and z axes, i.e np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]). axes[i] is the i-th
                 viewing axis.
         """

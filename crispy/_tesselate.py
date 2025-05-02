@@ -8,7 +8,7 @@ def _extract_bounds(seeds, bounds):
     """Get bounding box for tesselation.
 
     Args:
-        points (:obj:`numpy array`): Numpy array of shape=(N,3) specifying the seeds
+        points (:obj:`numpy.ndarray`): Numpy array of shape=(N,3) specifying the seeds
         bounds (:obj:`list` of :obj:`tuple`, optional): Bounds for the tesselation
 
     Returns:
@@ -38,7 +38,7 @@ def _get_plane_maps(points):
     """Get distance and normal maps for each point in the tesselation.
 
     Args:
-        points (:obj:`numpy array`): Numpy array of shape=(N,3) specifying the seeds
+        points (:obj:`numpy.ndarray`): Numpy array of shape=(N,3) specifying the seeds
 
     Returns:
         :obj:`tuple`: Tuple of the distance and normal maps for each point in the
@@ -71,16 +71,16 @@ def _get_halfspaces(point, distance, normals, bounds):
     and b is the distance to the origin of the plane.
 
     Args:
-        point (:obj:`numpy array`): Numpy array of shape=(3,) specifying the seed
-        distance (:obj:`numpy array`): Numpy array of shape=(N-1,) specifying the
+        point (:obj:`numpy.ndarray`): Numpy array of shape=(3,) specifying the seed
+        distance (:obj:`numpy.ndarray`): Numpy array of shape=(N-1,) specifying the
             distances of each point to all other points in the tesselation
-        normals (:obj:`numpy array`): Numpy array of shape=(N-1,3) specifying the
+        normals (:obj:`numpy.ndarray`): Numpy array of shape=(N-1,3) specifying the
             normal vectors of the planes defined by each point and all other points
             in the tesselation.
         bounds (:obj:`tuple`): Tuple of the bounds in x, y, z dimensions
 
     Returns:
-        :obj:`numpy array`: Numpy array of shape=(N,4) specifying the halfspaces
+        :obj:`numpy.ndarray`: Numpy array of shape=(N,4) specifying the halfspaces
             i.e the [A; b] array.
     """
     A = normals
@@ -109,7 +109,7 @@ def _is_on_boundary(verts, bounds):
     """Check if a polyhedron is on the boundary of the tesselation.
 
     Args:
-        verts (:obj:`numpy array`): Numpy array of shape=(N,3) specifying the vertices
+        verts (:obj:`numpy.ndarray`): Numpy array of shape=(N,3) specifying the vertices
             of the polyhedron
         bounds (:obj:`tuple`): Tuple of the bounds in x, y, z dimensions
 
@@ -135,9 +135,9 @@ def _build_mesh(
     """construct a mesh object from the vertices and simplices.
 
     Args:
-        vertices (:obj:`numpy array`): numpy arrays of shape=(N,3)
+        vertices (:obj:`numpy.ndarray`): numpy arrays of shape=(N,3)
             specifying the vertices of each polyhedron
-        simplices (:obj:`numpy array`): numpy arrays of shape=(M,3)
+        simplices (:obj:`numpy.ndarray`): numpy arrays of shape=(M,3)
             specifying the simplices of each polyhedron
         grain_id (:obj:`list` of :obj:`int`): List of integers specifying the
             grain id of each polyhedron
@@ -145,7 +145,7 @@ def _build_mesh(
             grain volume of each polyhedron
         surface_grain (:obj:`list` of :obj:`int`): List of integers specifying if
             the polyhedron is on the boundary
-        neighbours (:obj:`numpy array`, optional): Numpy array of shape=(N,) specifying
+        neighbours (:obj:`numpy.ndarray`, optional): Numpy array of shape=(N,) specifying
             the grain neighbours of each grain polyhedron. Defaults to None.
 
     Returns:
@@ -169,12 +169,12 @@ def _extract_points(seeds):
     """Extract the seed points from the input.
 
     Args:
-        seeds (:obj:`numpy array` or :obj:`list` of :obj:`ImageD11.grain.grain`):
+        seeds (:obj:`numpy.ndarray` or :obj:`list` of :obj:`ImageD11.grain.grain`):
             List of grains or a numpy array of shape=(N,3) specifying the seed
             coordinates of the voroni tesselation.
 
     Returns:
-        :obj:`numpy array`: Numpy array of shape=(N,3) specifying the seeds
+        :obj:`numpy.ndarray`: Numpy array of shape=(N,3) specifying the seeds
     """
     if isinstance(seeds[0], ImageD11.grain.grain):
         return np.array([g.translation for g in seeds])
@@ -191,7 +191,7 @@ def voronoi(seeds, bounds=None):
     It will contain a series of polyhedra, one for each seed.
 
     Args:
-        seeds (:obj:`numpy array` or :obj:`list` of :obj:`ImageD11.grain.grain`):
+        seeds (:obj:`numpy.ndarray` or :obj:`list` of :obj:`ImageD11.grain.grain`):
             List of grains or a numpy array of shape=(N,3) specifying the seed
             coordinates of the voroni tesselation.
         bounds (:obj:`list` of :obj:`tuple`, optional): Bounds for the tesselation
@@ -239,7 +239,6 @@ def voronoi(seeds, bounds=None):
     )
 
     return mesh
-
 
 
 if __name__ == "__main__":

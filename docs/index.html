@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>GrainMap &#8212; crispy 0.0.1 documentation</title>
+    <title>crispy - a CRystal population metric InSpector written in PYthon. &#8212; crispy 0.0.1 documentation</title>
   
   
   
@@ -249,49 +249,92 @@
                   
   <div class="toctree-wrapper compound">
 </div>
-<p># crispy
-crispy - a CRystal population metric InSpector written in PYthon.</p>
+<section id="crispy-a-crystal-population-metric-inspector-written-in-python">
+<h1>crispy - a CRystal population metric InSpector written in PYthon.<a class="headerlink" href="#crispy-a-crystal-population-metric-inspector-written-in-python" title="Link to this heading">#</a></h1>
+<p>crispy is a Python package for analyzing crystal population metrics from 3DXRD and
+lab-DCT data targeting interfacing between diffraction contrast modalities.</p>
+<p>One of the central features of crispy is the provision of per-grain reflections
+diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
+3DXRD grain maps and lab-DCT grain volumes.</p>
+<p>Interfaces for reading, analyzing, and visualizing grain maps are provided for</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>3DXRD grain maps</strong> (3D scatter of grain centroids and grain orientations)</p></li>
+<li><p><strong>lab-DCT voxel volumes</strong> (3D voxel volumes where each voxel is a single crystal grain)</p></li>
+</ul>
+</div></blockquote>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<p>To install <code class="docutils literal notranslate"><span class="pre">crispy</span></code> from source, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/AxelHenningsson/crispy.git
+<span class="nb">cd</span><span class="w"> </span>crispy
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
 <section id="grainmap">
-<h1>GrainMap<a class="headerlink" href="#grainmap" title="Link to this heading">#</a></h1>
+<h3>GrainMap<a class="headerlink" href="#grainmap" title="Link to this heading">#</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="crispy._grain_map.GrainMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._grain_map.</span></span><span class="sig-name descname"><span class="pre">GrainMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grain_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grains'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Factory class to represent a polycrystal.</p>
-<p>This class is a factory for creating polycrystal objects. It can create
-polycrystal objects from a list of ImageD11.grain.grain objects or from
-a path to an HDF5 file containing the grain information. The class also
-supports loading grain information from a lab-dct grain volume file.</p>
-<p>Depending on the input, it will return either a crispy._tdxrd_map.TDXRDMap
-or a crispy._dct_volume.LabDCTVolume. Common to the GrainMap is the
-attribute <cite>grains</cite>, which is a list of ImageD11.grain.grain objects
-representing the grains in the polycrystal. Moeover a polycrystal object
-always hold a reference cell, which is a unitcell object describing the
-lattice parameters and symmetry group of the material phase.</p>
-<p>Any polycrystal object can be mounted on a crispy.dfxm.Goniometer object to</p>
+<p>Factory class for creating <a class="reference internal" href="#crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.Polycrystal</span></code></a> objects.</p>
+<p>Creates <a class="reference internal" href="#crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.Polycrystal</span></code></a> objects from
+either a list of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code> objects or an HDF5 file containing
+grain information. Supports both 3DXRD grain maps and lab-DCT grain volumes.</p>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crispy</span>
+
+<span class="c1"># Load a 3DXRD grain map</span>
+<span class="n">path_to_h5_3dxrd</span> <span class="o">=</span> <span class="n">crispy</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">FEAU</span>
+<span class="n">grain_map_3dxrd</span> <span class="o">=</span> <span class="n">GrainMap</span><span class="p">(</span><span class="n">path_to_h5_3dxrd</span><span class="p">)</span>
+
+<span class="c1"># Load a lab-DCT grain volume</span>
+<span class="n">path_to_h5_lab_dct</span> <span class="o">=</span> <span class="n">crispy</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">AL1050</span>
+<span class="n">grain_map_lab_dct</span> <span class="o">=</span> <span class="n">GrainMap</span><span class="p">(</span><span class="n">path_to_h5_lab_dct</span><span class="p">)</span>
+
+<span class="c1"># Access grains and reference cell</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grain_map_3dxrd</span><span class="o">.</span><span class="n">grains</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grain_map_lab_dct</span><span class="o">.</span><span class="n">grains</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grain_map_3dxrd</span><span class="o">.</span><span class="n">reference_cell</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grain_map_lab_dct</span><span class="o">.</span><span class="n">reference_cell</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The factory returns either a <a class="reference internal" href="#crispy._tdxrd_map.TDXRDMap" title="crispy._tdxrd_map.TDXRDMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.TDXRDMap</span></code></a>
+(for 3DXRD) or a <a class="reference internal" href="#crispy._lab_dct_volume.LabDCTVolume" title="crispy._lab_dct_volume.LabDCTVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.LabDCTVolume</span></code></a>
+(for lab-DCT). Both types contain a <cite>grains</cite> attribute - a list of
+<a class="reference external" href="https://github.com/FABLE-3DXRD/ImageD11/blob/f1766f525288a6c49f20f98ee7d95ea9233db430/ImageD11/grain.py#L49">ImageD11.grain.grain</a>
+objects representing individual grains. They also contain a reference cell that
+describes the lattice parameters and symmetry group of the material phase.</p>
+<p>Any resulting <a class="reference internal" href="#crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.Polycrystal</span></code></a> can be
+mounted on a <a class="reference internal" href="#crispy.dfxm.Goniometer" title="crispy.dfxm.Goniometer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy.dfxm.Goniometer</span></code></a> to analyze accessible diffraction
+reflections for Dark-Field X-ray Microscopy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>grain_data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code>) – Absolute path to the HDF5 file containing the grain information, or
-alternatively a list of ImageD11.grain.grain objects. This may also
-be a path to a lab-dct grain volume file.</p></li>
-<li><p><strong>group_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The name of the group in the HDF5 file containing
-the grain information. Defaults to “grains”. Only used if
-<cite>grain_data</cite> is a string to an HDF5 file with a 3DXRD grain map.</p></li>
-<li><p><strong>lattice_parameters</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The lattice parameters of the
-polycrystal [a, b, c, alpha, beta, gamma]. Defaults to None.</p></li>
-<li><p><strong>symmetry</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – The symmetry group of the phase. Defaults to None.</p></li>
+<li><p><strong>grain_data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code>) – Either an absolute path to an HDF5 file containing grain data (3DXRD map
+or lab-DCT volume), or a list of ImageD11 grain objects. Example files
+can be found in the <cite>crispy.assets</cite> module.</p></li>
+<li><p><strong>group_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the HDF5 group containing grain information.
+Only used for 3DXRD HDF5 files. Defaults to “grains”.</p></li>
+<li><p><strong>lattice_parameters</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – Crystal lattice parameters
+[a, b, c, alpha, beta, gamma]. Defaults to None.</p></li>
+<li><p><strong>symmetry</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Symmetry group of the phase. Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A crispy._tdxrd_map.TDXRDMap or a crispy._dct_volume.LabDCTVolume.</p>
+<dd class="field-even"><p>Either <a class="reference internal" href="#crispy._tdxrd_map.TDXRDMap" title="crispy._tdxrd_map.TDXRDMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.TDXRDMap</span></code></a> or
+<a class="reference internal" href="#crispy._lab_dct_volume.LabDCTVolume" title="crispy._lab_dct_volume.LabDCTVolume"><code class="xref py py-class docutils literal notranslate"><span class="pre">crispy.LabDCTVolume</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If grain_data is neither a list of grain objects nor a valid
+    HDF5 file path.</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
 <section id="polycrystal">
-<h1>Polycrystal<a class="headerlink" href="#polycrystal" title="Link to this heading">#</a></h1>
+<h3>Polycrystal<a class="headerlink" href="#polycrystal" title="Link to this heading">#</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.</span></span><span class="sig-name descname"><span class="pre">Polycrystal</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal" title="Link to this definition">#</a></dt>
@@ -358,7 +401,7 @@ misorientations[i]. The shape of the second dimension depends
 on the number of neighbours of grain i.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -374,7 +417,7 @@ in neighbours[i]. with M being the number of neighbours of grain i,
 – a variable number of neighbours is allowed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -436,12 +479,12 @@ in neighbours[i]. with M being the number of neighbours of grain i,
 <dd><p>Compute the IPF colors for the polycrystal using orix (<a class="github reference external" href="https://github.com/pyxem/orix">pyxem/orix</a>)</p>
 <p>The implementation is based on the ImageD11 interpretation of orix.</p>
 <dl class="simple">
-<dt>sets a <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>: of RGB values for each grain in the polycrystal. Shape=(3, k).</dt><dd><p>self.grain.rgb[:, k] is the RGB value of grain when viewed along the k-th axis.</p>
+<dt>sets a <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>: of RGB values for each grain in the polycrystal. Shape=(3, k).</dt><dd><p>self.grain.rgb[:, k] is the RGB value of grain when viewed along the k-th axis.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>axes</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The viewing axes to compute the IPF colors for, default is the
+<dd class="field-odd"><p><strong>axes</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The viewing axes to compute the IPF colors for, default is the
 x, y, and z axes, i.e np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]). axes[i] is the i-th
 viewing axis.</p>
 </dd>
@@ -452,7 +495,7 @@ viewing axis.</p>
 
 </section>
 <section id="tdxrdmap">
-<h1>TDXRDMap<a class="headerlink" href="#tdxrdmap" title="Link to this heading">#</a></h1>
+<h3>TDXRDMap<a class="headerlink" href="#tdxrdmap" title="Link to this heading">#</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.</span></span><span class="sig-name descname"><span class="pre">TDXRDMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grainfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grains'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap" title="Link to this definition">#</a></dt>
@@ -491,45 +534,12 @@ the grain information. Defaults to “grains”.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.bounding_box">
-<span class="sig-name descname"><span class="pre">bounding_box</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.bounding_box" title="Link to this definition">#</a></dt>
-<dd><p>The bounding box of the polycrystal. Shape=(3,2).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.extent">
-<span class="sig-name descname"><span class="pre">extent</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.extent" title="Link to this definition">#</a></dt>
-<dd><p>The extent of the polycrystal. Shape=(3,).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.centroids">
-<span class="sig-name descname"><span class="pre">centroids</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.centroids" title="Link to this definition">#</a></dt>
-<dd><p>All the grain centroid postions in the polycrystal. Shape=(N, 3).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.u">
 <span class="sig-name descname"><span class="pre">u</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.u" title="Link to this definition">#</a></dt>
 <dd><p>All the U matrices of the grains in the polycrystal. Shape=(N, 3, 3).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -540,7 +550,7 @@ the grain information. Defaults to “grains”.</p></li>
 <dd><p>Alias for u.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -551,20 +561,7 @@ the grain information. Defaults to “grains”.</p></li>
 <dd><p>All the B matrices of the grains in the polycrystal. Shape=(N, 3, 3).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.neighbours">
-<span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.neighbours" title="Link to this definition">#</a></dt>
-<dd><p>The neighbours of each grain in the polycrystal. shape=(N,).
-each sub-array contains the indices of the neighbours of the corresponding grain.
-is None before calling the tesselate() method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -577,7 +574,7 @@ each sub-array contains the misorientations between the corresponding grain and 
 is None before calling the texturize() method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -588,30 +585,30 @@ is None before calling the texturize() method.</p>
 <dd></dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id0">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.neighbours">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.neighbours" title="Link to this definition">#</a></dt>
 <dd><p>Return the neighbours of each grain in the polycrystal.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounding_box</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.bounding_box">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounding_box</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.bounding_box" title="Link to this definition">#</a></dt>
 <dd><p>Return the bounding box of the polycrystal, shape=(3,2)</p>
 <p>Format is: [ [min_x, max_x], [min_y, max_y], [min_z, max_z] ].</p>
 <p>computation is done by taking the min and max of the centroids.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id2">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.extent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.extent" title="Link to this definition">#</a></dt>
 <dd><p>Return the extent of the polycrystal.</p>
 <p>Format is: [ xwidth, ywidth, zwidth ].</p>
 <p>computation is done by taking the min and max of the centroids.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="id3">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centroids</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.centroids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centroids</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.centroids" title="Link to this definition">#</a></dt>
 <dd><p>Return all the grain centroid postions in the polycrystal. shape=(N, 3)</p>
 </dd></dl>
 
@@ -665,8 +662,8 @@ is None before calling the texturize() method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>translations</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – 3D grain center translations each of shape=(3,).</p></li>
-<li><p><strong>ubi_matrices</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – ubi matrices each of shape=(3, 3).</p></li>
+<li><p><strong>translations</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – 3D grain center translations each of shape=(3,).</p></li>
+<li><p><strong>ubi_matrices</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – ubi matrices each of shape=(3, 3).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -722,7 +719,7 @@ written to file. Default is None.</p></li>
 
 </section>
 <section id="labdctvolume">
-<h1>LabDCTVolume<a class="headerlink" href="#labdctvolume" title="Link to this heading">#</a></h1>
+<h3>LabDCTVolume<a class="headerlink" href="#labdctvolume" title="Link to this heading">#</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.</span></span><span class="sig-name descname"><span class="pre">LabDCTVolume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume" title="Link to this definition">#</a></dt>
@@ -732,16 +729,16 @@ written to file. Default is None.</p></li>
 frame. The class is used to read the grain volume data from a h5
 file in the lab-dct format and to provide methods to manipulate the
 grain volume data. This class is a specific implementation of the
-Polycrystal class and can be interfaced with the crispy.dfxm.Goniometer
-to search for dfxm reflections. This may be usefull in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">Polycrystal</span></code> class and can be interfaced with the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">dfxm.Goniometer</span></code> to search for dfxm reflections. This may be usefull in
 preperation for synchrotron measurements to determine what type of
 reflections and orientation that will be available in the sample.</p>
 <p>Note that the lab-dct (as implemented by xnovo) coordinate system aligns
 with the ESR ID11 and ID03 coordinate systems in that the z axis is
 pointing towards the ceiling, the x axis is pointing along the beam
 photon propagation direction and the y axis is pointing to the left
-as seen by a traveling photon. Loading a lab dct map with LabDCTVolume
-will unify the coordinate system to be the same as that of crispy.TDXRDMap.</p>
+as seen by a traveling photon. Loading a lab dct map with <a class="reference internal" href="#crispy._lab_dct_volume.LabDCTVolume" title="crispy._lab_dct_volume.LabDCTVolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabDCTVolume</span></code></a>
+will unify the coordinate system to be the same as that of <code class="xref py py-obj docutils literal notranslate"><span class="pre">TDXRDMap</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the h5 file containing the grain
@@ -761,7 +758,7 @@ The file should contain the following datasets:
 grain volume.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ImageD11.unitcell</p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.unitcell</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1011,7 +1008,7 @@ is the axis of rotation.</p>
 
 </section>
 <section id="module-crispy.dfxm">
-<span id="dfxm"></span><h1>dfxm<a class="headerlink" href="#module-crispy.dfxm" title="Link to this heading">#</a></h1>
+<span id="dfxm"></span><h3>dfxm<a class="headerlink" href="#module-crispy.dfxm" title="Link to this heading">#</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="crispy.dfxm.Goniometer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy.dfxm.</span></span><span class="sig-name descname"><span class="pre">Goniometer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polycrystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motor_bounds</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/dfxm.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.dfxm.Goniometer" title="Link to this definition">#</a></dt>
@@ -1302,8 +1299,8 @@ e.g. {“mu”: (0, 20), “omega”: (-22, 22), “chi”: (-5, 5), “phi”: 
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>(</strong> (<em>rotation</em>) – obj: scipy.spatial.transform.Rotation): The rotations, length N</p></li>
-<li><p><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The lattice plane normals, shape (3, N)</p></li>
-<li><p><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The target vectors, shape (3, N)</p></li>
+<li><p><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The lattice plane normals, shape (3, N)</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The target vectors, shape (3, N)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1315,7 +1312,7 @@ from the target vector.</p>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1329,8 +1326,8 @@ from the target vector.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>(</strong> (<em>rotation</em>) – obj: scipy.spatial.transform.Rotation): The rotations, length N</p></li>
-<li><p><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The lattice plane normals, shape (3, N)</p></li>
-<li><p><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The target vectors, shape (3, N)</p></li>
+<li><p><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The lattice plane normals, shape (3, N)</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The target vectors, shape (3, N)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1350,17 +1347,17 @@ from the target vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – optimization variables flattened, shape (4*N,)</p></li>
-<li><p><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The lattice plane normals, shape (3, N)</p></li>
-<li><p><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The target vectors, shape (3, N)</p></li>
+<li><p><strong>x</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – optimization variables flattened, shape (4*N,)</p></li>
+<li><p><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The lattice plane normals, shape (3, N)</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The target vectors, shape (3, N)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The aggregated cost.
-(<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The gradient of the cost function, shape (4*N,)</p>
+(<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The gradient of the cost function, shape (4*N,)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>)</p>
+<dd class="field-odd"><p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1372,17 +1369,17 @@ from the target vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The UB matrix, shape (3, 3)</p></li>
-<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The hkl vectors, shape (3, N)</p></li>
+<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The UB matrix, shape (3, 3)</p></li>
+<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The hkl vectors, shape (3, N)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The lattice plane normals, shape (3, N)
-target (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The target vectors, shape (3, N)
-theta (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The Bragg angle in radians, shape (N,)</p>
+target (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The target vectors, shape (3, N)
+theta (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The Bragg angle in radians, shape (N,)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>nhat (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>)</p>
+<dd class="field-odd"><p>nhat (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1398,8 +1395,8 @@ beam which is assumed to propagate in the positive x-direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The UB matrix, shape (3, 3)</p></li>
-<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The hkl vectors, shape (3, N)</p></li>
+<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The UB matrix, shape (3, 3)</p></li>
+<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The hkl vectors, shape (3, N)</p></li>
 <li><p><strong>alignment_tol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – The tolerance for determining if the optimization
 managed to align the reflection for diffraction in unit of degrees,
 representing the misalignment of the lattice normal from the target vector.
@@ -1426,27 +1423,27 @@ success arrays will hold np.nan values for the unreachable reflections.</p></li>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="simple">
-<dt><strong>sol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The solution angles in degrees,</dt><dd><p>shape (4, N) solution angles are in the order
+<dt><strong>sol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The solution angles in degrees,</dt><dd><p>shape (4, N) solution angles are in the order
 [mu, omega, chi, phi] such that solution[:, i] are the
 goniometer angles for the ith reflection.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>residuals</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The residuals in degrees,</dt><dd><p>shape (N,) these are the misalignments of the lattice
+<dt><strong>residuals</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The residuals in degrees,</dt><dd><p>shape (N,) these are the misalignments of the lattice
 normal from the target vector given that the solution
 angles are applied.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>success</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The success of the optimization,</dt><dd><p>shape (N,) True if the optimization converged within a
+<dt><strong>success</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The success of the optimization,</dt><dd><p>shape (N,) True if the optimization converged within a
 tolerance of alignment_tol</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>theta</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The Bragg angles,</dt><dd><p>in degrees for each reflection, shape (N,)</p>
+<dt><strong>theta</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The Bragg angles,</dt><dd><p>in degrees for each reflection, shape (N,)</p>
 </dd>
 </dl>
 </li>
@@ -1558,8 +1555,8 @@ which are statically defined as the z-axis in BraggSym.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The UB matrix, shape (3, 3)</p></li>
-<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The hkl vectors, shape (3, N)</p></li>
+<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The UB matrix, shape (3, 3)</p></li>
+<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The hkl vectors, shape (3, N)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1567,12 +1564,12 @@ which are statically defined as the z-axis in BraggSym.</p>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="simple">
-<dt><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>):  The lattice plane</dt><dd><p>normals, shape (3, N)</p>
+<dt><strong>nhat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>):  The lattice plane</dt><dd><p>normals, shape (3, N)</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The target vectors, i.e.,</dt><dd><p>the z-axis in the lab frame, shape (3, N)</p>
+<dt><strong>target</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The target vectors, i.e.,</dt><dd><p>the z-axis in the lab frame, shape (3, N)</p>
 </dd>
 </dl>
 </li>
@@ -1596,8 +1593,8 @@ for the BraggSym class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The UB matrix, shape (3, 3)</p></li>
-<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The hkl vectors, shape (3, N)</p></li>
+<li><p><strong>ub</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The UB matrix, shape (3, 3)</p></li>
+<li><p><strong>hkls</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – The hkl vectors, shape (3, N)</p></li>
 <li><p><strong>alignment_tol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – The tolerance for determining if the optimization
 managed to align the reflection for diffraction in unit of degrees,
 representing the misalignment of the lattice normal from the target vector.
@@ -1624,21 +1621,21 @@ success arrays will hold np.nan values for the unreachable reflections.</p></li>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="simple">
-<dt><strong>sol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The solution angles in degrees,</dt><dd><p>shape (4, N) solution angles are in the order
+<dt><strong>sol</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The solution angles in degrees,</dt><dd><p>shape (4, N) solution angles are in the order
 [mu, omega, chi, phi] such that solution[:, i] are the
 goniometer angles for the ith reflection.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>residuals</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The residuals in degrees,</dt><dd><p>shape (N,) these are the misalignments of the lattice
+<dt><strong>residuals</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The residuals in degrees,</dt><dd><p>shape (N,) these are the misalignments of the lattice
 normal from the target vector given that the solution
 angles are applied.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>success</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>): The success of the optimization,</dt><dd><p>shape (N,) True if the optimization converged within a
+<dt><strong>success</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>): The success of the optimization,</dt><dd><p>shape (N,) True if the optimization converged within a
 tolerance of alignment_tol</p>
 </dd>
 </dl>
@@ -1657,7 +1654,7 @@ tolerance of alignment_tol</p>
 
 </section>
 <section id="module-crispy.vizualise">
-<span id="vizualise"></span><h1>vizualise<a class="headerlink" href="#module-crispy.vizualise" title="Link to this heading">#</a></h1>
+<span id="vizualise"></span><h3>vizualise<a class="headerlink" href="#module-crispy.vizualise" title="Link to this heading">#</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="crispy.vizualise.centroids">
 <span class="sig-prename descclassname"><span class="pre">crispy.vizualise.</span></span><span class="sig-name descname"><span class="pre">centroids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polycrystal</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/vizualise.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.vizualise.centroids" title="Link to this definition">#</a></dt>
@@ -1693,11 +1690,50 @@ to plot. Default is None.</p></li>
 
 </section>
 <section id="module-crispy.assets">
-<span id="assets"></span><h1>assets<a class="headerlink" href="#module-crispy.assets" title="Link to this heading">#</a></h1>
+<span id="assets"></span><h3>assets<a class="headerlink" href="#module-crispy.assets" title="Link to this heading">#</a></h3>
 <p>Module to load example data and phantoms.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy.assets.grainmap_id11">
-<span class="sig-prename descclassname"><span class="pre">crispy.assets.</span></span><span class="sig-name descname"><span class="pre">grainmap_id11</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.grainmap_id11" title="Link to this definition">#</a></dt>
+<p>Here you will find example datasets and phantoms that can be used to test and
+demonstrate the functionality of the crispy package. These assets are stored in
+the <cite>assets</cite> directory of the repository.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="crispy.assets.path">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy.assets.</span></span><span class="sig-name descname"><span class="pre">path</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.path" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Absolute paths to various assets.</p>
+<dl class="simple">
+<dt>Currently availabel example datasets are:</dt><dd><ul class="simple">
+<li><p>…/crispy/assets/FeAu_0p5_tR_ff1_grains.h5</p></li>
+<li><p>…/crispy/assets/lab_dct_silicon.h5</p></li>
+<li><p>…/crispy/assets/lab_dct_Al1050.h5</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crispy.assets.path.FEAU">
+<span class="sig-name descname"><span class="pre">FEAU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/naxhe/workspace/crispy/assets/FeAu_0p5_tR_ff1_grains.h5'</span></em><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.path.FEAU" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crispy.assets.path.SILICON">
+<span class="sig-name descname"><span class="pre">SILICON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/naxhe/workspace/crispy/assets/lab_dct_silicon.h5'</span></em><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.path.SILICON" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crispy.assets.path.AL1050">
+<span class="sig-name descname"><span class="pre">AL1050</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/naxhe/workspace/crispy/assets/lab_dct_Al1050.h5'</span></em><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.path.AL1050" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="crispy.assets.grain_map">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy.assets.</span></span><span class="sig-name descname"><span class="pre">grain_map</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.grain_map" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to load example grain maps.</p>
+<p>Various assets and example dataset are available in the <cite>assets</cite> directory.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy.assets.grain_map.tdxrd_map">
+<span class="sig-name descname"><span class="pre">tdxrd_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.grain_map.tdxrd_map" title="Link to this definition">#</a></dt>
 <dd><p>Load a grain map from the ID11 beamline at ESRF on a FeAu sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -1709,6 +1745,34 @@ to plot. Default is None.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy.assets.grain_map.lab_dct_volume">
+<span class="sig-name descname"><span class="pre">lab_dct_volume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/assets.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.assets.grain_map.lab_dct_volume" title="Link to this definition">#</a></dt>
+<dd><p>Load a lab-dct volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The name of the lab-dct volume to load.
+This can be one of the following:
+- “Al1050”: A lab-dct volume of a small polycrystalline Al1050 sample.
+- “silicon”: A lab-dct volume of three silicon single crystals shards.
+Defaults to “Al1050”.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the name is not one of the available assets.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Lab-dct volume.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#crispy._lab_dct_volume.LabDCTVolume" title="crispy._lab_dct_volume.LabDCTVolume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy._lab_dct_volume.LabDCTVolume</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
 </section>
 
 
@@ -1740,136 +1804,144 @@ to plot. Default is None.</p></li>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">GrainMap</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap"><code class="docutils literal notranslate"><span class="pre">GrainMap</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#grainmap">GrainMap</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap"><code class="docutils literal notranslate"><span class="pre">GrainMap</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#polycrystal">Polycrystal</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal"><code class="docutils literal notranslate"><span class="pre">Polycrystal</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.reference_cell"><code class="docutils literal notranslate"><span class="pre">Polycrystal.reference_cell</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.grains"><code class="docutils literal notranslate"><span class="pre">Polycrystal.grains</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.number_of_grains"><code class="docutils literal notranslate"><span class="pre">Polycrystal.number_of_grains</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal._misorientations"><code class="docutils literal notranslate"><span class="pre">Polycrystal._misorientations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.neighbours"><code class="docutils literal notranslate"><span class="pre">Polycrystal.neighbours</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.texturize"><code class="docutils literal notranslate"><span class="pre">Polycrystal.texturize()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.misorientations"><code class="docutils literal notranslate"><span class="pre">Polycrystal.misorientations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.ubi"><code class="docutils literal notranslate"><span class="pre">Polycrystal.ubi</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.u"><code class="docutils literal notranslate"><span class="pre">Polycrystal.u</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.orientation"><code class="docutils literal notranslate"><span class="pre">Polycrystal.orientation</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.b"><code class="docutils literal notranslate"><span class="pre">Polycrystal.b</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.strain"><code class="docutils literal notranslate"><span class="pre">Polycrystal.strain</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.crystal_system"><code class="docutils literal notranslate"><span class="pre">Polycrystal.crystal_system</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.colorize"><code class="docutils literal notranslate"><span class="pre">Polycrystal.colorize()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tdxrdmap">TDXRDMap</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap"><code class="docutils literal notranslate"><span class="pre">TDXRDMap</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.grains"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.grains</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_grains"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.number_of_grains</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.bounding_box"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.bounding_box</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.extent"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.extent</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.centroids"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.centroids</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.u"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.u</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.orientations"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.orientations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.b"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.b</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.neighbours"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.neighbours</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.misorientations"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.misorientations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.add_grain_attr"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.add_grain_attr()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.neighbours</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.bounding_box</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.extent</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.centroids</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.sum_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.sum_peak_intensity</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_peaks"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.number_of_peaks</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.median_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.median_peak_intensity</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.mean_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.mean_peak_intensity</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.min_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.min_peak_intensity</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.max_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.max_peak_intensity</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.std_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.std_peak_intensity</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.from_array"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.from_array()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.tesselate"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.tesselate()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.texturize"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.texturize()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.write"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.write()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#polycrystal">Polycrystal</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal"><code class="docutils literal notranslate"><span class="pre">Polycrystal</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.reference_cell"><code class="docutils literal notranslate"><span class="pre">Polycrystal.reference_cell</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.grains"><code class="docutils literal notranslate"><span class="pre">Polycrystal.grains</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.number_of_grains"><code class="docutils literal notranslate"><span class="pre">Polycrystal.number_of_grains</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal._misorientations"><code class="docutils literal notranslate"><span class="pre">Polycrystal._misorientations</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.neighbours"><code class="docutils literal notranslate"><span class="pre">Polycrystal.neighbours</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.texturize"><code class="docutils literal notranslate"><span class="pre">Polycrystal.texturize()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.misorientations"><code class="docutils literal notranslate"><span class="pre">Polycrystal.misorientations</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.ubi"><code class="docutils literal notranslate"><span class="pre">Polycrystal.ubi</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.u"><code class="docutils literal notranslate"><span class="pre">Polycrystal.u</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.orientation"><code class="docutils literal notranslate"><span class="pre">Polycrystal.orientation</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.b"><code class="docutils literal notranslate"><span class="pre">Polycrystal.b</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.strain"><code class="docutils literal notranslate"><span class="pre">Polycrystal.strain</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.crystal_system"><code class="docutils literal notranslate"><span class="pre">Polycrystal.crystal_system</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.colorize"><code class="docutils literal notranslate"><span class="pre">Polycrystal.colorize()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#labdctvolume">LabDCTVolume</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.reference_cell"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.reference_cell</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.voxel_size"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.voxel_size</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.labels"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.labels</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.X"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.X</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Y"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.Y</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Z"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.Z</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.orientations"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.orientations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.B0"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.B0</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.grains"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.grains</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.number_of_grains"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.number_of_grains</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.write"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.write()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.texturize"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.texturize()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.center_of_mass"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.center_of_mass</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.center_volume"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.center_volume()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.filter"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.filter()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.crop"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.crop()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.translate"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.translate()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.rotate"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.rotate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tdxrdmap">TDXRDMap</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap"><code class="docutils literal notranslate"><span class="pre">TDXRDMap</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.grains"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.grains</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_grains"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.number_of_grains</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.u"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.u</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.orientations"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.orientations</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.b"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.b</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.misorientations"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.misorientations</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.add_grain_attr"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.add_grain_attr()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.neighbours"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.neighbours</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.bounding_box"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.bounding_box</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.extent"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.extent</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.centroids"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.centroids</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.sum_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.sum_peak_intensity</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_peaks"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.number_of_peaks</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.median_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.median_peak_intensity</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.mean_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.mean_peak_intensity</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.min_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.min_peak_intensity</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.max_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.max_peak_intensity</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.std_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.std_peak_intensity</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.from_array"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.from_array()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.tesselate"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.tesselate()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.texturize"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.texturize()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.write"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.write()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.dfxm">dfxm</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer"><code class="docutils literal notranslate"><span class="pre">Goniometer</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.polycrystal"><code class="docutils literal notranslate"><span class="pre">Goniometer.polycrystal</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.energy"><code class="docutils literal notranslate"><span class="pre">Goniometer.energy</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.detector_distance"><code class="docutils literal notranslate"><span class="pre">Goniometer.detector_distance</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.motor_bounds"><code class="docutils literal notranslate"><span class="pre">Goniometer.motor_bounds</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.find_reflections"><code class="docutils literal notranslate"><span class="pre">Goniometer.find_reflections()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.table_of_reflections"><code class="docutils literal notranslate"><span class="pre">Goniometer.table_of_reflections()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.find_symmetry_axis"><code class="docutils literal notranslate"><span class="pre">Goniometer.find_symmetry_axis()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez"><code class="docutils literal notranslate"><span class="pre">Braggez</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.energy"><code class="docutils literal notranslate"><span class="pre">Braggez.energy</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.motor_bounds"><code class="docutils literal notranslate"><span class="pre">Braggez.motor_bounds</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.epsilon"><code class="docutils literal notranslate"><span class="pre">Braggez.epsilon</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.verbose"><code class="docutils literal notranslate"><span class="pre">Braggez.verbose</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_mu"><code class="docutils literal notranslate"><span class="pre">Braggez.R_mu()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_omega"><code class="docutils literal notranslate"><span class="pre">Braggez.R_omega()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_chi"><code class="docutils literal notranslate"><span class="pre">Braggez.R_chi()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_phi"><code class="docutils literal notranslate"><span class="pre">Braggez.R_phi()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R"><code class="docutils literal notranslate"><span class="pre">Braggez.R()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.cost_vector"><code class="docutils literal notranslate"><span class="pre">Braggez.cost_vector()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.cost"><code class="docutils literal notranslate"><span class="pre">Braggez.cost()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.cost_and_grad"><code class="docutils literal notranslate"><span class="pre">Braggez.cost_and_grad()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.get_unit_vectors"><code class="docutils literal notranslate"><span class="pre">Braggez.get_unit_vectors()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.align"><code class="docutils literal notranslate"><span class="pre">Braggez.align()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym"><code class="docutils literal notranslate"><span class="pre">BraggSym</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.energy"><code class="docutils literal notranslate"><span class="pre">BraggSym.energy</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.motor_bounds"><code class="docutils literal notranslate"><span class="pre">BraggSym.motor_bounds</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.epsilon"><code class="docutils literal notranslate"><span class="pre">BraggSym.epsilon</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.verbose"><code class="docutils literal notranslate"><span class="pre">BraggSym.verbose</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.get_unit_vectors"><code class="docutils literal notranslate"><span class="pre">BraggSym.get_unit_vectors()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.align"><code class="docutils literal notranslate"><span class="pre">BraggSym.align()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#labdctvolume">LabDCTVolume</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.reference_cell"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.reference_cell</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.voxel_size"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.voxel_size</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.labels"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.labels</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.X"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.X</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Y"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.Y</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Z"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.Z</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.orientations"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.orientations</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.B0"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.B0</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.grains"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.grains</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.number_of_grains"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.number_of_grains</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.write"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.write()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.texturize"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.texturize()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.center_of_mass"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.center_of_mass</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.center_volume"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.center_volume()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.filter"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.filter()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.crop"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.crop()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.translate"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.translate()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.rotate"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.rotate()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.vizualise">vizualise</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.vizualise.centroids"><code class="docutils literal notranslate"><span class="pre">centroids()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.vizualise.mesh"><code class="docutils literal notranslate"><span class="pre">mesh()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.dfxm">dfxm</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer"><code class="docutils literal notranslate"><span class="pre">Goniometer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.polycrystal"><code class="docutils literal notranslate"><span class="pre">Goniometer.polycrystal</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.energy"><code class="docutils literal notranslate"><span class="pre">Goniometer.energy</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.detector_distance"><code class="docutils literal notranslate"><span class="pre">Goniometer.detector_distance</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.motor_bounds"><code class="docutils literal notranslate"><span class="pre">Goniometer.motor_bounds</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.find_reflections"><code class="docutils literal notranslate"><span class="pre">Goniometer.find_reflections()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.table_of_reflections"><code class="docutils literal notranslate"><span class="pre">Goniometer.table_of_reflections()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.find_symmetry_axis"><code class="docutils literal notranslate"><span class="pre">Goniometer.find_symmetry_axis()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.assets">assets</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.grainmap_id11"><code class="docutils literal notranslate"><span class="pre">grainmap_id11()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez"><code class="docutils literal notranslate"><span class="pre">Braggez</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.energy"><code class="docutils literal notranslate"><span class="pre">Braggez.energy</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.motor_bounds"><code class="docutils literal notranslate"><span class="pre">Braggez.motor_bounds</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.epsilon"><code class="docutils literal notranslate"><span class="pre">Braggez.epsilon</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.verbose"><code class="docutils literal notranslate"><span class="pre">Braggez.verbose</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_mu"><code class="docutils literal notranslate"><span class="pre">Braggez.R_mu()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_omega"><code class="docutils literal notranslate"><span class="pre">Braggez.R_omega()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_chi"><code class="docutils literal notranslate"><span class="pre">Braggez.R_chi()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R_phi"><code class="docutils literal notranslate"><span class="pre">Braggez.R_phi()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.R"><code class="docutils literal notranslate"><span class="pre">Braggez.R()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.cost_vector"><code class="docutils literal notranslate"><span class="pre">Braggez.cost_vector()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.cost"><code class="docutils literal notranslate"><span class="pre">Braggez.cost()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.cost_and_grad"><code class="docutils literal notranslate"><span class="pre">Braggez.cost_and_grad()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.get_unit_vectors"><code class="docutils literal notranslate"><span class="pre">Braggez.get_unit_vectors()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Braggez.align"><code class="docutils literal notranslate"><span class="pre">Braggez.align()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym"><code class="docutils literal notranslate"><span class="pre">BraggSym</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.energy"><code class="docutils literal notranslate"><span class="pre">BraggSym.energy</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.motor_bounds"><code class="docutils literal notranslate"><span class="pre">BraggSym.motor_bounds</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.epsilon"><code class="docutils literal notranslate"><span class="pre">BraggSym.epsilon</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.verbose"><code class="docutils literal notranslate"><span class="pre">BraggSym.verbose</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.get_unit_vectors"><code class="docutils literal notranslate"><span class="pre">BraggSym.get_unit_vectors()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.BraggSym.align"><code class="docutils literal notranslate"><span class="pre">BraggSym.align()</span></code></a></li>
 </ul>
 </li>
 </ul>
-
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.vizualise">vizualise</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.vizualise.centroids"><code class="docutils literal notranslate"><span class="pre">centroids()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.vizualise.mesh"><code class="docutils literal notranslate"><span class="pre">mesh()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.assets">assets</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.path"><code class="docutils literal notranslate"><span class="pre">path</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.path.FEAU"><code class="docutils literal notranslate"><span class="pre">path.FEAU</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.path.SILICON"><code class="docutils literal notranslate"><span class="pre">path.SILICON</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.path.AL1050"><code class="docutils literal notranslate"><span class="pre">path.AL1050</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.grain_map"><code class="docutils literal notranslate"><span class="pre">grain_map</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.grain_map.tdxrd_map"><code class="docutils literal notranslate"><span class="pre">grain_map.tdxrd_map()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.assets.grain_map.lab_dct_volume"><code class="docutils literal notranslate"><span class="pre">grain_map.lab_dct_volume()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
