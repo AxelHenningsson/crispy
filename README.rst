@@ -159,4 +159,4 @@ To install ``crispy`` from source, run
 Documentation
 =====================================================================
 
-The extended documentation is about to be released at an externally hosted website.
+ `The extended documentation is available here <https://axelhenningsson.github.io/crispy/>`_.
