@@ -6,34 +6,32 @@ from xfab import tools
 
 
 class Goniometer:
-    """
-    A class to represent a Diffraction X-ray Microscopy (DFXM) experiment setup.
+    """A class representing a Dark-Field X-ray Microscopy (DFXM) experimental setup.
 
-    This class is designed to find the angular settings required of the microscope in order
-    to make a given set of Miller indices come into diffraction at some rotation of the turntable.
-
-    This is usefull for situations when we want to reach several reflection in DFXM
-    without re-mounitng the sample
+    This class calculates the required microscope angular settings to bring a set of
+    Miller indices into diffraction condition at specific turntable rotations.
 
     Attributes:
-        polycrystal (:obj:`crispy._polycrystal.Polycrystal`): The polycrystal object
-            mounted on the goniometer.
+        polycrystal (:class:`crispy.Polycrystal <crispy._polycrystal.Polycrystal>`):
+            The polycrystal object mounted on the goniometer.
         energy (:obj:`float`): Photon energy in keV.
-        detector_distance (:obj:`float`): The detector distance in meters.
-        motor_bounds (:obj:`dict`): Dictionary containing the motor bounds of the
-            goniometer/hexapod in units of degrees (sample stage) and meters
-            (for detector translations). Keys are given in the example dictionary below:
+        detector_distance (:obj:`float`): Distance between sample and detector
+            in metres.
+        motor_bounds (:obj:`dict`): Motor limits for the goniometer/hexapod in degrees
+            (sample stage) and metres (detector translations). Keys are shown in the
+            example below:
 
-           .. code-block:: python
+    .. code-block:: python
 
-              {
-              "mu": (0, 20), # degrees
-              "omega": (-22, 22), # degrees
-              "chi": (-5, 5), # degrees
-              "phi": (-5, 5), # degrees
-              "detector_z": (-0.04, 1.96), # meters
-              "detector_y": (-0.169, 1.16) # meters
-              }
+        motor_bounds = {
+        "mu": (0, 20), # degrees
+        "omega": (-22, 22), # degrees
+        "chi": (-5, 5), # degrees
+        "phi": (-5, 5), # degrees
+        "detector_z": (-0.04, 1.96), # metres
+        "detector_y": (-0.169, 1.16) # metres
+        }
+
     """
 
     def __init__(self, polycrystal, energy, detector_distance, motor_bounds):
@@ -44,6 +42,15 @@ class Goniometer:
         self.motor_bounds = motor_bounds
 
     def _get_hkls(self):
+        """Find all h,k,l miller indices that can diffract at the given energy.
+
+        This function will consider the symmetry of the polycrystal material phase.
+
+        Returns:
+            :obj:`numpy.ndarray`: Array of ``h,k,l`` Miller indices that can
+                diffract at the given energy. ``shape (3, N)`` where ``N`` is
+                the number of reflections.
+        """
         th_min = 0
         th_max = (
             np.arctan(self.motor_bounds["detector_z"][1] / self.detector_distance) / 2.0
@@ -63,50 +70,82 @@ class Goniometer:
         ftol=None,
         mask_unreachable=False,
     ):
-        """Find all reflecitions in the polycrystal reachable by the goniometer in DFXM
+        """Find all reflections reachable by the goniometer in DFXM in  *"simplified geometry"*.
 
-        Running this function will find all reflections in the polycrystal that are reachable
-        by the goniometer in DFXM. The reflections are found by running an optimization
-        algorithm that aligns the lattice normals with the target vectors. The target vectors
-        are defined as the z-axis rotated by the Bragg angle in the xz-plane into the reverse
-        direction of the beam which is assumed to propagate in the positive x-direction.
-        The reflections are stored in the polycrystal object as a dictionary with the keys
-        "hkl", "mu", "omega", "chi", "phi", "residual", and "theta". The values are the
-        corresponding values for each reflection. The reflections are stored in the order
-        they are found in the optimization. To access the reflections of a grain number i use:
+        Example:
 
-            polycrystal.grains[i].dfxm["hkl"] # hkl vectors that can diffract
-            polycrystal.grains[i].dfxm["mu"] # mu angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["omega"] # omega angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["chi"] # chi angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["phi"] # phi angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["residual"] # residuals, radians between the target vector Q-vector and the algined lattice normal.
-            polycrystal.grains[i].dfxm["theta"] # Bragg angles at which diffraction occurs
+        .. code-block:: python
+
+            import crispy
+
+            polycrystal = crispy.assets.grain_map.tdxrd_map()
+
+            motor_bounds = {
+            "mu": (0, 20), # degrees
+            "omega": (-22, 22), # degrees
+            "chi": (-5, 5), # degrees
+            "phi": (-5, 5), # degrees
+            "detector_z": (-0.04, 1.96), # metres
+            "detector_y": (-0.169, 1.16) # metres
+            }
+
+            goniometer = crispy.dfxm.Goniometer(polycrystal,
+                                    energy=17,
+                                    detector_distance=4,
+                                    motor_bounds=motor_bounds)
+            goniometer.find_reflections()
+
+            # The found reflections are stored in the `dfxm` dictionary of each grain.
+            reflections_grain_12 = polycrystal.grains[12].dfxm
+
+
+        Output dictorary for ``reflections_grain_12``:
+
+            - "chi":  array([-4.51990607])
+            - "hkl":  array([[0.], [0.], [2.]])
+            - "mu":  array([6.12038619])
+            - "omega":  array([-13.18363797])
+            - "phi":  array([-4.99889719])
+            - "residual":  array([0.])
+            - "theta":  array([14.71219735])
+
+        The reflections are found by running an optimisation algorithm that aligns the
+        lattice normals with target vectors. The target vectors are defined as the z-axis
+        rotated by the Bragg angle in the xz-plane into the reverse direction of the beam,
+        which is assumed to propagate in the positive x-direction.
+
+        The reflections are stored in the :attr:`dfxm` dictionary of each grain with keys:
+
+            - "hkl": Miller indices of diffracting planes
+            - "mu": Mu angles at which diffraction occurs
+            - "omega": Omega angles at which diffraction occurs
+            - "chi": Chi angles at which diffraction occurs
+            - "phi": Phi angles at which diffraction occurs
+            - "residual": Misalignment between target Q-vector and aligned lattice normal
+            - "theta": Bragg angles at which diffraction occurs
+
+        To access the reflections of grain ``i``, use:
+
+            polycrystal.grains[i].dfxm["hkl"]  # etc.
 
         Args:
-
-            alignment_tol (float): The tolerance for determining if the optimization
-                managed to align the reflection for diffraction in unit of degrees,
-                representing the misalignment of the lattice normal from the target vector.
-                Default is 1e-4.
-            maxiter (int): The maximum number of iterations for the optimization performed
-                by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
-                number of reflections.
-            maxls (int): The maximum number of line search iterations for the optimization per
-                iteration of L-BFGS-B. Default is 25.
-            ftol (float): The tolerance for the optimization cost function before termination.
-                Default is None, which will be set to 1e-8 / N, where N is the number of
-                reflections.
-            mask_unreachable (bool): If True, mask reflections that are unreachable
-                by the goniometer/hexapod. A reflection is unreachable if the misalignment
-                of the lattice normal from the target vector is greater than the maximum sum
-                of the absolute values of the motor bounds. Default is False.
-                Maskin unreachable reflections speed up the optimization by simply not
-                considering them. When masking is enabled, the solution and residuals
-                success arrays will hold np.nan values for the unreachable reflections.
+            alignment_tol (:obj:`float`): Tolerance for determining if optimisation
+                aligned the reflection, in degrees. Represents misalignment between
+                lattice normal and target vector. Default is 1e-4.
+            maxiter (:obj:`int`): Maximum iterations for L-BFGS-B optimisation.
+                Default is ``None``, set to 200 * N where N is number of reflections.
+            maxls (:obj:`int`): Maximum line search iterations per L-BFGS-B iteration.
+                Default is 25.
+            ftol (:obj:`float`): Tolerance for optimisation cost function termination.
+                Default is ``None``, set to 1e-8 / N where N is number of reflections.
+            mask_unreachable (:obj:`bool`): If ``True``, mask reflections unreachable by
+                goniometer/hexapod. A reflection is unreachable if misalignment exceeds
+                the sum of absolute motor bounds. Default is ``False``. Masking speeds up
+                optimisation by excluding unreachable reflections. When enabled,
+                unreachable reflections have ``np.nan`` values in solution and residuals.
         """
         hkls = self._get_hkls()
-        bez = Braggez(self.energy, self.motor_bounds)
+        bez = _Braggez(self.energy, self.motor_bounds)
 
         for g in self.polycrystal.grains:
             goni_angles, residual, success, theta = bez.align(
@@ -132,6 +171,46 @@ class Goniometer:
                 g.dfxm = None
 
     def table_of_reflections(self):
+        """Compile a :obj:`pandas.DataFrame` of the reflections found by :func:`find_reflections()`.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+
+            polycrystal = crispy.assets.grain_map.tdxrd_map()
+
+            motor_bounds = {
+            "mu": (0, 20), # degrees
+            "omega": (-22, 22), # degrees
+            "chi": (-5, 5), # degrees
+            "phi": (-5, 5), # degrees
+            "detector_z": (-0.04, 1.96), # metres
+            "detector_y": (-0.169, 1.16) # metres
+            }
+
+            goniometer = crispy.dfxm.Goniometer(polycrystal,
+                                    energy=17,
+                                    detector_distance=4,
+                                    motor_bounds=motor_bounds)
+            goniometer.find_reflections()
+            df = goniometer.table_of_reflections()
+
+
+        Output :obj:`pandas.DataFrame` for ``df`` looks like this:
+
+        .. image:: ../../docs/source/images/dfxm_table.png
+
+        Raises:
+            ValueError: if :func:`find_reflections()` has not been run.
+
+        Returns:
+            :obj:`pandas.DataFrame`: DataFrame of the reflections found
+                by :func:`find_reflections()`. For each grain, the DataFrame contains
+                column in accordance with the keys in the :attr:`dfxm` dictionary
+                of the grain. see :func:`find_reflections()` for more details.
+        """
         if not hasattr(self.polycrystal.grains[0], "dfxm"):
             raise ValueError("No reflections available. Run find_reflections() first.")
         tab = pd.DataFrame(
@@ -190,44 +269,67 @@ class Goniometer:
     ):
         """Find all Miller indices that can be aligned with the z-axis within motor bounds.
 
-        Running this function will find all reflections in the polycrystal that are reachable
-        by the goniometer in DFXM. The reflections are found by running an optimization
-        algorithm that aligns the lattice normals with the target vectors. The target vectors
-        are statically defined as the z-axis. The reflections are stored in the polycrystal
-        grains objects as dictionaries with the keys "hkl", "mu", "omega", "chi", "phi",
-        and "residual". To access the reflections of a grain number i use:
+        This allows for the identification of various oblique imaging geometries in
+        which multiple reflections are reachable by pure z-axis rotations.
 
-            polycrystal.grains[i].dfxm["hkl"] # hkl vectors that can diffract
-            polycrystal.grains[i].dfxm["mu"] # mu angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["omega"] # omega angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["chi"] # chi angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["phi"] # phi angles at which diffraction occurs
-            polycrystal.grains[i].dfxm["residual"] # residuals, radians between the target vector Q-vector and the algined lattice normal.
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+
+            polycrystal = crispy.assets.grain_map.lab_dct_volume("Al1050")
+
+            motor_bounds = {
+            "mu": (0, 20), # degrees
+            "omega": (-30, 30), # degrees
+            "chi": (-7, 7), # degrees
+            "phi": (-7, 7), # degrees
+            "detector_z": (-0.04, 1.96), # metres
+            "detector_y": (-0.169, 1.16) # metres
+            }
+
+            goniometer = crispy.dfxm.Goniometer(polycrystal,
+                                    energy=17,
+                                    detector_distance=4,
+                                    motor_bounds=motor_bounds)
+            goniometer.find_symmetry_axis()
+
+
+        Finds all reachable reflections in the polycrystal using an optimisation algorithm
+        that aligns lattice normals with target vectors (defined as the z-axis). The
+        reflections are stored in the polycrystal grain objects as dictionaries named
+        ``symmetry_axis`` with the following keys:
+
+            - "hkl": Miller indices that can diffract
+            - "mu": Mu angles at which diffraction occurs
+            - "omega": Omega angles at which diffraction occurs
+            - "chi": Chi angles at which diffraction occurs
+            - "phi": Phi angles at which diffraction occurs
+            - "residual": Radians between lattice normal and z-axis
+
+        To access the symmetry axis of grain ``i``, use:
+
+            polycrystal.grains[i].symmetry_axis["hkl"]  # etc.
 
         Args:
-
-            alignment_tol (float): The tolerance for determining if the optimization
-                managed to align the reflection for diffraction in unit of degrees,
-                representing the misalignment of the lattice normal from the target vector.
-                Default is 1e-4.
-            maxiter (int): The maximum number of iterations for the optimization performed
-                by L-BFGS-B. Default is None, which will be set to 200 * N, where N is the
-                number of reflections.
-            maxls (int): The maximum number of line search iterations for the optimization per
-                iteration of L-BFGS-B. Default is 25.
-            ftol (float): The tolerance for the optimization cost function before termination.
-                Default is None, which will be set to 1e-8 / N, where N is the number of
-                reflections.
-            mask_unreachable (bool): If True, mask reflections that are unreachable
-                by the goniometer/hexapod. A reflection is unreachable if the misalignment
-                of the lattice normal from the target vector is greater than the maximum sum
-                of the absolute values of the motor bounds. Default is False.
-                Maskin unreachable reflections speed up the optimization by simply not
-                considering them. When masking is enabled, the solution and residuals
-                success arrays will hold np.nan values for the unreachable reflections.
+            alignment_tol (:obj:`float`): Tolerance in degrees for determining if the
+                optimisation aligned the lattice normal with the z-axis. Represents the
+                misalignment between lattice normal and target vector. Default is 1e-4.
+            maxiter (:obj:`int`): Maximum iterations for L-BFGS-B optimisation.
+                Default is None (set to 200 * N, where N is number of reflections).
+            maxls (:obj:`int`): Maximum line search iterations per L-BFGS-B iteration.
+                Default is 25.
+            ftol (:obj:`float`): Tolerance for optimisation cost function termination.
+                Default is None (set to 1e-8 / N, where N is number of reflections).
+            mask_unreachable (:obj:`bool`): If True, mask unreachable lattice normals by the
+                goniometer/hexapod. A lattice normal is unreachable if its misalignment exceeds
+                the maximum sum of absolute motor bounds. Default is False. Masking speeds
+                up optimisation by excluding unreachable lattice normals. When enabled,
+                solution and residual arrays contain np.nan for unreachable lattice normals.
         """
         hkls = self._get_hkls()
-        bsym = BraggSym(self.energy, self.motor_bounds)
+        bsym = _BraggSym(self.energy, self.motor_bounds)
 
         for g in self.polycrystal.grains:
             goni_angles, residual, success = bsym.align(
@@ -252,7 +354,7 @@ class Goniometer:
                 g.symmetry_axis = None
 
 
-class Braggez(object):
+class _Braggez(object):
     """
     Braggez is a class that performs optimization of the gonio angles to align the crystal
     with the target reflection. The optimization is performed using the L-BFGS-B algorithm
@@ -622,7 +724,7 @@ class Braggez(object):
         return solution, residuals, success, np.degrees(theta)
 
 
-class BraggSym(Braggez):
+class _BraggSym(_Braggez):
     """BraggSym is a class that performs optimization of the gonio angles to align
     crystal lattice normals with the lab-z axis.
 

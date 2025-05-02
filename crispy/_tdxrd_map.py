@@ -5,7 +5,7 @@ import numpy as np
 import xfab
 import xfab.symmetry
 
-from . import _read, _tesselate
+from . import _tesselate
 from ._constants import CONSTANTS
 from ._polycrystal import Polycrystal
 
@@ -38,7 +38,9 @@ class TDXRDMap(Polycrystal):
         if isinstance(grainfile, list):
             self.grains = np.array(grainfile)
         else:
-            self.grains = _read.grains(grainfile, group_name)
+            self.grains = np.array(
+                ImageD11.grain.read_grain_file_h5(grainfile, group_name)
+            )
 
         if lattice_parameters and symmetry:
             self.reference_cell = ImageD11.unitcell.unitcell(
@@ -223,12 +225,16 @@ class TDXRDMap(Polycrystal):
                 mis = xfab.symmetry.Umis(u, self.grains[ni].u, _crystal_system)
                 self._misorientations[gi][i] = np.min(mis[:, 1])
 
-    def write(self, path, grains="all", neighbourhood=None):
+    def write(self, file_path, grains="all", neighbourhood=None):
         """Write the polycrystal to a file readable by Paraview.
 
+        The grain volume will be written to the specified file path,
+        the file format is ``.xdmf`` or ``.vtk``. The appropriate extension will
+        automatically be added if it is not already present.
+
         Args:
-            path (:obj:`str`): Absolute path to the file to write the polycrystal
-                to, must end in .vtk.
+            file_path (:obj:`str`): Absolute path to the file to write the polycrystal
+                to, must end in ``.xdmf`` or ``.vtk``.
             grains (:obj:`list` of :obj:`int` or :obj:`int` or :obj:`str`): The
                 grain ids to write. Defaults to "all" in which case all grains
                 in the polycrystal are written.
@@ -237,6 +243,7 @@ class TDXRDMap(Polycrystal):
                 written to file. Default is None.
 
         """
+        file_path += ".vtk" if not file_path.endswith(".vtk") else ""
 
         if self._mesh is None:
             raise ValueError(
@@ -260,7 +267,7 @@ class TDXRDMap(Polycrystal):
             mesh.cell_data["ipf-y"][0][i] = rgb[gid, :, 1]
             mesh.cell_data["ipf-z"][0][i] = rgb[gid, :, 2]
 
-        mesh.write(path)
+        mesh.write(file_path)
 
     def _select_grains(self, grains, neighbourhood):
         """Patch the grain index list to include neighbours, handle int, etc."""

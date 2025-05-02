@@ -1,18 +1,17 @@
+"""The vizualisation module contains functions genreally targeting visualising voronoi tesselations
+of polycrystals. I.e these function are usefull for :class:`crispy.TDXRDMap` <crispy._tdxrd_map.TDXRDMap>
+
+For lab-DCT volumes, see :func:`crispy.LabDCTVolume.write()` <crispy._lab_dct_volume.LabDCTVolume.write>
+for writing to paraview files to disc for visualization.
+"""
+
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from . import _tesselate
-
-
-def _crispy_styling():
-    fontsize = 18
-    ticksize = 18
-    plt.style.use("dark_background")
-    plt.rcParams["font.size"] = fontsize
-    plt.rcParams["xtick.labelsize"] = ticksize
-    plt.rcParams["ytick.labelsize"] = ticksize
+from ._lab_dct_volume import LabDCTVolume
 
 
 def _snap_to_bounds(ax, polycrystal):
@@ -31,40 +30,25 @@ def _xyz_labels(ax):
     ax.set_zlabel("Z um", labelpad=20)
 
 
-def centroids(polycrystal):
-    """Plot the centroids of the grains in the polycrystal.
-
-    Returns:
-        :obj:`matplotlib.figure.Figure`, :obj:`matplotlib.axes.Axes`
-    """
-    _crispy_styling()
-    fig, ax = plt.subplots(subplot_kw=dict(projection="3d"), figsize=(9, 7))
-    x, y, z = polycrystal.centroids.T
-    if hasattr(polycrystal.grains[0], "rgb"):
-        color = [g.rgb[:, 0] for g in polycrystal.grains]
-        ax.scatter3D(x, y, z, c=color, s=50)
-        axis = (
-            str(polycrystal._ipf_axes[0].round(3))
-            .replace("  ", ",")
-            .replace("[", "")
-            .replace("]", "")
-        )
-        coloring = "ipf (view-axis x,y,z = {})".format(axis)
-    else:
-        ax.scatter3D(x, y, z, c=range(len(x)), cmap="rainbow", s=50)
-        coloring = "grain id"
-    title = "Centroids of the Polycrystal"
-    title = f"{title}\nColoring by {coloring}"
-    ax.set_title(title)
-    _xyz_labels(ax)
-    _snap_to_bounds(ax, polycrystal)
-    return fig, ax
-
-
-def mesh(
-    polycrystal, neighbourhood=None, select=None
-):  # TODO: add args for surface/interiror grains, colorings, etc.
+def mesh(polycrystal, neighbourhood=None, select=None):
     """Plot the Voronoi tesselation of the polycrystal.
+
+    Example:
+
+    .. code-block:: python
+
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import crispy
+
+        polycrystal = crispy.assets.grain_map.tdxrd_map()
+        polycrystal.tesselate()
+        polycrystal.colorize(np.eye(3))
+
+        fig, ax = crispy.vizualise.mesh(polycrystal)
+        plt.show()
+
+    .. image:: ../../docs/source/images/mesh.png
 
     Args:
         polycrystal (:obj:`crispy.TDXRDMap`): The polycrystal object.
@@ -78,11 +62,13 @@ def mesh(
     Returns:
         :obj:`matplotlib.figure.Figure`, :obj:`matplotlib.axes.Axes`
     """
+    if isinstance(polycrystal, LabDCTVolume):
+        raise ValueError(
+            "Lab-DCT volumes are not yet supported for mesh visualization."
+        )
     assert polycrystal._mesh is not None, (
         "Mesh not yet generated. Call polycrystal.tesselate() first."
     )
-
-    _crispy_styling()
 
     fig, ax = plt.subplots(subplot_kw=dict(projection="3d"), figsize=(9, 7))
 

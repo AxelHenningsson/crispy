@@ -15,52 +15,55 @@ from ._polycrystal import Polycrystal
 
 
 class LabDCTVolume(Polycrystal):
-    """Class to represent a voxelated lab-dct grain volume.
+    """Class to represent a voxelated lab-DCT grain volume.
 
-    This class is used to represent a voxelated grain volume in the lab
-    frame. The class is used to read the grain volume data from a h5
-    file in the lab-dct format and to provide methods to manipulate the
-    grain volume data. This class is a specific implementation of the
-    :obj:`Polycrystal` class and can be interfaced with the
-    :obj:`dfxm.Goniometer` to search for dfxm reflections. This may be usefull in
-    preperation for synchrotron measurements to determine what type of
-    reflections and orientation that will be available in the sample.
+    Example:
 
-    Note that the lab-dct (as implemented by xnovo) coordinate system aligns
-    with the ESR ID11 and ID03 coordinate systems in that the z axis is
-    pointing towards the ceiling, the x axis is pointing along the beam
-    photon propagation direction and the y axis is pointing to the left
-    as seen by a traveling photon. Loading a lab dct map with :obj:`LabDCTVolume`
-    will unify the coordinate system to be the same as that of :obj:`TDXRDMap`.
+    .. code-block:: python
+
+        import crispy
+        h5_file_path = crispy.assets.path.AL1050
+        dct_volume = crispy.LabDCTVolume(h5_file_path)
+
+
+    This class represents a voxelated grain volume in the laboratory frame. It reads
+    grain volume data from an HDF5 file in the lab-DCT format and provides methods
+    for data manipulation. As a specific implementation of the
+    :class:`crispy.Polycrystal <crispy._polycrystal.Polycrystal>` class, it interfaces
+    with :obj:`crispy.dfxm.Goniometer` to search for DFXM reflections, useful for
+    planning synchrotron measurements.
+
+    The lab-DCT coordinate system (as implemented by xnovo) aligns with ESR ID11 and
+    ID03 coordinate systems: z-axis points towards the ceiling, x-axis along beam
+    propagation, and y-axis to the left as seen by a travelling photon. Loading a
+    lab-DCT map unifies the coordinate system with that of
+    :class:`crispy.TDXRDMap <crispy._tdxrd_map.TDXRDMap>`.
 
     Args:
-        file_path (str): The path to the h5 file containing the grain
-            volume data. The file should be in the lab-dct format.
-            The file should contain the following datasets:
-            - LabDCT/Spacing: The voxel size in microns.
-            - LabDCT/Data/GrainId: The grain id for each voxel.
-            - LabDCT/Data/Rodrigues: The Rodrigues vector for each voxel.
-            - PhaseInfo/Phase01/UnitCell: The unit cell parameters.
-            - PhaseInfo/Phase01/SpaceGroup: The space group of the phase.
+        file_path (:obj:`str`): Path to HDF5 file containing grain volume data in
+            lab-DCT format. Required datasets:
+
+            - ``LabDCT/Spacing``: Voxel size in microns
+            - ``LabDCT/Data/GrainId``: Grain ID per voxel
+            - ``LabDCT/Data/Rodrigues``: Rodrigues vector per voxel
+            - ``PhaseInfo/Phase01/UnitCell``: Unit cell parameters
+            - ``PhaseInfo/Phase01/SpaceGroup``: Space group of phase
 
     Attributes:
-        reference_cell (:obj:`ImageD11.unitcell`): The reference cell of the
-            grain volume.
-        voxel_size (float): The voxel size in microns.
-        labels (np.ndarray): The grain id for each voxel shape=(m,n,o)
-            axis=0 is z, axis=1 is y, axis=2 is x. coordinates always
-            increase from low to high along the positive axis direction.
-        X (np.ndarray): The x coordinates of the voxels in microns. shape=(m,n,o)
-        Y (np.ndarray): The y coordinates of the voxels in microns. shape=(m,n,o)
-        Z (np.ndarray): The z coordinates of the voxels in microns. shape=(m,n,o)
-        orientations (np.ndarray): The orientations of the grains in
-            matrix vector format. shape=(number_of_grains, 3, 3)
-        B0 (np.ndarray): The B0 matrix for the grain volume. I.e the
-            recirprocal lattice vectors in the lab frame (upper triangular
-            3,3 matrix).
-        grains (np.ndarray): The grains in the grain volume. len=number_of_grains
-        number_of_grains (int): The number of grains in the grain volume.
-
+        reference_cell (:obj:`ImageD11.unitcell`): Reference cell of grain volume
+        voxel_size (:obj:`float`): Voxel size in microns
+        labels (:obj:`numpy.ndarray`): Grain ID per voxel, ``shape (m,n,o)``.
+            ``axis=0`` is ``z``, ``axis=1`` is ``y``, ``axis=2`` is ``x``. Coordinates
+            increase along positive axis direction.
+        X (:obj:`numpy.ndarray`): ``X`` coordinates of voxels in microns, ``shape (m, n, o)``.
+        Y (:obj:`numpy.ndarray`): ``Y`` coordinates of voxels in microns, ``shape (m, n, o)``.
+        Z (:obj:`numpy.ndarray`): ``Z`` coordinates of voxels in microns, ``shape (m, n, o)``.
+        orientations (:obj:`numpy.ndarray`): Grain orientations in matrix vector
+            format, ``shape (number_of_grains, 3, 3)``.
+        B0 (:obj:`numpy.ndarray`): B0 matrix (reciprocal lattice vectors in lab
+            frame), upper triangular (3,3) matrix
+        grains (:obj:`numpy.ndarray`): Array of grains, ``len=number_of_grains``.
+        number_of_grains (:obj:`int`): Total number of grains.
     """
 
     def __init__(self, file_path):
@@ -77,6 +80,425 @@ class LabDCTVolume(Polycrystal):
         self._misorientations = None
 
         self._update_state()
+
+    def write(self, file_path):
+        """Write the grain volume to paraview readable formats.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+            polycrystal = crispy.assets.grain_map.lab_dct_volume('Al1050')
+            polycrystal.write("lab_dct_volume.xdmf")
+
+
+        The grain volume will be written to the specified file path,
+        the file format is ``.xdmf``. This extension will automatically
+        be added if it is not already present. The resulting .xdmf file can
+        be viewed in Paraview:
+
+        .. image:: ../../docs/source/images/lab_dct_paraview.png
+
+        The resulting point data will contain the following attributes:
+            - ``spacing_in_um``: The voxel size in microns.
+            - ``ipf_x``: The x component of the IPF color.
+            - ``ipf_y``: The y component of the IPF color.
+            - ``ipf_z``: The z component of the IPF color.
+            - ``labels``: The grain id for each voxel.
+            - ``grain_sizes``: The size of each grain in units of voxels.
+
+        The data format is sparse in the sense that only non-void voxels
+        will be written to the file.
+
+        Args:
+            file_path (:obj:`str`): The path to the file to write the grain
+                volume to. The file should be in the paraview readable
+                format.
+
+        """
+        file_path += ".xdmf" if not file_path.endswith(".xdmf") else ""
+
+        m = self.labels > -1
+        coordinates = np.array([self.X[m], self.Y[m], self.Z[m]]).T
+
+        _rgb = self._ipf_colors()
+        rgb = np.zeros((coordinates.shape[0], 3, 3))
+        for i, gid in enumerate(self.labels[m]):
+            rgb[i, :, :] = _rgb[gid, :, :]
+
+        grain_sizes = np.zeros((coordinates.shape[0],))
+        for i, gid in enumerate(self.labels[m]):
+            grain_sizes[i] = self.grain_sizes[gid]
+
+        cells = [("vertex", np.array([[i] for i in range(coordinates.shape[0])]))]
+        meshio.Mesh(
+            coordinates,
+            cells,
+            point_data={
+                "spacing_in_um": np.ones((coordinates.shape[0],)) * self.voxel_size,
+                "ipf_x": rgb[:, :, 0],
+                "ipf_y": rgb[:, :, 1],
+                "ipf_z": rgb[:, :, 2],
+                "labels": self.labels[m],
+                "grain_sizes": grain_sizes,
+            },
+        ).write(file_path)
+
+    @property
+    def center_of_mass(self):
+        """The center of mass of the voxel volume in units of microns.
+
+        The center of mass is defined as the arithmetic mean of the
+        coordinates of the non-void voxels.
+
+        returns:
+            numpy.ndarray of shape = (3,)
+
+        """
+        mask = self.labels > -1
+        return np.array(
+            [
+                np.mean(self.X[mask]),
+                np.mean(self.Y[mask]),
+                np.mean(self.Z[mask]),
+            ]
+        )
+
+    def crop(
+        self,
+        xmin=None,
+        xmax=None,
+        ymin=None,
+        ymax=None,
+        zmin=None,
+        zmax=None,
+    ):
+        """Crop the voxel volume to the specified bounds.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+            dct_volume = crispy.assets.grain_map.lab_dct_volume('Al1050')
+            bounds = dct_volume.bounding_box
+            dct_volume.crop(xmin=bounds[0],
+                    xmax=bounds[1]//2,
+                    ymin=bounds[2] + 10,
+                    ymax=bounds[3]//2 + 10,
+                    zmin=bounds[4],
+                    zmax=bounds[5]//2,
+                )
+            dct_volume.write("cropped_lab_dct_volume.xdmf")
+
+
+        .. image:: ../../docs/source/images/lab_dct_crop.png
+
+        The voxel volume will be cropped to the specified bounds. The
+        attributes will be updated accordingly pruning any grains that
+        are outside the bounds.
+
+        Args:
+            xmin (:obj:`float`): The minimum ``x`` coordinate of the crop.
+            xmax (:obj:`float`): The maximum ``x`` coordinate of the crop.
+            ymin (:obj:`float`): The minimum ``y`` coordinate of the crop.
+            ymax (:obj:`float`): The maximum ``y`` coordinate of the crop.
+            zmin (:obj:`float`): The minimum ``z`` coordinate of the crop.
+            zmax (:obj:`float`): The maximum ``z`` coordinate of the crop.
+        """
+        xmin = np.min(self.X[0, 0, :]) if xmin is None else xmin
+        xmax = np.max(self.X[0, 0, :]) if xmax is None else xmax
+        ymin = np.min(self.Y[0, :, 0]) if ymin is None else ymin
+        ymax = np.max(self.Y[0, :, 0]) if ymax is None else ymax
+        zmin = np.min(self.Z[:, 0, 0]) if zmin is None else zmin
+        zmax = np.max(self.Z[:, 0, 0]) if zmax is None else zmax
+
+        self._validate_crop_bounds(
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+            zmin,
+            zmax,
+        )
+
+        k1, k2 = (
+            np.argmin(np.abs(self.X[0, 0, :] - xmin)),
+            np.argmin(np.abs(self.X[0, 0, :] - xmax)) + 1,
+        )
+        j1, j2 = (
+            np.argmin(np.abs(self.Y[0, :, 0] - ymin)),
+            np.argmin(np.abs(self.Y[0, :, 0] - ymax)) + 1,
+        )
+        i1, i2 = (
+            np.argmin(np.abs(self.Z[:, 0, 0] - zmin)),
+            np.argmin(np.abs(self.Z[:, 0, 0] - zmax)) + 1,
+        )
+
+        old_labels = self.labels.copy()
+        vol = np.ones_like(self.labels, dtype=bool)
+        vol[i1:i2, j1:j2, k1:k2] = False
+        self.labels[vol] = -1
+        self._update_voxel_rotations(old_labels, self.labels)
+
+        self.labels = self.labels[i1:i2, j1:j2, k1:k2]
+        self.X = self.X[i1:i2, j1:j2, k1:k2]
+        self.Y = self.Y[i1:i2, j1:j2, k1:k2]
+        self.Z = self.Z[i1:i2, j1:j2, k1:k2]
+
+        self._update_state()
+
+    def texturize(self):
+        """Compute the misorientation between all grain neighbours.
+
+        NOTE: uses xfab.symmetry.Umis.
+
+        This function sets the misorientations attribute of the polycrystal object,
+        such that self.misorientations[i] is a shape=(n,) array of misorientations
+        between grain number i and its n neighbours. Each grain can have a different
+        number of neighbours. The misorientation between grain i and its j-th neighbour
+        is always the minimum misorientation between all possible orientations taking
+        into account the crystal system symmetry.
+
+        """
+        _crystal_system = CONSTANTS.CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
+        self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
+        for gi in range(len(self.grains)):
+            u = self.grains[gi].u
+            self._misorientations[gi] = np.zeros((len(self.neighbours[gi]),))
+            for i, ni in enumerate(self.neighbours[gi]):
+                mis = xfab.symmetry.Umis(u, self.grains[ni].u, _crystal_system)
+                self._misorientations[gi][i] = np.min(mis[:, 1])
+
+    def center_volume(self):
+        """Center the volume around the center of mass.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+            dct_volume = crispy.assets.grain_map.lab_dct_volume('Al1050')
+            dct_volume.center_volume()
+            # the dct_volume.center_of_mass will now be (0,0,0)
+
+
+        This in place-operation will update the voxel arrays by applying
+        the inverse translation of the current center of mass.
+        """
+        self.translate(-self.center_of_mass)
+
+    def filter(self, min_grain_size_in_voxels):
+        """Filter the grains based on their size.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+            dct_volume = crispy.assets.grain_map.lab_dct_volume('Al1050')
+            dct_volume.filter(min_grain_size_in_voxels=10000)
+            dct_volume.write("filtered_lab_dct_volume.xdmf")
+
+
+        .. image:: ../../docs/source/images/lab_dct_filter.png
+
+        Grains with a size smaller than grain_size will be removed from
+        the voxel volume. Attributes will be updated accordingly.
+
+        Args:
+            min_grain_size_in_voxels (:obj:`int`): The minimum size of the grains
+                to keep in units of voxels.
+        """
+        old_labels = self.labels.copy()
+        LabDCTVolume._filter(
+            self.labels,
+            self.grain_sizes,
+            min_grain_size_in_voxels,
+        )
+        self._update_voxel_rotations(old_labels, self.labels)
+        self._update_state()
+
+    def prune_boundary_grains(self):
+        """Prune the boundary grains.
+
+        This will remove all grains that thuch the edge of the volume.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+            dct_volume = crispy.assets.grain_map.lab_dct_volume('Al1050')
+            dct_volume.prune_boundary_grains()
+            dct_volume.write("pruned_lab_dct_volume.xdmf")
+
+
+        .. image:: ../../docs/source/images/lab_dct_prune_boundary_grains.png
+
+        This will remove all grains that are on the boundary of the voxel volume.
+        """
+        boundary_labels = self._get_boundary_labels(self.labels)
+        self._mask_labels(self.labels, boundary_labels)
+        self._update_state()
+
+    @staticmethod
+    @numba.njit
+    def _get_boundary_labels(labels):
+        """Get the labels of the boundary grains.
+
+        for each of the 6 faces, we iterate for each voxel in the face moving
+        towards the center of the volume until we hit a voxel that is not
+        labeled as -1 (void). We then return the list of labels that are on the
+        boundary.
+
+        Args:
+            labels (:obj:`np.ndarray`): The labels array. ``shape=(m, n, o)``.
+            boundary_labels (:obj:`np.ndarray`): The boundary labels array. ``shape=(m*n*o,)``.
+
+        Returns:
+            boundary_labels (:obj:`np.ndarray`): The boundary labels array. ``shape=(m*n*o,)``.
+                uint8 array with 1s for boundary grains and 0s for non-boundary grains.
+        """
+        index = np.array([0, 0, 0], dtype=np.uint32)
+        boundary_labels = np.ones(np.max(labels), dtype=np.uint8)
+        for a, b, c in [(0, 1, 2), (0, 2, 1), (1, 2, 0)]:
+            shape = labels.shape
+            for i in range(shape[a]):
+                for j in range(shape[b]):
+                    index[a], index[b] = i, j
+
+                    # Forward scan
+                    for k in range(shape[c]):
+                        index[c] = k
+                        ii, jj, kk = index
+                        if labels[ii, jj, kk] != -1:
+                            boundary_labels[labels[ii, jj, kk]] = 0
+                            break
+
+                    # Backward scan
+                    for k in range(shape[c] - 1, -1, -1):
+                        index[c] = k
+                        ii, jj, kk = index
+                        if labels[ii, jj, kk] != -1:
+                            boundary_labels[labels[ii, jj, kk]] = 0
+                            break
+
+        return boundary_labels
+
+    @staticmethod
+    @numba.njit
+    def _mask_labels(labels, mask):
+        """Set all labels to -1 that are not in the mask.
+
+        Args:
+            labels (:obj:`np.ndarray`): The labels array. ``shape=(m, n, o)``.
+            mask (:obj:`np.ndarray`): The mask array. ``shape=(m*n*o, )``.
+        """
+        for i in range(labels.shape[0]):
+            for j in range(labels.shape[1]):
+                for k in range(labels.shape[2]):
+                    if not mask[labels[i, j, k]]:
+                        labels[i, j, k] = -1
+
+    def translate(self, translation):
+        """Translate the voxel volume by the specified translation.
+
+        The voxel volume will be translated by the specified translation.
+        The attributes will be updated accordingly.
+
+        This is usefull for realigning the voxel volume to be used in
+        diffraction simulations or in integration with a synchrotron
+        measurement setting.
+
+        Args:
+            translation (:obj:`np.ndarray`): The translation vector in units of microns.
+                The translation vector should be of ``shape (3,)``.
+        """
+        dx, dy, dz = translation
+        self.X += dx
+        self.Y += dy
+        self.Z += dz
+        self.bounding_box = self._get_bounding_box(self.X, self.Y, self.Z)
+        for g in self.grains:
+            if hasattr(g, "translation") and g.translation is not None:
+                g.translation += translation
+        self.centroids += translation
+
+    def rotate(self, rotation):
+        """Rotate the voxel volume by the specified rotation.
+
+        Example:
+
+        .. code-block:: python
+
+            import crispy
+            import numpy as np
+            dct_volume = crispy.assets.grain_map.lab_dct_volume('Al1050')
+            angle = np.radians(32.3)
+            rotation = np.array([ [1,         0,             0      ],
+                                  [0,  np.cos(angle), -np.sin(angle)],
+                                  [0,  np.sin(angle),  np.cos(angle)]])
+            dct_volume.rotate(rotation)
+            dct_volume.write("rotated_lab_dct_volume.xdmf")
+
+
+        .. image:: ../../docs/source/images/lab_dct_rotate.png
+
+        The voxel volume will be rotated by the specified rotation.
+        The attributes will be updated accordingly. Note that the
+        frame of reference is the lab frame which is initally
+        aligned with the voxel volume grid. After subsequent
+        rotations, the frame of reference may not be aligned with
+        the voxel volume grid.
+
+        This will update both voxel coordinates and grain orientations.
+
+        This is usefull for realigning the voxel volume to be used in
+        diffraction simulations or in integration with a synchrotron
+        measurement setting.
+
+        Args:
+            rotation (:obj:`np.ndarray` or :obj:`scipy.spatial.transform.Rotation` ): The rotation
+                matrix, rotation vector or rotation object to rotate the voxel volume by.
+                if this is a rotation vector, it should be of ``shape (3,)`` with the norm
+                equal to the angle of rotation in radians. The direction of the vector
+                is the axis of rotation.
+        """
+        if isinstance(rotation, Rotation):
+            scipy_rot = rotation
+        elif isinstance(rotation, np.ndarray):
+            if rotation.shape == (3,):
+                scipy_rot = Rotation.from_rotvec(rotation)
+            elif rotation.shape == (3, 3):
+                scipy_rot = Rotation.from_matrix(rotation)
+            else:
+                raise ValueError("Rotation matrix must be of shape (3, 3)")
+        else:
+            raise ValueError(
+                "Rotation must be a rotation matrix or rotation vector or scipy.spatial.transform.Rotation object"
+            )
+
+        rotation_matrix = scipy_rot.as_matrix()
+        c1, c2, c3 = rotation_matrix.T
+
+        rotated_X = c1[0] * self.X + c2[0] * self.Y + c3[0] * self.Z
+        rotated_Y = c1[1] * self.X + c2[1] * self.Y + c3[1] * self.Z
+        rotated_Z = c1[2] * self.X + c2[2] * self.Y + c3[2] * self.Z
+
+        for g in self.grains:
+            if hasattr(g, "translation") and g.translation is not None:
+                g.translation = rotation_matrix @ g.translation
+            ubi = np.linalg.inv(rotation_matrix @ g.u @ g.B)
+            g.set_ubi(ubi)
+
+        self.voxel_rotations = scipy_rot * self.voxel_rotations
+        self.orientations = self._get_orientations(self.voxel_rotations, self.labels)
+        self.X = rotated_X
+        self.Y = rotated_Y
+        self.Z = rotated_Z
+        self.bounding_box = self._get_bounding_box(self.X, self.Y, self.Z)
 
     def _update_state(self):
         """Update the state of the grain volume after a crop or filter.
@@ -146,29 +568,30 @@ class LabDCTVolume(Polycrystal):
             Edge voxels are not included in the neighbourhood calculation.
 
             Args:
-                labels (np.ndarray): The grain id for each voxel shape=(m,n,o)
-                    axis=0 is z, axis=1 is y, axis=2 is x. coordinates always
-                    increase from low to high along the positive axis direction.
-                number_of_grains (int): The number of grains in the grain volume.
-                The number of grains is the maximum label id + 1.
-                The number of grains is the number of unique labels in the
-                labels array.
-            struct (np.ndarray): The structuring element to use for the
+                labels (:obj:`np.ndarray`): The grain id for each voxel ``shape=(m,n,o)``.
+                    ``axis=0`` is ``z``, ``axis=1`` is ``y``, ``axis=2`` is ``x``.
+                    coordinates always increase from low to high along the positive axis
+                    direction.
+                number_of_grains (:obj:`int`): The number of grains in the grain volume.
+                    The number of grains is the maximum label id + 1.
+                    The number of grains is the number of unique labels in the
+                    labels array.
+                struct (:obj:`np.ndarray`): The structuring element to use for the
                 neighbourhood. The structuring element should be a 3D
                 boolean array with the same shape as the labels array.
                 The default structuring element is the one defined above.
                 Struct shape must be odd in all dimensions.
 
         Returns:
-            neighbours (np.ndarray): The neighbours of each grain in the
-                grain volume. shape=(number_of_grains,)
+            neighbours (:obj:`np.ndarray`): The neighbours of each grain in the
+                grain volume. ``shape=(number_of_grains,)``.
                 The neighbours are defined as the labels of the grains that
                 are connected to the grain with the same label.
-            interface_areas (np.ndarray): The interface areas between each
+            interface_areas (:obj:`np.ndarray`): The interface areas between each
                 pair of grains in the grain volume in units of voxels.
-                shape=(number_of_grains,)
-            grain_sizes (np.ndarray): The size of each grain in the grain
-                volume in units of voxels. shape=(number_of_grains,)
+                ``shape=(number_of_grains,)``.
+            grain_sizes (:obj:`np.ndarray`): The size of each grain in the grain
+                volume in units of voxels. ``shape=(number_of_grains,)``.
         """
         assert isinstance(struct, np.ndarray), (
             "Structuring element must be a numpy array"
@@ -197,29 +620,28 @@ class LabDCTVolume(Polycrystal):
     def _unpack_structure_matrix(self, structure_matrix, number_of_grains):
         """Unpack a structure matrix into neighbours, interface areas and grain sizes.
 
-        At any one point in the voxel volume if a voxel of label i neighbours
-        a voxel of label j, the structure_matrix[i, j] is incremented by 1
+        a voxel of label ``j``, the ``structure_matrix[i, j]`` is incremented by 1
         counting up the interface area between the two grains. The diagonal
-        of the structure_matrix, representing the neighbourhood of a grain
+        of the ``structure_matrix``, representing the neighbourhood of a grain
         with itself, is reserved for the grain size such that whenever a
-        non-void voxel is traversed, the structure_matrix[i, i] is incremented
+        non-void voxel is traversed, the ``structure_matrix[i, i]`` is incremented
         by 1 counting up the number of voxels in the grain.
 
         Args:
-            structure_matrix (np.ndarray): The structure matrix to unpack.
-                shape=(number_of_grains, number_of_grains)
-            number_of_grains (int): The number of grains in the grain volume.
+            structure_matrix (:obj:`np.ndarray`): The structure matrix to unpack.
+                ``shape=(number_of_grains, number_of_grains)``.
+            number_of_grains (:obj:`int`): The number of grains in the grain volume.
 
         Returns:
-            neighbours (np.ndarray): The neighbours of each grain in the
-                grain volume. shape=(number_of_grains,)
+            neighbours (:obj:`np.ndarray`): The neighbours of each grain in the
+                grain volume. ``shape=(number_of_grains,)``.
                 The neighbours are defined as the labels of the grains that
                 are connected to the grain with the same label.
-            interface_areas (np.ndarray): The interface areas between each
+            interface_areas (:obj:`np.ndarray`): The interface areas between each
                 pair of grains in the grain volume in units of voxels.
-                shape=(number_of_grains,)
-            grain_sizes (np.ndarray): The size of each grain in the grain
-                volume in units of voxels. shape=(number_of_grains,)
+                ``shape=(number_of_grains,)``.
+            grain_sizes (:obj:`np.ndarray`): The size of each grain in the grain
+                volume in units of voxels. ``shape=(number_of_grains,)``.
         """
         grain_sizes = np.diag(structure_matrix)
         neighbours = np.empty((number_of_grains,), dtype=np.ndarray)
@@ -236,7 +658,7 @@ class LabDCTVolume(Polycrystal):
     def _volume_walker(labels, structure_matrix, struct):
         """Walk a 3D labeled array and find the neighbours of each label.
 
-        Neighbours are defined though the 3D structuring element struct.
+        Neighbours are defined though the 3D structuring element ``struct``.
 
         This is a parallelized and compiled function that is used internally
         to speed up the computation of the neighbours of each while avoiding
@@ -252,13 +674,13 @@ class LabDCTVolume(Polycrystal):
             structure_matrix. This is simply a N x N matrix of unsigned 32 bit
             integers. The matrix is filled by walking the 3D labeled array and
             checking the neighbours of each label. The neighbours are defined
-            though the 3D structuring element struct. At any one point in the
-            voxel volume if a voxel of label i neighbours a voxel of label j,
-            the structure_matrix[i, j] is incremented by 1 counting up the
+            though the 3D structuring element ``struct``. At any one point in the
+            voxel volume if a voxel of label ``i`` neighbours a voxel of label ``j``,
+            the ``structure_matrix[i, j]`` is incremented by 1 counting up the
             interface area between the two grains. The diagonal of the
-            structure_matrix, representing the neighbourhood of a grain
+            ``structure_matrix``, representing the neighbourhood of a grain
             with itself, is reserved for the grain size such that whenever a
-            non-void voxel is traversed, the structure_matrix[i, i] is incremented
+            non-void voxel is traversed, the ``structure_matrix[i, i]`` is incremented
             by 1 counting up the number of voxels in the grain.
 
             NOTE: This algorithm depends on the fact that the labels are
@@ -267,13 +689,14 @@ class LabDCTVolume(Polycrystal):
             of -1 is considered to be void.
 
         Args:
-            labels (np.ndarray): The grain id for each voxel shape=(m,n,o)
-                axis=0 is z, axis=1 is y, axis=2 is x. coordinates always
-                increase from low to high along the positive axis direction.
-            structure_matrix (np.ndarray): shape=(number_of_grains, number_of_grains)
+            labels (:obj:`np.ndarray`): The grain id for each voxel ``shape=(m,n,o)``.
+                ``axis=0`` is ``z``, ``axis=1`` is ``y``, ``axis=2`` is ``x``.
+                coordinates always increase from low to high along the positive axis
+                direction.
+            structure_matrix (:obj:`np.ndarray`): ``shape=(number_of_grains, number_of_grains)``.
                 of type uint32. The structure matrix is used to store the
                 number of neighbours for each grain, and the grain sizes.
-            struct (np.ndarray): The structuring element to use for the
+            struct (:obj:`np.ndarray`): The structuring element to use for the
                 neighbourhood. The structuring element should be a 3D
                 uint8 array of 1s and 0s.
 
@@ -327,77 +750,6 @@ class LabDCTVolume(Polycrystal):
                 for j in range(num_labels):
                     structure_matrix[i, j] += local_matrices[t, i, j]
 
-    def write(self, file_path):
-        """Write the grain volume to paraview readable formats.
-
-        The grain volume will be written to the specified file path,
-        example of formats are .vtk and .xdmf.
-
-        The resulting point data will contain the following attributes:
-            - spacing_in_um: The voxel size in microns.
-            - ipf_x: The x component of the IPF color.
-            - ipf_y: The y component of the IPF color.
-            - ipf_z: The z component of the IPF color.
-            - labels: The grain id for each voxel.
-            - grain_sizes: The size of each grain in units of voxels.
-
-        The data format is sparse in the sense that only non-void voxels
-        will be written to the file.
-
-        Args:
-            file_path (str): The path to the file to write the grain
-                volume to. The file should be in the paraview readable
-                format. The file should end with .vtk or .xdmf or similar.
-
-        """
-        m = self.labels > -1
-        coordinates = np.array([self.X[m], self.Y[m], self.Z[m]]).T
-
-        _rgb = self._ipf_colors()
-        rgb = np.zeros((coordinates.shape[0], 3, 3))
-        for i, gid in enumerate(self.labels[m]):
-            rgb[i, :, :] = _rgb[gid, :, :]
-
-        grain_sizes = np.zeros((coordinates.shape[0],))
-        for i, gid in enumerate(self.labels[m]):
-            grain_sizes[i] = self.grain_sizes[gid]
-
-        cells = [("vertex", np.array([[i] for i in range(coordinates.shape[0])]))]
-        meshio.Mesh(
-            coordinates,
-            cells,
-            point_data={
-                "spacing_in_um": np.ones((coordinates.shape[0],)) * self.voxel_size,
-                "ipf_x": rgb[:, :, 0],
-                "ipf_y": rgb[:, :, 1],
-                "ipf_z": rgb[:, :, 2],
-                "labels": self.labels[m],
-                "grain_sizes": grain_sizes,
-            },
-        ).write(file_path)
-
-    def texturize(self):
-        """Compute the misorientation between all grain neighbours.
-
-        NOTE: uses xfab.symmetry.Umis.
-
-        This function sets the misorientations attribute of the polycrystal object,
-        such that self.misorientations[i] is a shape=(n,) array of misorientations
-        between grain number i and its n neighbours. Each grain can have a different
-        number of neighbours. The misorientation between grain i and its j-th neighbour
-        is always the minimum misorientation between all possible orientations taking
-        into account the crystal system symmetry.
-
-        """
-        _crystal_system = CONSTANTS.CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
-        self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
-        for gi in range(len(self.grains)):
-            u = self.grains[gi].u
-            self._misorientations[gi] = np.zeros((len(self.neighbours[gi]),))
-            for i, ni in enumerate(self.neighbours[gi]):
-                mis = xfab.symmetry.Umis(u, self.grains[ni].u, _crystal_system)
-                self._misorientations[gi][i] = np.min(mis[:, 1])
-
     def _get_bounding_box(self, X, Y, Z):
         """Get the bounding box of the grain volume.
 
@@ -445,26 +797,6 @@ class LabDCTVolume(Polycrystal):
         to_keep = new_mask[old_mask]
         self.voxel_rotations = self.voxel_rotations[to_keep]
 
-    @property
-    def center_of_mass(self):
-        """The center of mass of the voxel volume in units of microns.
-
-        The center of mass is defined as the arithmetic mean of the
-        coordinates of the non-void voxels.
-
-        returns:
-            numpy.ndarray of shape = (3,)
-
-        """
-        mask = self.labels > -1
-        return np.array(
-            [
-                np.mean(self.X[mask]),
-                np.mean(self.Y[mask]),
-                np.mean(self.Z[mask]),
-            ]
-        )
-
     def _get_centroids(self, grain_sizes):
         """Centroids of each grain in the voxel volume in units of microns.
 
@@ -509,29 +841,6 @@ class LabDCTVolume(Polycrystal):
                 cs[l, 1] += thread_cs[t, l, 1]
                 cs[l, 2] += thread_cs[t, l, 2]
 
-    def center_volume(self):
-        """Center the volume around the center of mass."""
-        self.translate(-self.center_of_mass)
-
-    def filter(self, min_grain_size_in_voxels):
-        """Filter the grains based on their size.
-
-        Grains with a size smaller than grain_size will be removed from
-        the voxel volume. Attributes will be updated accordingly.
-
-        Args:
-            min_grain_size_in_voxels (int): The minimum size of the grains to keep in
-                units of voxels.
-        """
-        old_labels = self.labels.copy()
-        LabDCTVolume._filter(
-            self.labels,
-            self.grain_sizes,
-            min_grain_size_in_voxels,
-        )
-        self._update_voxel_rotations(old_labels, self.labels)
-        self._update_state()
-
     @staticmethod
     @numba.njit(parallel=True, cache=True)
     def _filter(labels, sizes, min_grain_size_in_voxels):
@@ -573,71 +882,6 @@ class LabDCTVolume(Polycrystal):
         unique_labels = np.unique(self.labels[mask])
         return unique_labels
 
-    def crop(
-        self,
-        xmin=None,
-        xmax=None,
-        ymin=None,
-        ymax=None,
-        zmin=None,
-        zmax=None,
-    ):
-        """Crop the voxel volume to the specified bounds.
-
-        The voxel volume will be cropped to the specified bounds. The
-        attributes will be updated accordingly pruning any grains that
-        are outside the bounds.
-
-        Args:
-            xmin (float): The minimum x coordinate of the crop.
-            xmax (float): The maximum x coordinate of the crop.
-            ymin (float): The minimum y coordinate of the crop.
-            ymax (float): The maximum y coordinate of the crop.
-            zmin (float): The minimum z coordinate of the crop.
-            zmax (float): The maximum z coordinate of the crop.
-        """
-        xmin = np.min(self.X[0, 0, :]) if xmin is None else xmin
-        xmax = np.max(self.X[0, 0, :]) if xmax is None else xmax
-        ymin = np.min(self.Y[0, :, 0]) if ymin is None else ymin
-        ymax = np.max(self.Y[0, :, 0]) if ymax is None else ymax
-        zmin = np.min(self.Z[:, 0, 0]) if zmin is None else zmin
-        zmax = np.max(self.Z[:, 0, 0]) if zmax is None else zmax
-
-        self._validate_crop_bounds(
-            xmin,
-            xmax,
-            ymin,
-            ymax,
-            zmin,
-            zmax,
-        )
-
-        k1, k2 = (
-            np.argmin(np.abs(self.X[0, 0, :] - xmin)),
-            np.argmin(np.abs(self.X[0, 0, :] - xmax)) + 1,
-        )
-        j1, j2 = (
-            np.argmin(np.abs(self.Y[0, :, 0] - ymin)),
-            np.argmin(np.abs(self.Y[0, :, 0] - ymax)) + 1,
-        )
-        i1, i2 = (
-            np.argmin(np.abs(self.Z[:, 0, 0] - zmin)),
-            np.argmin(np.abs(self.Z[:, 0, 0] - zmax)) + 1,
-        )
-
-        old_labels = self.labels.copy()
-        vol = np.ones_like(self.labels, dtype=bool)
-        vol[i1:i2, j1:j2, k1:k2] = False
-        self.labels[vol] = -1
-        self._update_voxel_rotations(old_labels, self.labels)
-
-        self.labels = self.labels[i1:i2, j1:j2, k1:k2]
-        self.X = self.X[i1:i2, j1:j2, k1:k2]
-        self.Y = self.Y[i1:i2, j1:j2, k1:k2]
-        self.Z = self.Z[i1:i2, j1:j2, k1:k2]
-
-        self._update_state()
-
     def _validate_crop_bounds(self, xmin, xmax, ymin, ymax, zmin, zmax):
         """Validate the crop bounds."""
 
@@ -652,87 +896,6 @@ class LabDCTVolume(Polycrystal):
         assert xmax >= xmin + self.voxel_size, "Crop bounds are too small in x"
         assert ymax >= ymin + self.voxel_size, "Crop bounds are too small in y"
         assert zmax >= zmin + self.voxel_size, "Crop bounds are too small in z"
-
-    def translate(self, translation):
-        """Translate the voxel volume by the specified translation.
-
-        The voxel volume will be translated by the specified translation.
-        The attributes will be updated accordingly.
-
-        This is usefull for realigning the voxel volume to be used in
-        diffraction simulations or in integration with a synchrotron
-        measurement setting.
-
-        Args:
-            translation (np.ndarray): The translation vector in units of microns.
-                The translation vector should be of shape (3,).
-        """
-        dx, dy, dz = translation
-        self.X += dx
-        self.Y += dy
-        self.Z += dz
-        self.bounding_box = self._get_bounding_box(self.X, self.Y, self.Z)
-        for g in self.grains:
-            if hasattr(g, "translation") and g.translation is not None:
-                g.translation += translation
-        self.centroids += translation
-
-    def rotate(self, rotation):
-        """Rotate the voxel volume by the specified rotation.
-
-        The voxel volume will be rotated by the specified rotation.
-        The attributes will be updated accordingly. Note that the
-        frame of reference is the lab frame which is initally
-        aligned with the voxel volume grid. After subsequent
-        rotations, the frame of reference may not be aligned with
-        the voxel volume grid.
-
-        This will update both voxel coordinates and grain orientations.
-
-        This is usefull for realigning the voxel volume to be used in
-        diffraction simulations or in integration with a synchrotron
-        measurement setting.
-
-        Args:
-            rotation (np.ndarray or scipy.spatial.transform.Rotation): The rotation
-                matrix, rotation vector or rotation object to rotate the voxel volume by.
-                if this is a rotation vector, it should be of shape (3,) with the norm
-                equal to the angle of rotation in radians. The direction of the vector
-                is the axis of rotation.
-        """
-        if isinstance(rotation, Rotation):
-            scipy_rot = rotation
-        elif isinstance(rotation, np.ndarray):
-            if rotation.shape == (3,):
-                scipy_rot = Rotation.from_rotvec(rotation)
-            elif rotation.shape == (3, 3):
-                scipy_rot = Rotation.from_matrix(rotation)
-            else:
-                raise ValueError("Rotation matrix must be of shape (3, 3)")
-        else:
-            raise ValueError(
-                "Rotation must be a rotation matrix or rotation vector or scipy.spatial.transform.Rotation object"
-            )
-
-        rotation_matrix = scipy_rot.as_matrix()
-        c1, c2, c3 = rotation_matrix.T
-
-        rotated_X = c1[0] * self.X + c2[0] * self.Y + c3[0] * self.Z
-        rotated_Y = c1[1] * self.X + c2[1] * self.Y + c3[1] * self.Z
-        rotated_Z = c1[2] * self.X + c2[2] * self.Y + c3[2] * self.Z
-
-        for g in self.grains:
-            if hasattr(g, "translation") and g.translation is not None:
-                g.translation = rotation_matrix @ g.translation
-            ubi = np.linalg.inv(rotation_matrix @ g.u @ g.B)
-            g.set_ubi(ubi)
-
-        self.voxel_rotations = scipy_rot * self.voxel_rotations
-        self.orientations = self._get_orientations(self.voxel_rotations, self.labels)
-        self.X = rotated_X
-        self.Y = rotated_Y
-        self.Z = rotated_Z
-        self.bounding_box = self._get_bounding_box(self.X, self.Y, self.Z)
 
     def _get_voxel_rotations(self, file_path, labels):
         """Get the Rodrigues vector from the h5 file."""
@@ -948,6 +1111,19 @@ LabDCTVolume._coord_sum.compile(
         numba.types.Array(numba.float32, 3, "C"),  # Z
         numba.types.Array(numba.int32, 3, "C"),  # labels
         numba.types.Array(numba.float32, 2, "C"),  # cs
+    )
+)
+
+LabDCTVolume._get_boundary_labels.compile(
+    (
+        numba.types.Array(numba.int32, 3, "C"),  # labels
+    )
+)
+
+LabDCTVolume._mask_labels.compile(
+    (
+        numba.types.Array(numba.int32, 3, "C"),  # labels
+        numba.types.Array(numba.int32, 1, "C"),  # to_remove
     )
 )
 

@@ -19,7 +19,7 @@ class TestBraggez(unittest.TestCase):
 
     def test_init(self):
         energy = 22
-        optimizer = crispy.dfxm.Braggez(energy, self.motor_bounds, epsilon=0.1)
+        optimizer = crispy.dfxm._Braggez(energy, self.motor_bounds, epsilon=0.1)
         self.assertEqual(optimizer.energy, energy)
         self.assertEqual(optimizer.motor_bounds, self.motor_bounds)
         self.assertEqual(optimizer.epsilon, 0.1)
@@ -32,7 +32,7 @@ class TestBraggez(unittest.TestCase):
         R0 = Rotation.from_rotvec(angle * xhat)
         target = R0.apply(zhat)
         nhat = zhat
-        optimizer = crispy.dfxm.Braggez(
+        optimizer = crispy.dfxm._Braggez(
             22,
             self.motor_bounds,
         )
@@ -58,7 +58,7 @@ class TestBraggez(unittest.TestCase):
                 [0, 0, 2],
             ]
         ).T
-        optimizer = crispy.dfxm.Braggez(energy, self.motor_bounds)
+        optimizer = crispy.dfxm._Braggez(energy, self.motor_bounds)
         sol, res, success, bragg_angles = optimizer.align(
             ub, hkls, mask_unreachable=True
         )
@@ -77,7 +77,7 @@ class TestBraggez(unittest.TestCase):
         R0 = Rotation.from_rotvec(angle * rotdir)
         target = R0.apply(zhat)
         nhat = zhat
-        optimizer = crispy.dfxm.Braggez(22, self.motor_bounds)
+        optimizer = crispy.dfxm._Braggez(22, self.motor_bounds)
         bounds = optimizer._explode_bounds(1)
 
         res = optimizer._minimize(
@@ -126,7 +126,7 @@ class TestBraggez(unittest.TestCase):
                 [0, 0, 2],
             ]
         ).T
-        optimizer = crispy.dfxm.Braggez(energy, self.motor_bounds)
+        optimizer = crispy.dfxm._Braggez(energy, self.motor_bounds)
         sol, res, success, bragg_angles = optimizer.align(ub, hkls)
 
         self.assertFalse(success[0])
@@ -175,7 +175,7 @@ class TestBraggez(unittest.TestCase):
         target[1, :] = _target[1]
         target[2, :] = _target[2]
 
-        optimizer = crispy.dfxm.Braggez(19.1, motor_bounds)
+        optimizer = crispy.dfxm._Braggez(19.1, motor_bounds)
         bounds = optimizer._explode_bounds(nhat.shape[1])
 
         result = optimizer._minimize(
@@ -198,13 +198,8 @@ class TestBraggez(unittest.TestCase):
 
         self.assertTrue(np.sum(success) == 12)  # with 99% probability
 
-    def test_find_reflections(self):
-        pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
-            group_name="Fe",
-            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
-            symmetry=225,
-        )
+    def test_find_reflections_tdxrd_map(self):
+        pc = crispy.assets.grain_map.tdxrd_map()
 
         motor_bounds = {
             "mu": (-9, 9),
@@ -239,13 +234,54 @@ class TestBraggez(unittest.TestCase):
                 break
         self.assertTrue(has_reflection)
 
-    def test_symmetry_axis(self):
-        pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
-            group_name="Fe",
-            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
-            symmetry=225,
+    def test_find_reflections_lab_dct_silicon(self):
+        pc = crispy.assets.grain_map.lab_dct_volume("silicon")
+
+        motor_bounds = {
+            "mu": (0, 22),
+            "omega": (-45, 45),
+            "chi": (-9, 9),
+            "phi": (-9, 9),
+            "detector_z": (-0.04, 1.96),
+            "detector_y": (-0.169, 1.16),
+        }
+
+        detector_distance = 4.0
+        energy = 17
+
+        goni = crispy.dfxm.Goniometer(
+            pc,
+            energy,
+            detector_distance,
+            motor_bounds,
         )
+
+        goni.find_reflections(
+            maxiter=600,
+            maxls=25,
+            ftol=1e-8,
+            alignment_tol=0.1,
+        )
+
+        reflections_found = 0
+        for g in pc.grains:
+            if g.dfxm is not None:
+                reflections_found += 1
+        self.assertTrue(reflections_found > len(pc.grains) * 0.5)
+
+
+class TestBraggSym(unittest.TestCase):
+    def setUp(self):
+        self.debug = False
+        self.motor_bounds = {
+            "mu": (0, 20),
+            "omega": (-22, 22),
+            "chi": (-5, 5),
+            "phi": (-5, 5),
+        }
+
+    def test_symmetry_axis(self):
+        pc = crispy.assets.grain_map.tdxrd_map()
 
         motor_bounds = {
             "mu": (-9, 9),
@@ -280,13 +316,8 @@ class TestBraggez(unittest.TestCase):
                 break
         self.assertTrue(has_symmetry_axis)
 
-    def test_symmetry_axis(self):
-        pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
-            group_name="Fe",
-            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
-            symmetry=225,
-        )
+    def test_symmetry_axis_oblique(self):
+        pc = crispy.assets.grain_map.tdxrd_map()
 
         g = pc.grains[0]
         g.ubi = np.linalg.inv(
@@ -326,7 +357,7 @@ class TestBraggez(unittest.TestCase):
         )
 
         np.testing.assert_allclose(
-            pc.grains[0].symmetry_axis['hkl'], np.array([0.0, 0.0, 2.0]).reshape(3, 1) 
+            pc.grains[0].symmetry_axis["hkl"], np.array([0.0, 0.0, 2.0]).reshape(3, 1)
         )
 
 

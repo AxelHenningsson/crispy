@@ -210,6 +210,19 @@ class TestLabDCTVolume(unittest.TestCase):
             msg="Z not preserved under cyclic rotation around x-axis",
         )
 
+    def test_prune_boundary_grains(self):
+        pc = crispy.GrainMap(
+            crispy.assets.path.AL1050,
+        )
+        pc.prune_boundary_grains()
+
+        np.testing.assert_allclose(pc.labels[:, :, 0], -1)
+        np.testing.assert_allclose(pc.labels[:, :, -1], -1)
+        np.testing.assert_allclose(pc.labels[:, 0, :], -1)
+        np.testing.assert_allclose(pc.labels[:, -1, :], -1)
+        np.testing.assert_allclose(pc.labels[0, :, :], -1)
+        np.testing.assert_allclose(pc.labels[-1, :, :], -1)
+
     def test_center_volume(self):
         pc = crispy.GrainMap(
             os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),

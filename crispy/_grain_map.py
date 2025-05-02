@@ -12,25 +12,33 @@ class GrainMap:
     either a list of :obj:`ImageD11.grain.grain` objects or an HDF5 file containing
     grain information. Supports both 3DXRD grain maps and lab-DCT grain volumes.
 
+
     Example:
-        .. code-block:: python
 
-            import crispy
+    .. code-block:: python
 
-            # Load a 3DXRD grain map
-            path_to_h5_3dxrd = crispy.assets.path.FEAU
-            grain_map_3dxrd = GrainMap(path_to_h5_3dxrd)
+        import crispy
 
-            # Load a lab-DCT grain volume
-            path_to_h5_lab_dct = crispy.assets.path.AL1050
-            grain_map_lab_dct = GrainMap(path_to_h5_lab_dct)
+        # Load a 3DXRD grain map
+        path_to_h5_3dxrd = crispy.assets.path.FEAU
+        grain_map_3dxrd = crispy.GrainMap(
+            path_to_h5_3dxrd,
+            group_name="Fe",  # match the top key in the h5 file
+            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
+            symmetry=225,  # cubic fcc
+        )
 
-            # Access grains and reference cell
-            print(grain_map_3dxrd.grains)
-            print(grain_map_lab_dct.grains)
-            print(grain_map_3dxrd.reference_cell)
-            print(grain_map_lab_dct.reference_cell)
+        # Load a lab-DCT grain volume
+        path_to_h5_lab_dct = crispy.assets.path.AL1050
+        grain_map_lab_dct = crispy.GrainMap(path_to_h5_lab_dct)
 
+        # Access grains and reference cell
+        # grain_map_3dxrd.grains
+        # grain_map_lab_dct.grains
+        # grain_map_3dxrd.reference_cell
+        # grain_map_lab_dct.reference_cell
+
+        
     The factory returns either a :class:`crispy.TDXRDMap <crispy._tdxrd_map.TDXRDMap>`
     (for 3DXRD) or a :class:`crispy.LabDCTVolume <crispy._lab_dct_volume.LabDCTVolume>`
     (for lab-DCT). Both types contain a `grains` attribute - a list of
