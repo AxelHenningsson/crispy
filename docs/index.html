@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>crispy - a CRystal population metric InSpector written in PYthon. &#8212; crispy 0.0.1 documentation</title>
+    <title>crispy &#8212; crispy 0.0.1 documentation</title>
   
   
   
@@ -249,8 +249,19 @@
                   
   <div class="toctree-wrapper compound">
 </div>
-<section id="crispy-a-crystal-population-metric-inspector-written-in-python">
-<h1>crispy - a CRystal population metric InSpector written in PYthon.<a class="headerlink" href="#crispy-a-crystal-population-metric-inspector-written-in-python" title="Link to this heading">#</a></h1>
+<section id="crispy">
+<h1>crispy<a class="headerlink" href="#crispy" title="Link to this heading">#</a></h1>
+<p><strong>a CRystal population metric InSpector written in PYthon.</strong></p>
+<a class="reference external image-reference" href="https://www.python.org/"><img alt="cross-platform" src="https://img.shields.io/badge/platform-cross--platform-brightgreen.svg" />
+</a>
+<a class="reference external image-reference" href="https://www.python.org/"><img alt="pure python" src="https://img.shields.io/badge/code-pure%20python-blue.svg" />
+</a>
+<a class="reference external image-reference" href="https://github.com/AxelHenningsson/crispy/actions/workflows/pytest-linux-py310.yml"><img alt="tests ubuntu-linux" src="https://github.com/AxelHenningsson/crispy/actions/workflows/pytest-linux-py310.yml/badge.svg" />
+</a>
+<a class="reference external image-reference" href="https://github.com/psf/black"><img alt="code style black" src="https://img.shields.io/badge/code%20style-black-000000.svg" />
+</a>
+<a class="reference external image-reference" href="https://axelhenningsson.github.io/darling/"><img alt="Sphinx documentation" src="https://img.shields.io/badge/docs-sphinx-blue.svg" />
+</a>
 <p>crispy is a Python package for analyzing crystal population metrics from 3DXRD and
 lab-DCT data targeting interfacing between diffraction contrast modalities.</p>
 <p>One of the central features of crispy is the provision of per-grain reflections
@@ -263,6 +274,12 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <li><p><strong>lab-DCT voxel volumes</strong> (3D voxel volumes where each voxel is a single crystal grain)</p></li>
 </ul>
 </div></blockquote>
+</section>
+<section id="authors">
+<h1>Authors<a class="headerlink" href="#authors" title="Link to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">crispy</span></code> is written and maintained by:</p>
+<p><a class="reference external" href="https://github.com/AxelHenningsson">Axel Henningsson</a>,</p>
+<p>Until an associated journal publication is available, if you use this code in your research, we ask that you cite this repository.</p>
 </section>
 <section id="usecase">
 <h1>Usecase<a class="headerlink" href="#usecase" title="Link to this heading">#</a></h1>
@@ -284,7 +301,7 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grain_map</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;grain_map.xdmf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="_images/readme_grains.png" src="_images/readme_grains.png" />
+<img alt="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_grains.png?raw=true" class="align-center" src="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_grains.png?raw=true" />
 <p>To search for accessible reflections in DFXM mode for <code class="docutils literal notranslate"><span class="pre">eta=0</span></code>, we can use the <a class="reference internal" href="#crispy.dfxm.Goniometer" title="crispy.dfxm.Goniometer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy.dfxm.Goniometer</span></code></a> class as</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">motor_bounds</span> <span class="o">=</span> <span class="p">{</span>
 <span class="s2">&quot;mu&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="c1"># degrees</span>
@@ -323,7 +340,7 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">goniometer</span><span class="o">.</span><span class="n">table_of_reflections</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="_images/readme_df.png" src="_images/readme_df.png" />
+<img alt="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_df.png?raw=true" src="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_df.png?raw=true" />
 <p>It is also possible to load a 3DXRD grain map from a file tesselate and visualize.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">path_to_my_grain_map</span> <span class="o">=</span> <span class="n">crispy</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">FEAU</span>
 <span class="n">grain_map</span> <span class="o">=</span> <span class="n">crispy</span><span class="o">.</span><span class="n">GrainMap</span><span class="p">(</span> <span class="n">path_to_my_grain_map</span> <span class="p">)</span>
@@ -332,7 +349,7 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <span class="n">crispy</span><span class="o">.</span><span class="n">visualize</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span> <span class="n">grain_map</span> <span class="p">)</span>
 </pre></div>
 </div>
-<img alt="_images/readme_tdxrd.png" src="_images/readme_tdxrd.png" />
+<img alt="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_tdxrd.png?raw=true" src="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_tdxrd.png?raw=true" />
 </section>
 <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
@@ -1681,7 +1698,8 @@ Defaults to “Al1050”.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">crispy - a CRystal population metric InSpector written in PYthon.</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">crispy</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#authors">Authors</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#usecase">Usecase</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#documentation">Documentation</a><ul class="visible nav section-nav flex-column">
