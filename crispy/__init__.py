@@ -1,14 +1,17 @@
-from . import _constants as CONSTANTS, _read, _tesselate
-from . import (
-    _grain_map,
-    _lab_dct_volume,
-    _polycrystal,
-    _tdxrd_map,
-    assets,
-    dfxm,
-    vizualise,
-)
+from . import assets, dfxm, vizualise
+from ._constants import CONSTANTS
+from ._grain_map import GrainMap
+from ._lab_dct_volume import LabDCTVolume
+from ._tdxrd_map import TDXRDMap
+from ._tesselate import voronoi
 
-GrainMap = _grain_map.GrainMap
-LabDCTVolume = _lab_dct_volume.LabDCTVolume
-TDXRDMap = _tdxrd_map.TDXRDMap
+__all__ = [
+    "CONSTANTS",
+    "GrainMap",
+    "LabDCTVolume",
+    "TDXRDMap",
+    "assets",
+    "dfxm",
+    "vizualise",
+    "voronoi",
+]

@@ -15,7 +15,7 @@ class TestTDXRDMap(unittest.TestCase):
         lattice_parameters = [2.866, 2.866, 2.866, 90.0, 90.0, 90.0]
 
         pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
+            crispy.assets.path.FEAU,
             group_name="Fe",
             lattice_parameters=lattice_parameters,
             symmetry=225,

@@ -251,8 +251,12 @@
 </div>
 <p># crispy
 crispy - a CRystal population metric InSpector written in PYthon.</p>
-<section id="module-crispy._grain_map.GrainMap">
-<span id="grainmap"></span><h1>GrainMap<a class="headerlink" href="#module-crispy._grain_map.GrainMap" title="Link to this heading">#</a></h1>
+<section id="grainmap">
+<h1>GrainMap<a class="headerlink" href="#grainmap" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="crispy._grain_map.GrainMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._grain_map.</span></span><span class="sig-name descname"><span class="pre">GrainMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grain_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grains'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Factory class to represent a polycrystal.</p>
 <p>This class is a factory for creating polycrystal objects. It can create
 polycrystal objects from a list of ImageD11.grain.grain objects or from
@@ -266,162 +270,32 @@ always hold a reference cell, which is a unitcell object describing the
 lattice parameters and symmetry group of the material phase.</p>
 <p>Any polycrystal object can be mounted on a crispy.dfxm.Goniometer object to</p>
 <dl class="field-list simple">
-<dt class="field-odd">param grain_data<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Absolute path to the HDF5 file containing the grain information, or
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grain_data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code>) – Absolute path to the HDF5 file containing the grain information, or
 alternatively a list of ImageD11.grain.grain objects. This may also
-be a path to a lab-dct grain volume file.</p>
-</dd>
-<dt class="field-even">type grain_data<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code></p>
-</dd>
-<dt class="field-odd">param group_name<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The name of the group in the HDF5 file containing
+be a path to a lab-dct grain volume file.</p></li>
+<li><p><strong>group_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The name of the group in the HDF5 file containing
 the grain information. Defaults to “grains”. Only used if
-<cite>grain_data</cite> is a string to an HDF5 file with a 3DXRD grain map.</p>
+<cite>grain_data</cite> is a string to an HDF5 file with a 3DXRD grain map.</p></li>
+<li><p><strong>lattice_parameters</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The lattice parameters of the
+polycrystal [a, b, c, alpha, beta, gamma]. Defaults to None.</p></li>
+<li><p><strong>symmetry</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – The symmetry group of the phase. Defaults to None.</p></li>
+</ul>
 </dd>
-<dt class="field-even">type group_name<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-<dt class="field-odd">param lattice_parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The lattice parameters of the
-polycrystal [a, b, c, alpha, beta, gamma]. Defaults to None.</p>
-</dd>
-<dt class="field-even">type lattice_parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></p>
-</dd>
-<dt class="field-odd">param symmetry<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The symmetry group of the phase. Defaults to None.</p>
-</dd>
-<dt class="field-even">type symmetry<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-odd">returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A crispy._tdxrd_map.TDXRDMap or a crispy._dct_volume.LabDCTVolume.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A crispy._tdxrd_map.TDXRDMap or a crispy._dct_volume.LabDCTVolume.</p>
 </dd>
 </dl>
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__delattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__delattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement delattr(self, name).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__dir__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__dir__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__dir__" title="Link to this definition">#</a></dt>
-<dd><p>Default dir() implementation.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__eq__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__eq__" title="Link to this definition">#</a></dt>
-<dd><p>Return self==value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__format__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__format__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_spec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__format__" title="Link to this definition">#</a></dt>
-<dd><p>Default object formatter.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__ge__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__ge__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__ge__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__getattribute__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__getattribute__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__getattribute__" title="Link to this definition">#</a></dt>
-<dd><p>Return getattr(self, name).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__gt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__gt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__gt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__hash__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__hash__" title="Link to this definition">#</a></dt>
-<dd><p>Return hash(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__init_subclass__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__init_subclass__" title="Link to this definition">#</a></dt>
-<dd><p>This method is called when a class is subclassed.</p>
-<p>The default implementation does nothing. It may be
-overridden to extend subclasses.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__le__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__le__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__le__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__lt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__lt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__ne__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__ne__" title="Link to this definition">#</a></dt>
-<dd><p>Return self!=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__reduce__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__reduce__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__reduce__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__reduce_ex__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__reduce_ex__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__repr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__repr__" title="Link to this definition">#</a></dt>
-<dd><p>Return repr(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__setattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__setattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement setattr(self, name, value).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__sizeof__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__sizeof__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__sizeof__" title="Link to this definition">#</a></dt>
-<dd><p>Size of object in memory, in bytes.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__str__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__str__" title="Link to this definition">#</a></dt>
-<dd><p>Return str(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._grain_map.GrainMap.__subclasshook__">
-<span class="sig-prename descclassname"><span class="pre">crispy._grain_map.GrainMap.</span></span><span class="sig-name descname"><span class="pre">__subclasshook__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_grain_map/GrainMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._grain_map.GrainMap.__subclasshook__" title="Link to this definition">#</a></dt>
-<dd><p>Abstract classes can override this to customize issubclass().</p>
-<p>This is invoked early on by abc.ABCMeta.__subclasscheck__().
-It should return True, False or NotImplemented.  If it returns
-NotImplemented, the normal algorithm is used.  Otherwise, it
-overrides the normal algorithm (and the outcome is cached).</p>
 </dd></dl>
 
 </section>
-<section id="module-crispy._polycrystal.Polycrystal">
-<span id="polycrystal"></span><h1>Polycrystal<a class="headerlink" href="#module-crispy._polycrystal.Polycrystal" title="Link to this heading">#</a></h1>
+<section id="polycrystal">
+<h1>Polycrystal<a class="headerlink" href="#polycrystal" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.</span></span><span class="sig-name descname"><span class="pre">Polycrystal</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Meta class to represent a polycrystal.</p>
 <p>This class is a meta class for creating polycrystal objects. Examples of
 incarnations of this class are TDXRDMap and LabDCTVolume. To create a
@@ -437,7 +311,7 @@ compute available reciprocal space vectors and the corresponding
 diffraction angles for DFXM experiments.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.reference_cell">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">reference_cell</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.reference_cell" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">reference_cell</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.reference_cell" title="Link to this definition">#</a></dt>
 <dd><p>The reference cell of the
 polycrystal. This is a unitcell object describing the lattice
 parameters and symmetry group of the material phase.</p>
@@ -450,7 +324,7 @@ parameters and symmetry group of the material phase.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.grains">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.grains" title="Link to this definition">#</a></dt>
 <dd><p>A list of
 ImageD11.grain.grain objects representing the grains in the
 polycrystal.</p>
@@ -463,7 +337,7 @@ polycrystal.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.number_of_grains">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">number_of_grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.number_of_grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">number_of_grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.number_of_grains" title="Link to this definition">#</a></dt>
 <dd><p>The number of grains in the
 polycrystal.</p>
 <dl class="field-list simple">
@@ -475,7 +349,7 @@ polycrystal.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal._misorientations">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">_misorientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal._misorientations" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_misorientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal._misorientations" title="Link to this definition">#</a></dt>
 <dd><p>The misorientations between
 all grain neighbours. This is a 2D array of shape (N, …) where N
 is the number of grains in the polycrystal. i.e the misorientations
@@ -491,7 +365,7 @@ on the number of neighbours of grain i.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.neighbours">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.neighbours" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.neighbours" title="Link to this definition">#</a></dt>
 <dd><p>The neighbours of each grain in the
 polycrystal. This is a 2D array of shape (N, M) where N is the
 number of grains in the polycrystal and M is the number of
@@ -505,155 +379,98 @@ in neighbours[i]. with M being the number of neighbours of grain i,
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__delattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__delattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement delattr(self, name).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.texturize">
+<span class="sig-name descname"><span class="pre">texturize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.texturize" title="Link to this definition">#</a></dt>
+<dd><p>Compute the misorientations between all grain neighbours.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__dir__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__dir__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__dir__" title="Link to this definition">#</a></dt>
-<dd><p>Default dir() implementation.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.misorientations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">misorientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.misorientations" title="Link to this definition">#</a></dt>
+<dd><p>Return the misorientations between all grain neighbours.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__eq__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__eq__" title="Link to this definition">#</a></dt>
-<dd><p>Return self==value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.ubi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ubi</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.ubi" title="Link to this definition">#</a></dt>
+<dd><p>Return all the UBI matrices of the grains in the polycrystal. shape=(N, 3, 3)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__format__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__format__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_spec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__format__" title="Link to this definition">#</a></dt>
-<dd><p>Default object formatter.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.u">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">u</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.u" title="Link to this definition">#</a></dt>
+<dd><p>Return all the U matrices of the grains in the polycrystal. shape=(N, 3, 3)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__ge__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__ge__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__ge__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;=value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.orientation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.orientation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.b">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.b" title="Link to this definition">#</a></dt>
+<dd><p>Return all the B matrices of the grains in the polycrystal. shape=(N, 3, 3)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__getattribute__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__getattribute__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__getattribute__" title="Link to this definition">#</a></dt>
-<dd><p>Return getattr(self, name).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.strain">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">strain</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.strain" title="Link to this definition">#</a></dt>
+<dd><p>Return all the sample strain tensors of the grains in the polycrystal. shape=(N, 3, 3)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__gt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__gt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__gt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.crystal_system">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crystal_system</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.crystal_system" title="Link to this definition">#</a></dt>
+<dd><p>Return the crystal system of the polycrystal as as a string</p>
+<dl class="simple">
+<dt>i.e<span class="classifier">triclinic, monoclinic, orthorhombic, tetragonal,</span></dt><dd><p>trigonal, hexagonal or cubic</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__hash__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__hash__" title="Link to this definition">#</a></dt>
-<dd><p>Return hash(self).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.colorize">
+<span class="sig-name descname"><span class="pre">colorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipf_axes</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.colorize" title="Link to this definition">#</a></dt>
+<dd><p>Compute the IPF colors for the polycrystal using orix (<a class="github reference external" href="https://github.com/pyxem/orix">pyxem/orix</a>)</p>
+<p>The implementation is based on the ImageD11 interpretation of orix.</p>
+<dl class="simple">
+<dt>sets a <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>: of RGB values for each grain in the polycrystal. Shape=(3, k).</dt><dd><p>self.grain.rgb[:, k] is the RGB value of grain when viewed along the k-th axis.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axes</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The viewing axes to compute the IPF colors for, default is the
+x, y, and z axes, i.e np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]). axes[i] is the i-th
+viewing axis.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__init_subclass__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__init_subclass__" title="Link to this definition">#</a></dt>
-<dd><p>This method is called when a class is subclassed.</p>
-<p>The default implementation does nothing. It may be
-overridden to extend subclasses.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__le__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__le__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__le__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__lt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__lt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__ne__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__ne__" title="Link to this definition">#</a></dt>
-<dd><p>Return self!=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__new__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__new__" title="Link to this definition">#</a></dt>
-<dd><p>Create and return a new object.  See help(type) for accurate signature.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__reduce__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__reduce__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__reduce__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__reduce_ex__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__reduce_ex__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__repr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__repr__" title="Link to this definition">#</a></dt>
-<dd><p>Return repr(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__setattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__setattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement setattr(self, name, value).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__sizeof__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__sizeof__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__sizeof__" title="Link to this definition">#</a></dt>
-<dd><p>Size of object in memory, in bytes.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__str__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__str__" title="Link to this definition">#</a></dt>
-<dd><p>Return str(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._polycrystal.Polycrystal.__subclasshook__">
-<span class="sig-prename descclassname"><span class="pre">crispy._polycrystal.Polycrystal.</span></span><span class="sig-name descname"><span class="pre">__subclasshook__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_polycrystal/Polycrystal.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._polycrystal.Polycrystal.__subclasshook__" title="Link to this definition">#</a></dt>
-<dd><p>Abstract classes can override this to customize issubclass().</p>
-<p>This is invoked early on by abc.ABCMeta.__subclasscheck__().
-It should return True, False or NotImplemented.  If it returns
-NotImplemented, the normal algorithm is used.  Otherwise, it
-overrides the normal algorithm (and the outcome is cached).</p>
 </dd></dl>
 
 </section>
-<section id="module-crispy._tdxrd_map.TDXRDMap">
-<span id="tdxrdmap"></span><h1>TDXRDMap<a class="headerlink" href="#module-crispy._tdxrd_map.TDXRDMap" title="Link to this heading">#</a></h1>
+<section id="tdxrdmap">
+<h1>TDXRDMap<a class="headerlink" href="#tdxrdmap" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.</span></span><span class="sig-name descname"><span class="pre">TDXRDMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grainfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grains'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polycrystal</span></code></a></p>
 <p>Class to represent a polycrystal as a list of grain centroids and orientations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param grainfile<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Absolute path to the HDF5 file containing the grain information, or
-alternatively a list of ImageD11.grain.grain objects.</p>
-</dd>
-<dt class="field-even">type grainfile<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code></p>
-</dd>
-<dt class="field-odd">param group_name<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The name of the group in the HDF5 file containing
-the grain information. Defaults to “grains”.</p>
-</dd>
-<dt class="field-even">type group_name<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grainfile</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageD11.grain.grain</span></code>) – Absolute path to the HDF5 file containing the grain information, or
+alternatively a list of ImageD11.grain.grain objects.</p></li>
+<li><p><strong>group_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The name of the group in the HDF5 file containing
+the grain information. Defaults to “grains”.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.grains">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.grains" title="Link to this definition">#</a></dt>
 <dd><p>List of grains in the polycrystal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -664,7 +481,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.number_of_grains">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">number_of_grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.number_of_grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">number_of_grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.number_of_grains" title="Link to this definition">#</a></dt>
 <dd><p>Number of grains in the polycrystal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -675,7 +492,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.bounding_box">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">bounding_box</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.bounding_box" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">bounding_box</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.bounding_box" title="Link to this definition">#</a></dt>
 <dd><p>The bounding box of the polycrystal. Shape=(3,2).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -686,7 +503,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.extent">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">extent</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.extent" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">extent</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.extent" title="Link to this definition">#</a></dt>
 <dd><p>The extent of the polycrystal. Shape=(3,).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -697,7 +514,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.centroids">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">centroids</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.centroids" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">centroids</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.centroids" title="Link to this definition">#</a></dt>
 <dd><p>All the grain centroid postions in the polycrystal. Shape=(N, 3).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -708,7 +525,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.u">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">u</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.u" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">u</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.u" title="Link to this definition">#</a></dt>
 <dd><p>All the U matrices of the grains in the polycrystal. Shape=(N, 3, 3).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -719,7 +536,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.orientations">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">orientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.orientations" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">orientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.orientations" title="Link to this definition">#</a></dt>
 <dd><p>Alias for u.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -730,7 +547,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.b">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">b</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.b" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">b</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.b" title="Link to this definition">#</a></dt>
 <dd><p>All the B matrices of the grains in the polycrystal. Shape=(N, 3, 3).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -741,7 +558,7 @@ the grain information. Defaults to “grains”.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.neighbours">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.neighbours" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.neighbours" title="Link to this definition">#</a></dt>
 <dd><p>The neighbours of each grain in the polycrystal. shape=(N,).
 each sub-array contains the indices of the neighbours of the corresponding grain.
 is None before calling the tesselate() method.</p>
@@ -754,7 +571,7 @@ is None before calling the tesselate() method.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.misorientations">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">misorientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.misorientations" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">misorientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.misorientations" title="Link to this definition">#</a></dt>
 <dd><p>The misorientations between all grain neighbours. shape=(N,).
 each sub-array contains the misorientations between the corresponding grain and its neighbours.
 is None before calling the texturize() method.</p>
@@ -765,135 +582,151 @@ is None before calling the texturize() method.</p>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__delattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__delattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement delattr(self, name).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.add_grain_attr">
+<span class="sig-name descname"><span class="pre">add_grain_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grains</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.add_grain_attr" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighbours</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition">#</a></dt>
+<dd><p>Return the neighbours of each grain in the polycrystal.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__dir__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__dir__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__dir__" title="Link to this definition">#</a></dt>
-<dd><p>Default dir() implementation.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bounding_box</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition">#</a></dt>
+<dd><p>Return the bounding box of the polycrystal, shape=(3,2)</p>
+<p>Format is: [ [min_x, max_x], [min_y, max_y], [min_z, max_z] ].</p>
+<p>computation is done by taking the min and max of the centroids.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__eq__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__eq__" title="Link to this definition">#</a></dt>
-<dd><p>Return self==value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="id2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extent</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition">#</a></dt>
+<dd><p>Return the extent of the polycrystal.</p>
+<p>Format is: [ xwidth, ywidth, zwidth ].</p>
+<p>computation is done by taking the min and max of the centroids.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__format__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__format__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_spec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__format__" title="Link to this definition">#</a></dt>
-<dd><p>Default object formatter.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="id3">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centroids</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition">#</a></dt>
+<dd><p>Return all the grain centroid postions in the polycrystal. shape=(N, 3)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__ge__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__ge__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__ge__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;=value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.sum_peak_intensity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sum_peak_intensity</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.sum_peak_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Return sum intensity of all indexed peaks for each grain. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__getattribute__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__getattribute__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__getattribute__" title="Link to this definition">#</a></dt>
-<dd><p>Return getattr(self, name).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.number_of_peaks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_peaks</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.number_of_peaks" title="Link to this definition">#</a></dt>
+<dd><p>Return number of indexed peaks for each grain. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__gt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__gt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__gt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.median_peak_intensity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">median_peak_intensity</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.median_peak_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Return the median peak intensity for all grains. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__hash__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__hash__" title="Link to this definition">#</a></dt>
-<dd><p>Return hash(self).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.mean_peak_intensity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_peak_intensity</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.mean_peak_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean peak intensity for all grains. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__init_subclass__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__init_subclass__" title="Link to this definition">#</a></dt>
-<dd><p>This method is called when a class is subclassed.</p>
-<p>The default implementation does nothing. It may be
-overridden to extend subclasses.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.min_peak_intensity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min_peak_intensity</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.min_peak_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Return the minimum peak intensity for all grains. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__le__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__le__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__le__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;=value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.max_peak_intensity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_peak_intensity</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.max_peak_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Return the maximum peak intensity for all grains. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__lt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__lt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.std_peak_intensity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_peak_intensity</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.std_peak_intensity" title="Link to this definition">#</a></dt>
+<dd><p>Return the standard deviation of peak intensities for all grains. shape=(N,)</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__ne__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__ne__" title="Link to this definition">#</a></dt>
-<dd><p>Return self!=value.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.from_array">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ubi_matrices</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.from_array" title="Link to this definition">#</a></dt>
+<dd><p>Instantiate the polycrystal from pure translations and ubi matrices.</p>
+<p>This circumvents the need to read a grain file and ImageD11.grain.grain objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>translations</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – 3D grain center translations each of shape=(3,).</p></li>
+<li><p><strong>ubi_matrices</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – ubi matrices each of shape=(3, 3).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The polycrystal object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy._tdxrd_map.TDXRDMAP</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__new__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__new__" title="Link to this definition">#</a></dt>
-<dd><p>Create and return a new object.  See help(type) for accurate signature.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.tesselate">
+<span class="sig-name descname"><span class="pre">tesselate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.tesselate" title="Link to this definition">#</a></dt>
+<dd><p>Perform a voronoi tesselation using crispy.tesselate.voronoi</p>
+<p>Generates the polycrystal mesh with one convex polyhedra per grain.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__reduce__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__reduce__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__reduce__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.texturize">
+<span class="sig-name descname"><span class="pre">texturize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.texturize" title="Link to this definition">#</a></dt>
+<dd><p>Compute the misorientation between all grain neighbours.</p>
+<p>NOTE: uses xfab.symmetry.Umis.</p>
+<p>This function sets the misorientations attribute of the polycrystal object,
+such that self.misorientations[i] is a shape=(n,) array of misorientations
+between grain number i and its n neighbours. Each grain can have a different
+number of neighbours. The misorientation between grain i and its j-th neighbour
+is always the minimum misorientation between all possible orientations taking
+into account the crystal system symmetry.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__reduce_ex__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__reduce_ex__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grains</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbourhood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.write" title="Link to this definition">#</a></dt>
+<dd><p>Write the polycrystal to a file readable by Paraview.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Absolute path to the file to write the polycrystal
+to, must end in .vtk.</p></li>
+<li><p><strong>grains</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – The
+grain ids to write. Defaults to “all” in which case all grains
+in the polycrystal are written.</p></li>
+<li><p><strong>neighbourhood</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – When not None, the grains argument is overwritten
+such that the grain number -neighbourhood- and all of its neighbours are
+written to file. Default is None.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__repr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__repr__" title="Link to this definition">#</a></dt>
-<dd><p>Return repr(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__setattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__setattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement setattr(self, name, value).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__sizeof__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__sizeof__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__sizeof__" title="Link to this definition">#</a></dt>
-<dd><p>Size of object in memory, in bytes.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__str__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__str__" title="Link to this definition">#</a></dt>
-<dd><p>Return str(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.__subclasshook__">
-<span class="sig-prename descclassname"><span class="pre">crispy._tdxrd_map.TDXRDMap.</span></span><span class="sig-name descname"><span class="pre">__subclasshook__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map/TDXRDMap.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.__subclasshook__" title="Link to this definition">#</a></dt>
-<dd><p>Abstract classes can override this to customize issubclass().</p>
-<p>This is invoked early on by abc.ABCMeta.__subclasscheck__().
-It should return True, False or NotImplemented.  If it returns
-NotImplemented, the normal algorithm is used.  Otherwise, it
-overrides the normal algorithm (and the outcome is cached).</p>
 </dd></dl>
 
 </section>
-<section id="module-crispy._lab_dct_volume.LabDCTVolume">
-<span id="labdctvolume"></span><h1>LabDCTVolume<a class="headerlink" href="#module-crispy._lab_dct_volume.LabDCTVolume" title="Link to this heading">#</a></h1>
+<section id="labdctvolume">
+<h1>LabDCTVolume<a class="headerlink" href="#labdctvolume" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.</span></span><span class="sig-name descname"><span class="pre">LabDCTVolume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polycrystal</span></code></a></p>
 <p>Class to represent a voxelated lab-dct grain volume.</p>
 <p>This class is used to represent a voxelated grain volume in the lab
 frame. The class is used to read the grain volume data from a h5
@@ -910,8 +743,8 @@ photon propagation direction and the y axis is pointing to the left
 as seen by a traveling photon. Loading a lab dct map with LabDCTVolume
 will unify the coordinate system to be the same as that of crispy.TDXRDMap.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param file_path<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The path to the h5 file containing the grain
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the h5 file containing the grain
 volume data. The file should be in the lab-dct format.
 The file should contain the following datasets:
 - LabDCT/Spacing: The voxel size in microns.
@@ -920,13 +753,10 @@ The file should contain the following datasets:
 - PhaseInfo/Phase01/UnitCell: The unit cell parameters.
 - PhaseInfo/Phase01/SpaceGroup: The space group of the phase.</p>
 </dd>
-<dt class="field-even">type file_path<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.reference_cell">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">reference_cell</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.reference_cell" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">reference_cell</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.reference_cell" title="Link to this definition">#</a></dt>
 <dd><p>The reference cell of the
 grain volume.</p>
 <dl class="field-list simple">
@@ -938,7 +768,7 @@ grain volume.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.voxel_size">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">voxel_size</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.voxel_size" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">voxel_size</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.voxel_size" title="Link to this definition">#</a></dt>
 <dd><p>The voxel size in microns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -949,7 +779,7 @@ grain volume.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.labels">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">labels</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.labels" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">labels</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.labels" title="Link to this definition">#</a></dt>
 <dd><p>The grain id for each voxel shape=(m,n,o)
 axis=0 is z, axis=1 is y, axis=2 is x. coordinates always
 increase from low to high along the positive axis direction.</p>
@@ -962,7 +792,7 @@ increase from low to high along the positive axis direction.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.X">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">X</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.X" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">X</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.X" title="Link to this definition">#</a></dt>
 <dd><p>The x coordinates of the voxels in microns. shape=(m,n,o)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -973,7 +803,7 @@ increase from low to high along the positive axis direction.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.Y">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">Y</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.Y" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">Y</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.Y" title="Link to this definition">#</a></dt>
 <dd><p>The y coordinates of the voxels in microns. shape=(m,n,o)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -984,7 +814,7 @@ increase from low to high along the positive axis direction.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.Z">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">Z</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.Z" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">Z</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.Z" title="Link to this definition">#</a></dt>
 <dd><p>The z coordinates of the voxels in microns. shape=(m,n,o)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -995,7 +825,7 @@ increase from low to high along the positive axis direction.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.orientations">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">orientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.orientations" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">orientations</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.orientations" title="Link to this definition">#</a></dt>
 <dd><p>The orientations of the grains in
 matrix vector format. shape=(number_of_grains, 3, 3)</p>
 <dl class="field-list simple">
@@ -1007,7 +837,7 @@ matrix vector format. shape=(number_of_grains, 3, 3)</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.B0">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">B0</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.B0" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">B0</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.B0" title="Link to this definition">#</a></dt>
 <dd><p>The B0 matrix for the grain volume. I.e the
 recirprocal lattice vectors in the lab frame (upper triangular
 3,3 matrix).</p>
@@ -1020,7 +850,7 @@ recirprocal lattice vectors in the lab frame (upper triangular
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.grains">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.grains" title="Link to this definition">#</a></dt>
 <dd><p>The grains in the grain volume. len=number_of_grains</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1031,7 +861,7 @@ recirprocal lattice vectors in the lab frame (upper triangular
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.number_of_grains">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">number_of_grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.number_of_grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">number_of_grains</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.number_of_grains" title="Link to this definition">#</a></dt>
 <dd><p>The number of grains in the grain volume.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1040,130 +870,143 @@ recirprocal lattice vectors in the lab frame (upper triangular
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__delattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__delattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__delattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement delattr(self, name).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.write" title="Link to this definition">#</a></dt>
+<dd><p>Write the grain volume to paraview readable formats.</p>
+<p>The grain volume will be written to the specified file path,
+example of formats are .vtk and .xdmf.</p>
+<dl class="simple">
+<dt>The resulting point data will contain the following attributes:</dt><dd><ul class="simple">
+<li><p>spacing_in_um: The voxel size in microns.</p></li>
+<li><p>ipf_x: The x component of the IPF color.</p></li>
+<li><p>ipf_y: The y component of the IPF color.</p></li>
+<li><p>ipf_z: The z component of the IPF color.</p></li>
+<li><p>labels: The grain id for each voxel.</p></li>
+<li><p>grain_sizes: The size of each grain in units of voxels.</p></li>
+</ul>
+</dd>
+</dl>
+<p>The data format is sparse in the sense that only non-void voxels
+will be written to the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the file to write the grain
+volume to. The file should be in the paraview readable
+format. The file should end with .vtk or .xdmf or similar.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__dir__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__dir__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__dir__" title="Link to this definition">#</a></dt>
-<dd><p>Default dir() implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.texturize">
+<span class="sig-name descname"><span class="pre">texturize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.texturize" title="Link to this definition">#</a></dt>
+<dd><p>Compute the misorientation between all grain neighbours.</p>
+<p>NOTE: uses xfab.symmetry.Umis.</p>
+<p>This function sets the misorientations attribute of the polycrystal object,
+such that self.misorientations[i] is a shape=(n,) array of misorientations
+between grain number i and its n neighbours. Each grain can have a different
+number of neighbours. The misorientation between grain i and its j-th neighbour
+is always the minimum misorientation between all possible orientations taking
+into account the crystal system symmetry.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__eq__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__eq__" title="Link to this definition">#</a></dt>
-<dd><p>Return self==value.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.center_of_mass">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">center_of_mass</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.center_of_mass" title="Link to this definition">#</a></dt>
+<dd><p>The center of mass of the voxel volume in units of microns.</p>
+<p>The center of mass is defined as the arithmetic mean of the
+coordinates of the non-void voxels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray of shape = (3,)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__format__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__format__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_spec</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__format__" title="Link to this definition">#</a></dt>
-<dd><p>Default object formatter.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.center_volume">
+<span class="sig-name descname"><span class="pre">center_volume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.center_volume" title="Link to this definition">#</a></dt>
+<dd><p>Center the volume around the center of mass.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__ge__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__ge__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__ge__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;=value.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_grain_size_in_voxels</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.filter" title="Link to this definition">#</a></dt>
+<dd><p>Filter the grains based on their size.</p>
+<p>Grains with a size smaller than grain_size will be removed from
+the voxel volume. Attributes will be updated accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>min_grain_size_in_voxels</strong> (<em>int</em>) – The minimum size of the grains to keep in
+units of voxels.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__getattribute__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__getattribute__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__getattribute__" title="Link to this definition">#</a></dt>
-<dd><p>Return getattr(self, name).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.crop">
+<span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.crop" title="Link to this definition">#</a></dt>
+<dd><p>Crop the voxel volume to the specified bounds.</p>
+<p>The voxel volume will be cropped to the specified bounds. The
+attributes will be updated accordingly pruning any grains that
+are outside the bounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xmin</strong> (<em>float</em>) – The minimum x coordinate of the crop.</p></li>
+<li><p><strong>xmax</strong> (<em>float</em>) – The maximum x coordinate of the crop.</p></li>
+<li><p><strong>ymin</strong> (<em>float</em>) – The minimum y coordinate of the crop.</p></li>
+<li><p><strong>ymax</strong> (<em>float</em>) – The maximum y coordinate of the crop.</p></li>
+<li><p><strong>zmin</strong> (<em>float</em>) – The minimum z coordinate of the crop.</p></li>
+<li><p><strong>zmax</strong> (<em>float</em>) – The maximum z coordinate of the crop.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__gt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__gt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__gt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&gt;value.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translation</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.translate" title="Link to this definition">#</a></dt>
+<dd><p>Translate the voxel volume by the specified translation.</p>
+<p>The voxel volume will be translated by the specified translation.
+The attributes will be updated accordingly.</p>
+<p>This is usefull for realigning the voxel volume to be used in
+diffraction simulations or in integration with a synchrotron
+measurement setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>translation</strong> (<em>np.ndarray</em>) – The translation vector in units of microns.
+The translation vector should be of shape (3,).</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__hash__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__hash__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__hash__" title="Link to this definition">#</a></dt>
-<dd><p>Return hash(self).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotation</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.rotate" title="Link to this definition">#</a></dt>
+<dd><p>Rotate the voxel volume by the specified rotation.</p>
+<p>The voxel volume will be rotated by the specified rotation.
+The attributes will be updated accordingly. Note that the
+frame of reference is the lab frame which is initally
+aligned with the voxel volume grid. After subsequent
+rotations, the frame of reference may not be aligned with
+the voxel volume grid.</p>
+<p>This will update both voxel coordinates and grain orientations.</p>
+<p>This is usefull for realigning the voxel volume to be used in
+diffraction simulations or in integration with a synchrotron
+measurement setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rotation</strong> (<em>np.ndarray</em><em> or </em><em>scipy.spatial.transform.Rotation</em>) – The rotation
+matrix, rotation vector or rotation object to rotate the voxel volume by.
+if this is a rotation vector, it should be of shape (3,) with the norm
+equal to the angle of rotation in radians. The direction of the vector
+is the axis of rotation.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__init_subclass__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__init_subclass__" title="Link to this definition">#</a></dt>
-<dd><p>This method is called when a class is subclassed.</p>
-<p>The default implementation does nothing. It may be
-overridden to extend subclasses.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__le__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__le__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__le__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__lt__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__lt__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__lt__" title="Link to this definition">#</a></dt>
-<dd><p>Return self&lt;value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__ne__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__ne__" title="Link to this definition">#</a></dt>
-<dd><p>Return self!=value.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__new__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__new__" title="Link to this definition">#</a></dt>
-<dd><p>Create and return a new object.  See help(type) for accurate signature.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__reduce__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__reduce__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__reduce__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__reduce_ex__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__reduce_ex__" title="Link to this definition">#</a></dt>
-<dd><p>Helper for pickle.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__repr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__repr__" title="Link to this definition">#</a></dt>
-<dd><p>Return repr(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__setattr__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__setattr__" title="Link to this definition">#</a></dt>
-<dd><p>Implement setattr(self, name, value).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__sizeof__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__sizeof__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__sizeof__" title="Link to this definition">#</a></dt>
-<dd><p>Size of object in memory, in bytes.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__str__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__str__" title="Link to this definition">#</a></dt>
-<dd><p>Return str(self).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.__subclasshook__">
-<span class="sig-prename descclassname"><span class="pre">crispy._lab_dct_volume.LabDCTVolume.</span></span><span class="sig-name descname"><span class="pre">__subclasshook__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume/LabDCTVolume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.__subclasshook__" title="Link to this definition">#</a></dt>
-<dd><p>Abstract classes can override this to customize issubclass().</p>
-<p>This is invoked early on by abc.ABCMeta.__subclasscheck__().
-It should return True, False or NotImplemented.  If it returns
-NotImplemented, the normal algorithm is used.  Otherwise, it
-overrides the normal algorithm (and the outcome is cached).</p>
 </dd></dl>
 
 </section>
@@ -1185,7 +1028,7 @@ without re-mounitng the sample</p>
 mounted on the goniometer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#module-crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy._polycrystal.Polycrystal</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#crispy._polycrystal.Polycrystal" title="crispy._polycrystal.Polycrystal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy._polycrystal.Polycrystal</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1898,119 +1741,83 @@ to plot. Default is None.</p></li>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">GrainMap</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__delattr__"><code class="docutils literal notranslate"><span class="pre">__delattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__dir__"><code class="docutils literal notranslate"><span class="pre">__dir__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__eq__"><code class="docutils literal notranslate"><span class="pre">__eq__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__format__"><code class="docutils literal notranslate"><span class="pre">__format__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__ge__"><code class="docutils literal notranslate"><span class="pre">__ge__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__getattribute__"><code class="docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__gt__"><code class="docutils literal notranslate"><span class="pre">__gt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__hash__"><code class="docutils literal notranslate"><span class="pre">__hash__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__le__"><code class="docutils literal notranslate"><span class="pre">__le__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__lt__"><code class="docutils literal notranslate"><span class="pre">__lt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__ne__"><code class="docutils literal notranslate"><span class="pre">__ne__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__reduce__"><code class="docutils literal notranslate"><span class="pre">__reduce__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__reduce_ex__"><code class="docutils literal notranslate"><span class="pre">__reduce_ex__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__repr__"><code class="docutils literal notranslate"><span class="pre">__repr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__setattr__"><code class="docutils literal notranslate"><span class="pre">__setattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__sizeof__"><code class="docutils literal notranslate"><span class="pre">__sizeof__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__str__"><code class="docutils literal notranslate"><span class="pre">__str__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap.__subclasshook__"><code class="docutils literal notranslate"><span class="pre">__subclasshook__()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._grain_map.GrainMap"><code class="docutils literal notranslate"><span class="pre">GrainMap</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy._polycrystal.Polycrystal">Polycrystal</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.reference_cell"><code class="docutils literal notranslate"><span class="pre">reference_cell</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.grains"><code class="docutils literal notranslate"><span class="pre">grains</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.number_of_grains"><code class="docutils literal notranslate"><span class="pre">number_of_grains</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal._misorientations"><code class="docutils literal notranslate"><span class="pre">_misorientations</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.neighbours"><code class="docutils literal notranslate"><span class="pre">neighbours</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__delattr__"><code class="docutils literal notranslate"><span class="pre">__delattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__dir__"><code class="docutils literal notranslate"><span class="pre">__dir__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__eq__"><code class="docutils literal notranslate"><span class="pre">__eq__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__format__"><code class="docutils literal notranslate"><span class="pre">__format__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__ge__"><code class="docutils literal notranslate"><span class="pre">__ge__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__getattribute__"><code class="docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__gt__"><code class="docutils literal notranslate"><span class="pre">__gt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__hash__"><code class="docutils literal notranslate"><span class="pre">__hash__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__le__"><code class="docutils literal notranslate"><span class="pre">__le__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__lt__"><code class="docutils literal notranslate"><span class="pre">__lt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__ne__"><code class="docutils literal notranslate"><span class="pre">__ne__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__new__"><code class="docutils literal notranslate"><span class="pre">__new__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__reduce__"><code class="docutils literal notranslate"><span class="pre">__reduce__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__reduce_ex__"><code class="docutils literal notranslate"><span class="pre">__reduce_ex__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__repr__"><code class="docutils literal notranslate"><span class="pre">__repr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__setattr__"><code class="docutils literal notranslate"><span class="pre">__setattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__sizeof__"><code class="docutils literal notranslate"><span class="pre">__sizeof__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__str__"><code class="docutils literal notranslate"><span class="pre">__str__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.__subclasshook__"><code class="docutils literal notranslate"><span class="pre">__subclasshook__()</span></code></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#polycrystal">Polycrystal</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal"><code class="docutils literal notranslate"><span class="pre">Polycrystal</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.reference_cell"><code class="docutils literal notranslate"><span class="pre">Polycrystal.reference_cell</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.grains"><code class="docutils literal notranslate"><span class="pre">Polycrystal.grains</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.number_of_grains"><code class="docutils literal notranslate"><span class="pre">Polycrystal.number_of_grains</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal._misorientations"><code class="docutils literal notranslate"><span class="pre">Polycrystal._misorientations</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.neighbours"><code class="docutils literal notranslate"><span class="pre">Polycrystal.neighbours</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.texturize"><code class="docutils literal notranslate"><span class="pre">Polycrystal.texturize()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.misorientations"><code class="docutils literal notranslate"><span class="pre">Polycrystal.misorientations</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.ubi"><code class="docutils literal notranslate"><span class="pre">Polycrystal.ubi</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.u"><code class="docutils literal notranslate"><span class="pre">Polycrystal.u</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.orientation"><code class="docutils literal notranslate"><span class="pre">Polycrystal.orientation</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.b"><code class="docutils literal notranslate"><span class="pre">Polycrystal.b</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.strain"><code class="docutils literal notranslate"><span class="pre">Polycrystal.strain</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.crystal_system"><code class="docutils literal notranslate"><span class="pre">Polycrystal.crystal_system</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._polycrystal.Polycrystal.colorize"><code class="docutils literal notranslate"><span class="pre">Polycrystal.colorize()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy._tdxrd_map.TDXRDMap">TDXRDMap</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.grains"><code class="docutils literal notranslate"><span class="pre">grains</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_grains"><code class="docutils literal notranslate"><span class="pre">number_of_grains</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.bounding_box"><code class="docutils literal notranslate"><span class="pre">bounding_box</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.extent"><code class="docutils literal notranslate"><span class="pre">extent</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.centroids"><code class="docutils literal notranslate"><span class="pre">centroids</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.u"><code class="docutils literal notranslate"><span class="pre">u</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.orientations"><code class="docutils literal notranslate"><span class="pre">orientations</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.b"><code class="docutils literal notranslate"><span class="pre">b</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.neighbours"><code class="docutils literal notranslate"><span class="pre">neighbours</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.misorientations"><code class="docutils literal notranslate"><span class="pre">misorientations</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__delattr__"><code class="docutils literal notranslate"><span class="pre">__delattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__dir__"><code class="docutils literal notranslate"><span class="pre">__dir__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__eq__"><code class="docutils literal notranslate"><span class="pre">__eq__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__format__"><code class="docutils literal notranslate"><span class="pre">__format__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__ge__"><code class="docutils literal notranslate"><span class="pre">__ge__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__getattribute__"><code class="docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__gt__"><code class="docutils literal notranslate"><span class="pre">__gt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__hash__"><code class="docutils literal notranslate"><span class="pre">__hash__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__le__"><code class="docutils literal notranslate"><span class="pre">__le__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__lt__"><code class="docutils literal notranslate"><span class="pre">__lt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__ne__"><code class="docutils literal notranslate"><span class="pre">__ne__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__new__"><code class="docutils literal notranslate"><span class="pre">__new__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__reduce__"><code class="docutils literal notranslate"><span class="pre">__reduce__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__reduce_ex__"><code class="docutils literal notranslate"><span class="pre">__reduce_ex__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__repr__"><code class="docutils literal notranslate"><span class="pre">__repr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__setattr__"><code class="docutils literal notranslate"><span class="pre">__setattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__sizeof__"><code class="docutils literal notranslate"><span class="pre">__sizeof__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__str__"><code class="docutils literal notranslate"><span class="pre">__str__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.__subclasshook__"><code class="docutils literal notranslate"><span class="pre">__subclasshook__()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy._lab_dct_volume.LabDCTVolume">LabDCTVolume</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.reference_cell"><code class="docutils literal notranslate"><span class="pre">reference_cell</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.voxel_size"><code class="docutils literal notranslate"><span class="pre">voxel_size</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.labels"><code class="docutils literal notranslate"><span class="pre">labels</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.X"><code class="docutils literal notranslate"><span class="pre">X</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Y"><code class="docutils literal notranslate"><span class="pre">Y</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Z"><code class="docutils literal notranslate"><span class="pre">Z</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.orientations"><code class="docutils literal notranslate"><span class="pre">orientations</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.B0"><code class="docutils literal notranslate"><span class="pre">B0</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.grains"><code class="docutils literal notranslate"><span class="pre">grains</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.number_of_grains"><code class="docutils literal notranslate"><span class="pre">number_of_grains</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__delattr__"><code class="docutils literal notranslate"><span class="pre">__delattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__dir__"><code class="docutils literal notranslate"><span class="pre">__dir__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__eq__"><code class="docutils literal notranslate"><span class="pre">__eq__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__format__"><code class="docutils literal notranslate"><span class="pre">__format__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__ge__"><code class="docutils literal notranslate"><span class="pre">__ge__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__getattribute__"><code class="docutils literal notranslate"><span class="pre">__getattribute__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__gt__"><code class="docutils literal notranslate"><span class="pre">__gt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__hash__"><code class="docutils literal notranslate"><span class="pre">__hash__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__le__"><code class="docutils literal notranslate"><span class="pre">__le__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__lt__"><code class="docutils literal notranslate"><span class="pre">__lt__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__ne__"><code class="docutils literal notranslate"><span class="pre">__ne__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__new__"><code class="docutils literal notranslate"><span class="pre">__new__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__reduce__"><code class="docutils literal notranslate"><span class="pre">__reduce__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__reduce_ex__"><code class="docutils literal notranslate"><span class="pre">__reduce_ex__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__repr__"><code class="docutils literal notranslate"><span class="pre">__repr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__setattr__"><code class="docutils literal notranslate"><span class="pre">__setattr__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__sizeof__"><code class="docutils literal notranslate"><span class="pre">__sizeof__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__str__"><code class="docutils literal notranslate"><span class="pre">__str__()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.__subclasshook__"><code class="docutils literal notranslate"><span class="pre">__subclasshook__()</span></code></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#tdxrdmap">TDXRDMap</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap"><code class="docutils literal notranslate"><span class="pre">TDXRDMap</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.grains"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.grains</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_grains"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.number_of_grains</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.bounding_box"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.bounding_box</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.extent"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.extent</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.centroids"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.centroids</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.u"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.u</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.orientations"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.orientations</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.b"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.b</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.neighbours"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.neighbours</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.misorientations"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.misorientations</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.add_grain_attr"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.add_grain_attr()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id0"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.neighbours</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.bounding_box</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.extent</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.centroids</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.sum_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.sum_peak_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.number_of_peaks"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.number_of_peaks</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.median_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.median_peak_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.mean_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.mean_peak_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.min_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.min_peak_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.max_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.max_peak_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.std_peak_intensity"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.std_peak_intensity</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.from_array"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.from_array()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.tesselate"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.tesselate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.texturize"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.texturize()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._tdxrd_map.TDXRDMap.write"><code class="docutils literal notranslate"><span class="pre">TDXRDMap.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#labdctvolume">LabDCTVolume</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.reference_cell"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.reference_cell</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.voxel_size"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.voxel_size</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.labels"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.labels</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.X"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.X</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Y"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.Y</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.Z"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.Z</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.orientations"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.orientations</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.B0"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.B0</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.grains"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.grains</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.number_of_grains"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.number_of_grains</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.write"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.write()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.texturize"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.texturize()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.center_of_mass"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.center_of_mass</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.center_volume"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.center_volume()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.filter"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.filter()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.crop"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.crop()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.translate"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.translate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy._lab_dct_volume.LabDCTVolume.rotate"><code class="docutils literal notranslate"><span class="pre">LabDCTVolume.rotate()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#module-crispy.dfxm">dfxm</a><ul class="visible nav section-nav flex-column">

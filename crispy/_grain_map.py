@@ -1,7 +1,8 @@
 import h5py
 import numpy as np
 
-import crispy
+from ._lab_dct_volume import LabDCTVolume
+from ._tdxrd_map import TDXRDMap
 
 
 class GrainMap:
@@ -41,21 +42,22 @@ class GrainMap:
         cls, grain_data, group_name="grains", lattice_parameters=None, symmetry=None
     ):
         if isinstance(grain_data, (list, np.ndarray)):
-            return crispy.TDXRDMap(grain_data, group_name, lattice_parameters, symmetry)
+            return TDXRDMap(grain_data, group_name, lattice_parameters, symmetry)
         elif isinstance(grain_data, str):
             if not grain_data.endswith(".h5"):
                 raise ValueError("File path does not end with .h5")
             with h5py.File(grain_data, "r") as f:
                 if "LabDCT" in list(f.keys()):
-                    return crispy.LabDCTVolume(grain_data)
+                    return LabDCTVolume(grain_data)
                 else:
-                    return crispy.TDXRDMap(
+                    return TDXRDMap(
                         grain_data, group_name, lattice_parameters, symmetry
                     )
         else:
             raise ValueError(
                 "grain_data must be an array of ImageD11.grain.grain objects or a path to an HDF5 file."
             )
+
 
 if __name__ == "__main__":
     pass

@@ -11,7 +11,7 @@ class TestTesselate(unittest.TestCase):
         np.random.seed(42)
 
     def test_tesselate(self):
-        grains = crispy.assets.grainmap_id11()
+        grains = crispy.assets.grain_map.tdxrd_map().grains
         mesh = crispy._tesselate.voronoi(grains)
         self.assertEqual(np.max(mesh.cell_data["grain_id"]), len(grains) - 1)
         self.assertEqual(np.max(mesh.cell_data["surface_grain"]), 1)

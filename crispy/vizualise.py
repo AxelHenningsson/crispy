@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-import crispy
+from . import _tesselate
 
 
 def _crispy_styling():
@@ -89,12 +89,12 @@ def mesh(
     if neighbourhood is not None:
         grains_index = polycrystal._select_grains(None, neighbourhood)
         local_geometry = polycrystal._extract_geom(grains_index)
-        mesh = crispy._tesselate._build_mesh(*local_geometry)
+        mesh = _tesselate._build_mesh(*local_geometry)
         grains = polycrystal.grains[grains_index]
     elif select is not None:
         grains_index = select
         local_geometry = polycrystal._extract_geom(grains_index)
-        mesh = crispy._tesselate._build_mesh(*local_geometry)
+        mesh = _tesselate._build_mesh(*local_geometry)
         grains = polycrystal.grains[grains_index]
     else:
         mesh = polycrystal._mesh
@@ -140,7 +140,6 @@ def mesh(
     _xyz_labels(ax)
 
     return fig, ax
-
 
 
 if __name__ == "__main__":

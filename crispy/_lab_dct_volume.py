@@ -10,8 +10,8 @@ import xfab
 import xfab.symmetry
 from scipy.spatial.transform import Rotation
 
-from crispy._constants import _CRYSTAL_SYSTEM_STR_TO_INT, DEFAULT_STRUCT
-from crispy._polycrystal import Polycrystal
+from ._constants import CONSTANTS
+from ._polycrystal import Polycrystal
 
 
 class LabDCTVolume(Polycrystal):
@@ -128,26 +128,28 @@ class LabDCTVolume(Polycrystal):
                 "Labels are not sequential in the range [-1, number_of_grains-1] with -1 for void"
             )
 
-    def _spatial_search(self, labels, number_of_grains, struct=DEFAULT_STRUCT):
+    def _spatial_search(
+        self, labels, number_of_grains, struct=CONSTANTS.DEFAULT_STRUCT
+    ):
         """Compute spatial properties of grains in the voxel volume.
 
-        By default, neighbourhoods are defined though the 3D structuring element:
-            struct = np.array(
-                [
-                    [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
-                    [[0, 1, 0], [1, 1, 1], [0, 1, 0]],
-                    [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
-                ],
-                dtype=uint8,
-            )
+            By default, neighbourhoods are defined though the 3D structuring element:
+                struct = np.array(
+                    [
+                        [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+                        [[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+                        [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+                    ],
+                    dtype=uint8,
+                )
 
-        Edge voxels are not included in the neighbourhood calculation.
+            Edge voxels are not included in the neighbourhood calculation.
 
-        Args:
-            labels (np.ndarray): The grain id for each voxel shape=(m,n,o)
-                axis=0 is z, axis=1 is y, axis=2 is x. coordinates always
-                increase from low to high along the positive axis direction.
-            number_of_grains (int): The number of grains in the grain volume.
+            Args:
+                labels (np.ndarray): The grain id for each voxel shape=(m,n,o)
+                    axis=0 is z, axis=1 is y, axis=2 is x. coordinates always
+                    increase from low to high along the positive axis direction.
+                number_of_grains (int): The number of grains in the grain volume.
                 The number of grains is the maximum label id + 1.
                 The number of grains is the number of unique labels in the
                 labels array.
@@ -387,7 +389,7 @@ class LabDCTVolume(Polycrystal):
         into account the crystal system symmetry.
 
         """
-        _crystal_system = _CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
+        _crystal_system = CONSTANTS._CRYSTAL_SYSTEM_STR_TO_INT[self.crystal_system]
         self._misorientations = np.empty((len(self.grains),), dtype=np.ndarray)
         for gi in range(len(self.grains)):
             u = self.grains[gi].u

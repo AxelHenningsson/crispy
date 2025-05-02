@@ -9,7 +9,7 @@
 GrainMap
 ======================================
 
-.. automodule:: crispy._grain_map.GrainMap 
+.. autoclass:: crispy._grain_map.GrainMap 
     :members:
     :show-inheritance:
 
@@ -17,7 +17,7 @@ GrainMap
 Polycrystal
 ======================================
 
-.. automodule:: crispy._polycrystal.Polycrystal
+.. autoclass:: crispy._polycrystal.Polycrystal
     :members:
     :show-inheritance:
 
@@ -25,7 +25,7 @@ Polycrystal
 TDXRDMap
 ======================================
 
-.. automodule:: crispy._tdxrd_map.TDXRDMap
+.. autoclass:: crispy._tdxrd_map.TDXRDMap
     :members:
     :show-inheritance:
 
@@ -33,7 +33,7 @@ TDXRDMap
 LabDCTVolume
 ======================================
 
-.. automodule:: crispy._lab_dct_volume.LabDCTVolume
+.. autoclass:: crispy._lab_dct_volume.LabDCTVolume
     :members:
     :show-inheritance:
 

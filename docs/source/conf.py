@@ -54,7 +54,9 @@ exclude_patterns = ["raw_README.rst"]
 
 autodoc_default_options = {
     "members": True,
-    "undoc-members": True,
+    "undoc-members": False,
+    "private-members": False,
+    "special-members": False,
     "show-inheritance": True,
 }
 

@@ -15,14 +15,14 @@ class TestLabDCTVolume(unittest.TestCase):
     def test_init(self):
         try:
             pc = crispy.GrainMap(
-                os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+                crispy.assets.path.SILICON,
             )
         except Exception as e:
             self.fail(f"Failed to initialize GrainMap with lab_dct_silicon.h5: {e}")
 
         try:
             pc = crispy.GrainMap(
-                os.path.join(crispy.assets._asset_path, "lab_dct_Al1050.h5"),
+                crispy.assets.path.AL1050,
             )
         except Exception as e:
             self.fail(f"Failed to initialize GrainMap with lab_dct_Al1050.h5: {e}")
@@ -34,7 +34,7 @@ class TestLabDCTVolume(unittest.TestCase):
 
     def test_center_of_mass(self):
         pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+            crispy.assets.path.SILICON,
         )
         self.assertIsInstance(
             pc.center_of_mass, np.ndarray, msg="center_of_mass is not a numpy array"
@@ -45,7 +45,7 @@ class TestLabDCTVolume(unittest.TestCase):
 
     def test_translate(self):
         pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+            crispy.assets.path.SILICON,
         )
         center_of_mass = pc.center_of_mass
         bounding_box = np.array(pc.bounding_box)
@@ -119,10 +119,10 @@ class TestLabDCTVolume(unittest.TestCase):
 
     def test_rotate(self):
         pc0 = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+            crispy.assets.path.SILICON,
         )
         pc1 = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+            crispy.assets.path.SILICON,
         )
 
         try:
@@ -189,7 +189,7 @@ class TestLabDCTVolume(unittest.TestCase):
         )
 
         pc1 = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+            crispy.assets.path.SILICON,
         )
         rotation = Rotation.from_rotvec(np.radians(10.0) * np.array([1.0, 0.0, 0.0]))
         pc1.rotate(rotation)
@@ -235,7 +235,7 @@ class TestLabDCTVolume(unittest.TestCase):
 
     def test_crop(self):
         pc = crispy.GrainMap(
-            os.path.join(crispy.assets._asset_path, "lab_dct_silicon.h5"),
+            crispy.assets.path.SILICON,
         )
         expected_bounding_box = np.array(pc.bounding_box) // 2
         expected_bounding_box[0] += pc.voxel_size / 10.0
@@ -317,7 +317,7 @@ class TestLabDCTVolume(unittest.TestCase):
         structure_matrix = np.zeros(
             (number_of_grains, number_of_grains), dtype=np.uint32
         )
-        struct = crispy._constants.DEFAULT_STRUCT
+        struct = crispy.CONSTANTS.DEFAULT_STRUCT
         crispy.LabDCTVolume._volume_walker(labels, structure_matrix, struct)
 
         self.assertTrue(isinstance(structure_matrix, np.ndarray))

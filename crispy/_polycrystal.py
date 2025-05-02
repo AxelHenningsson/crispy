@@ -2,7 +2,7 @@ import numpy as np
 from orix.plot import IPFColorKeyTSL
 from orix.vector.vector3d import Vector3d
 
-from crispy._constants import _SPACEGROUP_TO_CRYSTAL_SYSTEM
+from ._constants import CONSTANTS
 
 
 class Polycrystal:
@@ -100,7 +100,7 @@ class Polycrystal:
             trigonal, hexagonal or cubic
 
         """
-        return _SPACEGROUP_TO_CRYSTAL_SYSTEM[self.reference_cell.symmetry]
+        return CONSTANTS._SPACEGROUP_TO_CRYSTAL_SYSTEM[self.reference_cell.symmetry]
 
     def _ipf_colors(self, axes=np.eye(3)):
         """Compute the IPF colors for the polycrystal using orix (https://github.com/pyxem/orix)
