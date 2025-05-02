@@ -1,7 +1,36 @@
-crispy 
-=====================================================================
-**a CRystal population metric InSpector written in PYthon.**
 
+.. raw:: html
+
+    <h1 style="font-size: 6.2em; font-weight: bold;">
+        <span style="color:#f67280;">c</span>
+        <span style="color:#f8b195;">r</span>
+        <span style="color:#fbc687;">i</span>
+        <span style="color:#c06c84;">s</span>
+        <span style="color:#6c5b7b;">p</span>
+        <span style="color:#355c7d;">y</span>
+    </h1>
+
+    <p style="font-size: 1.3em; font-weight: bold;">
+        a <span style="color:#f67280;">C</span><span style="color:#f8b195;">R</span>ystal population metric 
+        <span style="color:#c06c84;">In</span><span style="color:#6c5b7b;">S</span>pector written in 
+        <span style="color:#355c7d;">PY</span>thon allowing for interfacing between 
+        <span style="color:#355c7d;">3DXRD</span> /
+        <span style="color:#6c5b7b;">Lab-DCT</span> and
+        <span style="color:#fbc687;">Dark-Field X-ray Microscopy (DFXM)</span>.
+    </p>
+
+crispy is a Python package for analyzing crystal population metrics from 3DXRD and
+lab-DCT data targeting interfacing between diffraction contrast modalities.
+
+One of the central features of crispy is the provision of per-grain reflections
+diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
+3DXRD grain maps and lab-DCT grain volumes.
+
+Interfaces for reading, analyzing, and visualizing grain maps are provided for
+
+    * **3DXRD grain maps** (3D scatter of grain centroids and grain orientations)
+
+    * **lab-DCT voxel volumes** (3D voxel volumes where each voxel is a single crystal grain)
 
 .. image:: https://img.shields.io/badge/platform-cross--platform-brightgreen.svg
    :target: https://www.python.org/
@@ -26,20 +55,6 @@ crispy
 .. image:: https://img.shields.io/badge/docs-sphinx-blue.svg
    :target: https://axelhenningsson.github.io/darling/
    :alt: Sphinx documentation
-
-
-crispy is a Python package for analyzing crystal population metrics from 3DXRD and
-lab-DCT data targeting interfacing between diffraction contrast modalities.
-
-One of the central features of crispy is the provision of per-grain reflections
-diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
-3DXRD grain maps and lab-DCT grain volumes.
-
-Interfaces for reading, analyzing, and visualizing grain maps are provided for
-
-    * **3DXRD grain maps** (3D scatter of grain centroids and grain orientations)
-
-    * **lab-DCT voxel volumes** (3D voxel volumes where each voxel is a single crystal grain)
 
 Authors
 =====================================================================
