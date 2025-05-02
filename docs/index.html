@@ -301,7 +301,7 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grain_map</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;grain_map.xdmf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_grains.png?raw=true" class="align-center" src="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_grains.png?raw=true" />
+<img alt="https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_grains.png?raw=true" class="align-center" src="https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_grains.png?raw=true" />
 <p>To search for accessible reflections in DFXM mode for <code class="docutils literal notranslate"><span class="pre">eta=0</span></code>, we can use the <a class="reference internal" href="#crispy.dfxm.Goniometer" title="crispy.dfxm.Goniometer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crispy.dfxm.Goniometer</span></code></a> class as</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">motor_bounds</span> <span class="o">=</span> <span class="p">{</span>
 <span class="s2">&quot;mu&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="c1"># degrees</span>
@@ -340,7 +340,7 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">goniometer</span><span class="o">.</span><span class="n">table_of_reflections</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_df.png?raw=true" src="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_df.png?raw=true" />
+<img alt="https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_df.png?raw=true" src="https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_df.png?raw=true" />
 <p>It is also possible to load a 3DXRD grain map from a file tesselate and visualize.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">path_to_my_grain_map</span> <span class="o">=</span> <span class="n">crispy</span><span class="o">.</span><span class="n">assets</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">FEAU</span>
 <span class="n">grain_map</span> <span class="o">=</span> <span class="n">crispy</span><span class="o">.</span><span class="n">GrainMap</span><span class="p">(</span> <span class="n">path_to_my_grain_map</span> <span class="p">)</span>
@@ -349,7 +349,7 @@ diffraction information for Dark-Field X-ray Microscopy (DFXM) by analyzing
 <span class="n">crispy</span><span class="o">.</span><span class="n">visualize</span><span class="o">.</span><span class="n">mesh</span><span class="p">(</span> <span class="n">grain_map</span> <span class="p">)</span>
 </pre></div>
 </div>
-<img alt="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_tdxrd.png?raw=true" src="https://github.com/AxelHenningsson/crispy/blob/dev/docs/source/images/readme_tdxrd.png?raw=true" />
+<img alt="https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_tdxrd.png?raw=true" src="https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_tdxrd.png?raw=true" />
 </section>
 <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
