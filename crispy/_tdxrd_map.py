@@ -150,9 +150,7 @@ class TDXRDMap(Polycrystal):
 
     @classmethod
     def from_array(
-        cls,
-        translations,
-        ubi_matrices,
+        cls, translations, ubi_matrices, lattice_parameters=None, symmetry=None
     ):
         """Instantiate the polycrystal from pure translations and ubi matrices.
 
@@ -161,6 +159,8 @@ class TDXRDMap(Polycrystal):
         Args:
             translations (:obj:`iterable` of :obj:`numpy.ndarray`): 3D grain center translations each of shape=(3,).
             ubi_matrices (:obj:`iterable` of :obj:`numpy.ndarray`): ubi matrices each of shape=(3, 3).
+            lattice_parameters (:obj:`iterable` of :obj:`numpy.ndarray`): lattice parameters each of shape=(6,).
+            symmetry (:obj:`int`): space group number.
 
         Returns:
             :obj:`crispy._tdxrd_map.TDXRDMAP`: The polycrystal object.
@@ -168,8 +168,10 @@ class TDXRDMap(Polycrystal):
         if len(translations) != len(ubi_matrices):
             raise ValueError("translations and ubi_matrices must have the same length")
         grains = [ImageD11.grain.grain(ubi) for ubi in ubi_matrices]
+        reference_cell = ImageD11.unitcell.unitcell(lattice_parameters, symmetry)
         for g, t in zip(grains, translations):
             g.translation = t
+            g.ref_unitcell = reference_cell
         return cls(grains)
 
     def tesselate(self):
