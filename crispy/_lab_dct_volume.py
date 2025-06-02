@@ -355,11 +355,11 @@ class LabDCTVolume(Polycrystal):
         )
 
         faces = []
-        if "z" in faces_to_prune:
+        if "x" in faces_to_prune:
             faces.append((0, 1, 2))
         if "y" in faces_to_prune:
             faces.append((0, 2, 1))
-        if "x" in faces_to_prune:
+        if "z" in faces_to_prune:
             faces.append((1, 2, 0))
         faces = np.array(faces, dtype=np.uint8)
 
@@ -385,7 +385,7 @@ class LabDCTVolume(Polycrystal):
 
         Returns:
             boundary_labels (:obj:`np.ndarray`): The boundary labels array. ``shape=(m*n*o,)``.
-                uint8 array with 1s for boundary grains and 0s for non-boundary grains.
+                uint8 array with 0s for boundary grains and 1s for non-boundary grains.
         """
         index = np.array([0, 0, 0], dtype=np.uint32)
         boundary_labels = np.ones(np.max(labels), dtype=np.uint8)
