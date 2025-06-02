@@ -320,7 +320,7 @@ class LabDCTVolume(Polycrystal):
         self._update_voxel_rotations(old_labels, self.labels)
         self._update_state()
 
-    def prune_boundary_grains(self):
+    def prune_boundary_grains(self, faces_to_prune="xyz"):
         """Prune the boundary grains.
 
         This will remove all grains that thuch the edge of the volume.
@@ -337,15 +337,40 @@ class LabDCTVolume(Polycrystal):
 
         .. image:: ../../docs/source/images/lab_dct_prune_boundary_grains.png
 
+        Args:
+            faces_to_prune (:obj:`str`): A string containing the faces to prune.
+            can be one of 'xyz', 'xy', 'xz', 'yz', 'x', 'y', 'z' or permutations
+            of these. For example, 'xy' will prune the grains on the x and y faces
+            but not the z faces.
+
         This will remove all grains that are on the boundary of the voxel volume.
         """
-        boundary_labels = self._get_boundary_labels(self.labels)
+        old_labels = self.labels.copy()
+
+        assert isinstance(faces_to_prune, str), (
+            "faces_to_prune must be a string containing 'x', 'y', 'z' to specify which faces to prune"
+        )
+        assert len(faces_to_prune) <= 3, (
+            "faces_to_prune must be a string containing 'x', 'y', 'z' to specify which faces to prune"
+        )
+
+        faces = []
+        if "z" in faces_to_prune:
+            faces.append((0, 1, 2))
+        if "y" in faces_to_prune:
+            faces.append((0, 2, 1))
+        if "x" in faces_to_prune:
+            faces.append((1, 2, 0))
+        faces = np.array(faces, dtype=np.uint8)
+
+        boundary_labels = self._get_boundary_labels(self.labels, faces)
         self._mask_labels(self.labels, boundary_labels)
+        self._update_voxel_rotations(old_labels, self.labels)
         self._update_state()
 
     @staticmethod
     @numba.njit
-    def _get_boundary_labels(labels):
+    def _get_boundary_labels(labels, faces):
         """Get the labels of the boundary grains.
 
         for each of the 6 faces, we iterate for each voxel in the face moving
@@ -356,6 +381,7 @@ class LabDCTVolume(Polycrystal):
         Args:
             labels (:obj:`np.ndarray`): The labels array. ``shape=(m, n, o)``.
             boundary_labels (:obj:`np.ndarray`): The boundary labels array. ``shape=(m*n*o,)``.
+            faces (:obj:`np.ndarray`): The faces to check for boundary grains.
 
         Returns:
             boundary_labels (:obj:`np.ndarray`): The boundary labels array. ``shape=(m*n*o,)``.
@@ -363,7 +389,7 @@ class LabDCTVolume(Polycrystal):
         """
         index = np.array([0, 0, 0], dtype=np.uint32)
         boundary_labels = np.ones(np.max(labels), dtype=np.uint8)
-        for a, b, c in [(0, 1, 2), (0, 2, 1), (1, 2, 0)]:
+        for a, b, c in faces:
             shape = labels.shape
             for i in range(shape[a]):
                 for j in range(shape[b]):
@@ -1117,6 +1143,7 @@ LabDCTVolume._coord_sum.compile(
 LabDCTVolume._get_boundary_labels.compile(
     (
         numba.types.Array(numba.int32, 3, "C"),  # labels
+        numba.types.Array(numba.uint8, 2, "C"),  # faces
     )
 )
 
