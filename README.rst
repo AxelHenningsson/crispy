@@ -120,7 +120,7 @@ The resulting reflections can be accessed as
 
 .. code-block:: python
 
-    polycrystal.grains[i].dfxm
+    goniometer.polycrystal.grains[i].dfxm
 
 Providing a dictionary with refleciton information for each grain.
 
