@@ -154,7 +154,7 @@ It is also possible to load a 3DXRD grain map from a file tesselate and visualiz
     grain_map = crispy.GrainMap( path_to_my_grain_map )
     grain_map.tesselate()
     grain_map.colorize( np.eye(3) )
-    crispy.visualize.mesh( grain_map )
+    crispy.vizualise.mesh( grain_map )
 
 .. image:: https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_tdxrd.png?raw=true
 
