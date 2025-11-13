@@ -134,6 +134,43 @@ class TestBraggez(unittest.TestCase):
         self.assertGreater(res[0], 5)
         self.assertLessEqual(np.radians(res[1]), 1e-4)
 
+    def test_good_and_bad_reflection_eta_arbitrary(self):
+        pc = crispy.GrainMap(
+            os.path.join(crispy.assets._asset_path, "FeAu_0p5_tR_ff1_grains.h5"),
+            group_name="Fe",
+            lattice_parameters=[4.0493, 4.0493, 4.0493, 90.0, 90.0, 90.0],
+            symmetry=225,
+        )
+        energy = 19.1
+        ub = pc.grains[15].ub
+        hkls = np.array(
+            [
+                [2, 2, 2],
+                [0, 0, 2],
+            ]
+        ).T
+        optimizer = crispy.dfxm._Braggez(energy, self.motor_bounds)
+        sol, res, success, bragg_angles = optimizer.align(ub, hkls, eta=0)
+
+        self.assertFalse(success[0])
+        self.assertTrue(success[1])
+        self.assertGreater(res[0], 5)
+        self.assertLessEqual(np.radians(res[1]), 1e-4)
+
+        optimizer = crispy.dfxm._Braggez(energy, self.motor_bounds)
+
+        eta = -43.42340
+        R_eta = Rotation.from_rotvec(np.radians(eta) * np.array([1, 0, 0])).as_matrix()
+        ub = R_eta @ ub
+        sol, res, success, bragg_angles = optimizer.align(
+            ub, hkls, eta=eta, alignment_tol=1.0
+        )
+
+        self.assertFalse(success[0])
+        self.assertTrue(success[1])
+        self.assertGreater(res[0], 5)
+        self.assertLessEqual(np.radians(res[1]), np.radians(1.0))
+
     def _fibonacci_sphere(self, samples):
         points = []
         phi = np.pi * (np.sqrt(5.0) - 1.0)  # golden angle in radians
@@ -254,6 +291,42 @@ class TestBraggez(unittest.TestCase):
             energy,
             detector_distance,
             motor_bounds,
+        )
+
+        goni.find_reflections(
+            maxiter=600,
+            maxls=25,
+            ftol=1e-8,
+            alignment_tol=0.1,
+        )
+
+        reflections_found = 0
+        for g in pc.grains:
+            if g.dfxm is not None:
+                reflections_found += 1
+        self.assertTrue(reflections_found > len(pc.grains) * 0.5)
+
+    def test_find_reflections_lab_dct_silicon_eta_arbitrary(self):
+        pc = crispy.assets.grain_map.lab_dct_volume("silicon")
+
+        motor_bounds = {
+            "mu": (0, 22),
+            "omega": (-45, 45),
+            "chi": (-9, 9),
+            "phi": (-9, 9),
+            "detector_z": (-0.04, 1.96),
+            "detector_y": (-0.169, 1.16),
+        }
+
+        detector_distance = 4.0
+        energy = 17
+
+        goni = crispy.dfxm.Goniometer(
+            pc,
+            energy,
+            detector_distance,
+            motor_bounds,
+            eta=-43.42340,
         )
 
         goni.find_reflections(

@@ -590,7 +590,7 @@ class _Braggez(object):
         theta = np.arcsin(self.wavelength / (2 * d))
         target = self.R_mu(theta).apply(self._zhat.T).T
 
-        # implements arbitrayr eta scattering angle
+        # implements arbitrary eta scattering angle
         R_eta = Rotation.from_rotvec(np.radians(eta) * np.array([1, 0, 0]))
         target = R_eta.apply(target.T).T
 
@@ -647,7 +647,7 @@ class _Braggez(object):
         normals to the target vectors. The target vectors are defined as the z-axis
         rotated by the Bragg angle in the xz-plane into the reverse direction of the
         beam which is assumed to propagate in the positive x-direction. If eta is not 0
-        the target vectors are rotated by the eta angle about the x-axis.
+        the target
 
         Args:
             ub (:obj:`numpy.ndarray`): The UB matrix, shape (3, 3)
