@@ -20,6 +20,8 @@ class Goniometer:
         motor_bounds (:obj:`dict`): Motor limits for the goniometer/hexapod in degrees
             (sample stage) and metres (detector translations). Keys are shown in the
             example below:
+        eta (:obj:`float`): Azimuth scattering angle in degrees. Default is 0 degrees.
+
 
     .. code-block:: python
 
@@ -34,12 +36,13 @@ class Goniometer:
 
     """
 
-    def __init__(self, polycrystal, energy, detector_distance, motor_bounds):
+    def __init__(self, polycrystal, energy, detector_distance, motor_bounds, eta=0):
         self.polycrystal = polycrystal
         self.energy = energy
         self.wavelength = 12.398419874273968 / self.energy
         self.detector_distance = detector_distance
         self.motor_bounds = motor_bounds
+        self.eta = eta
 
     def _get_hkls(self):
         """Find all h,k,l miller indices that can diffract at the given energy.
@@ -156,6 +159,7 @@ class Goniometer:
                 maxls,
                 ftol,
                 mask_unreachable,
+                eta=self.eta,
             )
             if np.sum(success) != 0:
                 g.dfxm = {
@@ -166,6 +170,7 @@ class Goniometer:
                     "phi": goni_angles[3, success],
                     "residual": residual[success],
                     "theta": theta[success],
+                    "eta": self.eta,
                 }
             else:
                 g.dfxm = None
@@ -371,7 +376,7 @@ class _Braggez(object):
     z-axis, chi is a positive rotation about the x-axis, and phi is a positive rotation about
     the y-axis.
 
-    The target reflection is always defined as lying in the xz-plane, with eta=0 (ez).
+    The target reflection is by default defined as lying in the xz-plane, with eta=0 (ez).
     This is also known as the simplified dfxm geometry.
 
     The mathmatical problem is defined as follows:
@@ -566,12 +571,13 @@ class _Braggez(object):
             },
         )
 
-    def get_unit_vectors(self, ub, hkls):
+    def get_unit_vectors(self, ub, hkls, eta):
         """Get the lattice plane normals, nhat, and the target vectors
 
         Args:
             ub (:obj:`numpy.ndarray`): The UB matrix, shape (3, 3)
             hkls (:obj:`numpy.ndarray`): The hkl vectors, shape (3, N)
+            eta (:obj:`float`): Azimuth scattering angle in degrees. Default is 0 degrees.
 
         Returns:
             nhat (:obj:`numpy.ndarray`): The lattice plane normals, shape (3, N)
@@ -583,6 +589,11 @@ class _Braggez(object):
         d = 1 / np.linalg.norm(Q, axis=0)
         theta = np.arcsin(self.wavelength / (2 * d))
         target = self.R_mu(theta).apply(self._zhat.T).T
+
+        # implements arbitrayr eta scattering angle
+        R_eta = Rotation.from_rotvec(np.radians(eta) * np.array([1, 0, 0]))
+        target = R_eta.apply(target.T).T
+
         return nhat, target, theta
 
     def _print_results(self, sol, res, success):
@@ -628,13 +639,15 @@ class _Braggez(object):
         maxls=25,
         ftol=None,
         mask_unreachable=False,
+        eta=0,
     ):
-        """Align Q = ub @ hkls vectors with eta=0 plane to satisfy Bragg's law.
+        """Align Q = ub @ hkls vectors a given eta plane to satisfy Bragg's law.
 
         Runs an optimization to find the goniometer angles that align the lattice plane
         normals to the target vectors. The target vectors are defined as the z-axis
         rotated by the Bragg angle in the xz-plane into the reverse direction of the
-        beam which is assumed to propagate in the positive x-direction.
+        beam which is assumed to propagate in the positive x-direction. If eta is not 0
+        the target vectors are rotated by the eta angle about the x-axis.
 
         Args:
             ub (:obj:`numpy.ndarray`): The UB matrix, shape (3, 3)
@@ -658,6 +671,7 @@ class _Braggez(object):
                 unreachable reflections speed up the optimization by simply not
                 considering them. When masking is enabled, the solution and residuals
                 success arrays will hold np.nan values for the unreachable reflections.
+            eta (:obj:`float`): Azimuth scattering angle in degrees. Default is 0 degrees.
 
         Returns:
             (:obj:`tuple`): tuple containing:
@@ -679,7 +693,7 @@ class _Braggez(object):
                 - **theta** (:obj:`numpy.ndarray`): The Bragg angles,
                         in degrees for each reflection, shape (N,)
         """
-        nhat, target, theta = self.get_unit_vectors(ub, hkls)
+        nhat, target, theta = self.get_unit_vectors(ub, hkls, eta)
 
         if mask_unreachable:
             unreachable = self._mask_unreachable(nhat, target)
