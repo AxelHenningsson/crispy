@@ -238,11 +238,12 @@ class Goniometer:
             if g.dfxm:
                 for n in range(len(g.dfxm["mu"])):
                     h, k, l = g.dfxm["hkl"][:, n].astype(int)
-                    mu, omega, chi, phi = (
+                    mu, omega, chi, phi, eta = (
                         g.dfxm["mu"][n],
                         g.dfxm["omega"][n],
                         g.dfxm["chi"][n],
                         g.dfxm["phi"][n],
+                        g.dfxm["eta"][n],
                     )
                     theta = g.dfxm["theta"][n]
                     detector_z = (
@@ -258,7 +259,7 @@ class Goniometer:
                         chi,
                         phi,
                         2 * theta,
-                        0,
+                        eta,
                         detector_z,
                     ]
                     i += 1

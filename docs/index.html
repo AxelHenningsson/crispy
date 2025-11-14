@@ -863,7 +863,7 @@ is None before calling the texturize() method.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="crispy._tdxrd_map.TDXRDMap.from_array">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ubi_matrices</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.from_array" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ubi_matrices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_tdxrd_map.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._tdxrd_map.TDXRDMap.from_array" title="Link to this definition">#</a></dt>
 <dd><p>Instantiate the polycrystal from pure translations and ubi matrices.</p>
 <p>This circumvents the need to read a grain file and ImageD11.grain.grain objects.</p>
 <dl class="field-list simple">
@@ -871,6 +871,8 @@ is None before calling the texturize() method.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>translations</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – 3D grain center translations each of shape=(3,).</p></li>
 <li><p><strong>ubi_matrices</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – ubi matrices each of shape=(3, 3).</p></li>
+<li><p><strong>lattice_parameters</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">iterable</span></code> of <code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>) – lattice parameters each of shape=(6,).</p></li>
+<li><p><strong>symmetry</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – space group number.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1218,7 +1220,7 @@ to keep in units of voxels.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="crispy._lab_dct_volume.LabDCTVolume.prune_boundary_grains">
-<span class="sig-name descname"><span class="pre">prune_boundary_grains</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.prune_boundary_grains" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">prune_boundary_grains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">faces_to_prune</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/_lab_dct_volume.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy._lab_dct_volume.LabDCTVolume.prune_boundary_grains" title="Link to this definition">#</a></dt>
 <dd><p>Prune the boundary grains.</p>
 <p>This will remove all grains that thuch the edge of the volume.</p>
 <p>Example:</p>
@@ -1229,6 +1231,23 @@ to keep in units of voxels.</p>
 </pre></div>
 </div>
 <img alt="_images/lab_dct_prune_boundary_grains.png" src="_images/lab_dct_prune_boundary_grains.png" />
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>faces_to_prune</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – A string containing the faces to prune.</p></li>
+<li><p><strong>'xyz'</strong> (<em>can be one of</em>)</p></li>
+<li><p><strong>'xy'</strong></p></li>
+<li><p><strong>'xz'</strong></p></li>
+<li><p><strong>'yz'</strong></p></li>
+<li><p><strong>'x'</strong></p></li>
+<li><p><strong>'y'</strong></p></li>
+<li><p><strong>permutations</strong> (<em>'z' or</em>)</p></li>
+<li><p><strong>example</strong> (<em>of these. For</em>)</p></li>
+<li><p><strong>faces</strong> (<em>'xy' will prune the grains on the x and y</em>)</p></li>
+<li><p><strong>faces.</strong> (<em>but not the z</em>)</p></li>
+</ul>
+</dd>
+</dl>
 <p>This will remove all grains that are on the boundary of the voxel volume.</p>
 </dd></dl>
 
@@ -1294,7 +1313,7 @@ is the axis of rotation.</p>
 <span id="dfxm"></span><h2>dfxm<a class="headerlink" href="#module-crispy.dfxm" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="crispy.dfxm.Goniometer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy.dfxm.</span></span><span class="sig-name descname"><span class="pre">Goniometer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polycrystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motor_bounds</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/dfxm.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.dfxm.Goniometer" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crispy.dfxm.</span></span><span class="sig-name descname"><span class="pre">Goniometer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polycrystal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector_distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motor_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/dfxm.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.dfxm.Goniometer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class representing a Dark-Field X-ray Microscopy (DFXM) experimental setup.</p>
 <p>This class calculates the required microscope angular settings to bring a set of
@@ -1342,6 +1361,17 @@ example below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crispy.dfxm.Goniometer.eta">
+<span class="sig-name descname"><span class="pre">eta</span></span><a class="reference external" href="https://github.com/AxelHenningsson/crispy/tree/main/crispy/dfxm.py/"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crispy.dfxm.Goniometer.eta" title="Link to this definition">#</a></dt>
+<dd><p>Azimuth scattering angle in degrees. Default is 0 degrees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1809,6 +1839,7 @@ Defaults to “Al1050”.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.energy"><code class="docutils literal notranslate"><span class="pre">Goniometer.energy</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.detector_distance"><code class="docutils literal notranslate"><span class="pre">Goniometer.detector_distance</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.motor_bounds"><code class="docutils literal notranslate"><span class="pre">Goniometer.motor_bounds</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.eta"><code class="docutils literal notranslate"><span class="pre">Goniometer.eta</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.find_reflections"><code class="docutils literal notranslate"><span class="pre">Goniometer.find_reflections()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.table_of_reflections"><code class="docutils literal notranslate"><span class="pre">Goniometer.table_of_reflections()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#crispy.dfxm.Goniometer.find_symmetry_axis"><code class="docutils literal notranslate"><span class="pre">Goniometer.find_symmetry_axis()</span></code></a></li>
