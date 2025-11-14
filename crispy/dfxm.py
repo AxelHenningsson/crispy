@@ -243,7 +243,7 @@ class Goniometer:
                         g.dfxm["omega"][n],
                         g.dfxm["chi"][n],
                         g.dfxm["phi"][n],
-                        g.dfxm["eta"][n],
+                        g.dfxm["eta"],
                     )
                     theta = g.dfxm["theta"][n]
                     detector_z = (
