@@ -81,7 +81,7 @@ class LabDCTVolume(Polycrystal):
 
         self._update_state()
 
-    def write(self, file_path):
+    def write(self, file_path, selected_grains=None):
         """Write the grain volume to paraview readable formats.
 
         Example:
@@ -115,11 +115,17 @@ class LabDCTVolume(Polycrystal):
             file_path (:obj:`str`): The path to the file to write the grain
                 volume to. The file should be in the paraview readable
                 format.
+            selected_grains (:obj:`list` of :obj:`int`): The grains to write.
+                Defaults to None in which case all grains are written.
 
         """
         file_path += ".xdmf" if not file_path.endswith(".xdmf") else ""
 
-        m = self.labels > -1
+        if selected_grains is None:
+            m = self.labels > -1
+        else:
+            m = np.isin(self.labels, selected_grains)
+
         coordinates = np.array([self.X[m], self.Y[m], self.Z[m]]).T
 
         _rgb = self._ipf_colors()
