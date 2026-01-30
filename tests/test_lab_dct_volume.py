@@ -210,6 +210,44 @@ class TestLabDCTVolume(unittest.TestCase):
             msg="Z not preserved under cyclic rotation around x-axis",
         )
 
+        # Test that the centroids are changing correctly under rotation
+        pc2 = crispy.GrainMap(
+            crispy.assets.path.SILICON,
+        )
+        original_centroids = pc2.centroids.copy()
+        rotation = Rotation.from_rotvec(np.radians(10.0) * np.array([1.0, 0.0, 0.0]))
+        pc2.rotate(rotation)
+
+        centroids_after_rotation = pc2.centroids.copy()
+
+        resx = centroids_after_rotation[:, 0] - original_centroids[:, 0]
+        resy = centroids_after_rotation[:, 1] - original_centroids[:, 1]
+        resz = centroids_after_rotation[:, 2] - original_centroids[:, 2]
+
+        np.testing.assert_allclose(
+            resx,
+            0,
+            err_msg="Centroids x-positions were not preserved under rotation around the x-axis",
+        )
+        self.assertGreater(
+            np.abs(np.sum(resy)),
+            0,
+            msg="Centroids y-positions were not changed under rotation around the x-axis",
+        )
+        self.assertGreater(
+            np.abs(np.sum(resz)),
+            0,
+            msg="Centroids z-positions were not changed under rotation around the x-axis",
+        )
+
+        expected_centroid = rotation.as_matrix() @ original_centroids[0]
+        actual_centroid = centroids_after_rotation[0]
+        np.testing.assert_allclose(
+            expected_centroid,
+            actual_centroid,
+            err_msg="Centroids not changing correctly under rotation around the x-axis",
+        )
+
     def test_prune_boundary_grains(self):
         pc = crispy.GrainMap(
             crispy.assets.path.AL1050,

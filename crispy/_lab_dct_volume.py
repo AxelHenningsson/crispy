@@ -532,6 +532,8 @@ class LabDCTVolume(Polycrystal):
         self.Z = rotated_Z
         self.bounding_box = self._get_bounding_box(self.X, self.Y, self.Z)
 
+        self.centroids = (rotation_matrix @ self.centroids.T).T
+
     def _update_state(self):
         """Update the state of the grain volume after a crop or filter.
 
