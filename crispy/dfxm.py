@@ -377,6 +377,10 @@ class _Braggez(object):
     z-axis, chi is a positive rotation about the x-axis, and phi is a positive rotation about
     the y-axis.
 
+    For APS, mu is positive about y in this internal frame, and phi is below chi.
+    In APS laboratory coordinates this is Rx(mu) Ry(omega) Rx(phi) Rz(chi).
+    Input UB matrices are always in the ImageD11/MIDAS frame.
+
     The target reflection is by default defined as lying in the xz-plane, with eta=0 (ez).
     This is also known as the simplified dfxm geometry.
 
@@ -397,6 +401,7 @@ class _Braggez(object):
             e.g. {"mu": (0, 20), "omega": (-22, 22), "chi": (-5, 5), "phi": (-5, 5)}
         epsilon (float): Small number used to compute the numerical derivatives during optimization
         verbose (bool): If True, print the results and iteration of the optimization
+        beamline (str): ``"ID03"`` (default) or ``"APS"`` for 20-ID-E.
 
     Attributes:
         energy (float): Energy of the X-ray beam in keV
@@ -407,14 +412,25 @@ class _Braggez(object):
 
     """
 
-    def __init__(self, energy, motor_bounds, epsilon=1e-6, verbose=False):
+    def __init__(self, energy, motor_bounds, epsilon=1e-6, verbose=False, beamline="ID03"):
+        if beamline not in ("ID03", "APS"):
+            raise ValueError('beamline must be "ID03" or "APS"')
         self.energy = energy
         self.wavelength = 12.398419874273968 / energy
         self.motor_bounds = motor_bounds
+        self.beamline = beamline
 
         self._xhat = np.array([[1], [0], [0]])
         self._yhat = np.array([[0], [1], [0]])
         self._zhat = np.array([[0], [0], [1]])
+
+        # Axes are in the grain-map frame; parameter order is mu, omega, chi, phi.
+        if beamline == "ID03":
+            self._rotation_axes = (-self._yhat, self._zhat, self._xhat, self._yhat)
+            self._rotation_order = (0, 1, 2, 3)
+        else:
+            self._rotation_axes = (self._yhat, self._zhat, self._xhat, self._yhat)
+            self._rotation_order = (0, 1, 3, 2)
 
         self._set_rotational_increments(epsilon)
         self.epsilon = epsilon
@@ -433,20 +449,25 @@ class _Braggez(object):
         self.dR_phiT = self.R_phi(-epsilon)
 
     def R_mu(self, mu):
-        return Rotation.from_rotvec((mu * (-self._yhat)).T)
+        return Rotation.from_rotvec((mu * self._rotation_axes[0]).T)
 
     def R_omega(self, omega):
-        return Rotation.from_rotvec((omega * self._zhat).T)
+        return Rotation.from_rotvec((omega * self._rotation_axes[1]).T)
 
     def R_chi(self, chi):
-        return Rotation.from_rotvec((chi * self._xhat).T)
+        return Rotation.from_rotvec((chi * self._rotation_axes[2]).T)
 
     def R_phi(self, phi):
-        return Rotation.from_rotvec((phi * (self._yhat)).T)
+        return Rotation.from_rotvec((phi * self._rotation_axes[3]).T)
+
+    def _rotations(self, x):
+        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
+        rotations = (self.R_mu(mu), self.R_omega(omega), self.R_chi(chi), self.R_phi(phi))
+        return [rotations[i] for i in self._rotation_order]
 
     def R(self, x):
-        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
-        return self.R_mu(mu) * self.R_omega(omega) * self.R_chi(chi) * self.R_phi(phi)
+        R1, R2, R3, R4 = self._rotations(x)
+        return R1 * R2 * R3 * R4
 
     def _arccos(self, ang, tol):
         """Simply to supress the annoying rounding warnings from numpy"""
@@ -499,11 +520,11 @@ class _Braggez(object):
             (:obj:`numpy.ndarray`): The aggregated cost.
             (:obj:`numpy.ndarray`): The gradient of the cost function, shape (4*N,)
         """
-        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
-        R1 = self.R_mu(mu)
-        R2 = self.R_omega(omega)
-        R3 = self.R_chi(chi)
-        R4 = self.R_phi(phi)
+        R1, R2, R3, R4 = self._rotations(x)
+        increments = (self.dR_mu, self.dR_omega, self.dR_chi, self.dR_phi)
+        inverse = (self.dR_muT, self.dR_omegaT, self.dR_chiT, self.dR_phiT)
+        dR1, dR2, dR3, dR4 = [increments[i] for i in self._rotation_order]
+        dR1T, dR2T, dR3T, dR4T = [inverse[i] for i in self._rotation_order]
 
         # for speed optimization
         R12 = R1 * R2
@@ -518,22 +539,23 @@ class _Braggez(object):
         # second order central difference scheme
         N = nhat.shape[1]
         jac = np.zeros((4 * N,))
+        i1, i2, i3, i4 = self._rotation_order
 
-        jac[0:N] = self.cost_vector(
-            self.dR_mu * R1234, nhat, target
-        ) - self.cost_vector(self.dR_muT * R1234, nhat, target)
+        jac[i1 * N : (i1 + 1) * N] = self.cost_vector(
+            dR1 * R1234, nhat, target
+        ) - self.cost_vector(dR1T * R1234, nhat, target)
 
-        jac[N : 2 * N] = self.cost_vector(
-            R1 * self.dR_omega * R234, nhat, target
-        ) - self.cost_vector(R1 * self.dR_omegaT * R234, nhat, target)
+        jac[i2 * N : (i2 + 1) * N] = self.cost_vector(
+            R1 * dR2 * R234, nhat, target
+        ) - self.cost_vector(R1 * dR2T * R234, nhat, target)
 
-        jac[2 * N : 3 * N] = self.cost_vector(
-            R12 * self.dR_chi * R34, nhat, target
-        ) - self.cost_vector(R12 * self.dR_chiT * R34, nhat, target)
+        jac[i3 * N : (i3 + 1) * N] = self.cost_vector(
+            R12 * dR3 * R34, nhat, target
+        ) - self.cost_vector(R12 * dR3T * R34, nhat, target)
 
-        jac[3 * N :] = self.cost_vector(
-            R123 * self.dR_phi * R4, nhat, target
-        ) - self.cost_vector(R123 * self.dR_phiT * R4, nhat, target)
+        jac[i4 * N : (i4 + 1) * N] = self.cost_vector(
+            R123 * dR4 * R4, nhat, target
+        ) - self.cost_vector(R123 * dR4T * R4, nhat, target)
 
         jac = jac / (2 * self.epsilon)
 
@@ -589,7 +611,7 @@ class _Braggez(object):
         nhat = Q / np.linalg.norm(Q, axis=0)
         d = 1 / np.linalg.norm(Q, axis=0)
         theta = np.arcsin(self.wavelength / (2 * d))
-        target = self.R_mu(theta).apply(self._zhat.T).T
+        target = Rotation.from_rotvec((-theta * self._yhat).T).apply(self._zhat.T).T
 
         # implements arbitrary eta scattering angle
         R_eta = Rotation.from_rotvec(np.radians(eta) * np.array([1, 0, 0]))
@@ -759,6 +781,9 @@ class _BraggSym(_Braggez):
     the y-axis.
 
     The target reflection is always defined as the z-axis.
+
+    For APS, the axes and stacking order follow _Braggez. The target is still
+    internal +z, which is APS laboratory +y.
 
     The mathmatical problem is defined as follows:
         Let nhat be a vector on the unit sphere representing the target reflection in its
