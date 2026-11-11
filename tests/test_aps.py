@@ -33,7 +33,7 @@ class TestAPS(unittest.TestCase):
             c, s = np.cos(a), np.sin(a)
             return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
 
-        return rx(mu) @ ry(omega) @ rx(phi) @ rz(chi)
+        return rx(mu) @ ry(omega) @ rz(chi) @ rx(phi)
 
     def grain_map(self, diffracting=True):
         rotation = self.aps_rotation(self.angles)
@@ -155,6 +155,65 @@ class TestAPS(unittest.TestCase):
             angles = np.radians([result[k][i] for k in ["mu", "omega", "chi", "phi"]])
             q = self.aps_rotation(angles) @ self.axes @ pc.grains[0].ub @ hkl
             np.testing.assert_allclose(q / np.linalg.norm(q), [0, 1, 0], atol=2e-4)
+
+    def test_motor_names(self):
+        named = {
+            "RX": self.bounds["mu"],
+            "omega": self.bounds["omega"],
+            "samRZ": self.bounds["chi"],
+            "samRX": self.bounds["phi"],
+            "detector_y": self.bounds["detector_y"],
+            "detector_x": self.bounds["detector_x"],
+        }
+        motors = ["RX", "omega", "samRZ", "samRX"]
+        pc = self.grain_map()
+        goni = crispy.dfxm.Goniometer(pc, 30, 4, named, beamline="APS")
+        goni.find_reflections(maxiter=800, ftol=1e-10, alignment_tol=0.01)
+        result = pc.grains[0].dfxm
+        table = goni.table_of_reflections()
+        self.assertIsNotNone(result)
+        for internal, motor in zip(["mu", "omega", "chi", "phi"], motors):
+            np.testing.assert_array_equal(result[motor], result[internal])
+            np.testing.assert_array_equal(table[f"{motor} [dgr]"], result[motor])
+            self.assertGreaterEqual(result[motor].min(), named[motor][0])
+            self.assertLessEqual(result[motor].max(), named[motor][1])
+        for name in ["mu", "chi", "phi"]:
+            self.assertNotIn(f"{name} [dgr]", table)
+        # The named angles, applied in stack order, bring the grain to Bragg.
+        for i, hkl in enumerate(result["hkl"].T):
+            angles = np.radians([result[m][i] for m in motors])
+            q = self.aps_rotation(angles) @ self.axes @ pc.grains[0].ub @ hkl
+            outgoing = q + np.array([0, 0, 1 / goni.wavelength])
+            self.assertAlmostEqual(
+                np.linalg.norm(outgoing), 1 / goni.wavelength, places=3
+            )
+        goni.find_symmetry_axis(maxiter=800, ftol=1e-10, alignment_tol=0.01)
+        if pc.grains[0].symmetry_axis:
+            for motor in motors:
+                self.assertIn(motor, pc.grains[0].symmetry_axis)
+
+        optimizer = crispy.dfxm._Braggez(30, named, beamline="APS")
+        self.assertEqual(optimizer.motor_bounds["chi"], named["samRZ"])
+        self.assertEqual(optimizer.motor_bounds["phi"], named["samRX"])
+        with self.assertRaisesRegex(ValueError, "same motor"):
+            crispy.dfxm.Goniometer(
+                self.grain_map(), 30, 4, dict(named, mu=(0, 1)), beamline="APS"
+            )
+        del named["samRX"]
+        with self.assertRaisesRegex(ValueError, "samRX"):
+            crispy.dfxm.Goniometer(self.grain_map(), 30, 4, named, beamline="APS")
+
+    def test_id03_names_unchanged(self):
+        bounds = {
+            "mu": (0, 20), "omega": (-40, 40), "chi": (-8, 8), "phi": (-8, 8),
+            "detector_z": (-0.04, 1.2), "detector_y": (-1, 1),
+        }
+        goni = crispy.dfxm.Goniometer(self.grain_map(), 30, 4, bounds)
+        goni.find_reflections()
+        table = goni.table_of_reflections()
+        for name in ["mu", "omega", "chi", "phi"]:
+            self.assertIn(f"{name} [dgr]", table)
+        self.assertNotIn("samRX [dgr]", table)
 
     def test_invalid_beamline(self):
         with self.assertRaisesRegex(ValueError, "beamline"):

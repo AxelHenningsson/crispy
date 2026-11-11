@@ -213,10 +213,10 @@ Use ``beamline="APS"`` with the same grain maps and workflow:
 .. code-block:: python
 
     motor_bounds = {
-        "mu": (-20, 20),       # ZONDA Rx, degrees
-        "omega": (-180, 180),  # Labmotion Ry, degrees
-        "phi": (-8, 8),        # Kohzu samRX, degrees
-        "chi": (-8, 8),        # Kohzu samRZ, degrees
+        "RX": (-20, 20),       # hexapod Rx, degrees
+        "omega": (-180, 180),  # rotation about y, degrees
+        "samRZ": (-8, 8),      # lower sample tilt, degrees
+        "samRX": (-8, 8),      # upper sample tilt, degrees
         "detector_y": (-0.04, 1.96),  # vertical, metres; example limits
         "detector_x": (-0.169, 1.16),  # horizontal, metres; example limits
     }
@@ -227,19 +227,25 @@ Use ``beamline="APS"`` with the same grain maps and workflow:
     goniometer.find_reflections()
     df = goniometer.table_of_reflections()
 
-APS uses +z along the beam and +y up. The model assumes right-handed positive
-rotations and Kohzu Rx below Rz, giving
-``R = Rx(mu) @ Ry(omega) @ Rx(phi) @ Rz(chi)`` in APS coordinates. The axis
+APS uses +z along the beam and +y up. The motor stack, from the base up, is
+hexapod ``RX`` -> ``omega`` -> ``samY``, ``samZ``, ``samX`` -> ``samRZ`` ->
+``samRX``. The model assumes right-handed positive rotations, giving
+``R = Rx(RX) @ Ry(omega) @ Rz(samRZ) @ Rx(samRX)`` in APS coordinates. The axis
 definitions and stacking order are set in ``_Braggez.__init__``. The default
 ``beamline="ID03"`` retains the existing geometry.
 
+Bounds and results use the APS motor names. They correspond to the ID03 names
+as ``RX = mu``, ``samRZ = chi`` and ``samRX = phi``; the ID03 names are also
+accepted in ``motor_bounds`` and are kept as extra keys in ``grain.dfxm``.
+
 Grain positions and UB matrices remain in the ImageD11/MIDAS frame; do not
 permute them before passing them to the goniometer. Angles use the same assumed
-reference pose as the ID03 model. With only a MIDAS wedge W, APS ``mu = -W``.
-The model does not read motor metadata or calculate sample-centering moves.
+reference pose as the ID03 model. With only a MIDAS wedge W, APS ``RX = -W``.
+The model does not read motor metadata or calculate sample-centering moves;
+the hexapod translations, ``RY``, ``RZ`` and ``samX/Y/Z`` are not modelled.
 
-The reflection table retains ``mu``, ``omega``, ``chi`` and ``phi`` and reports
-detector offsets along APS x and y in millimetres. Eta is zero towards +y and
+The reflection table has columns ``RX``, ``omega``, ``samRZ`` and ``samRX`` and
+reports detector offsets along APS x and y in millimetres. Eta is zero towards +y and
 positive towards -x. ``find_symmetry_axis()`` targets APS +y (vertical).
 
 

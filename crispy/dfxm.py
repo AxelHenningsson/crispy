@@ -4,6 +4,30 @@ from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 from xfab import tools
 
+# Beamline motor name for each internal angle (mu, omega, chi, phi).
+_MOTOR_NAMES = {
+    "ID03": {"mu": "mu", "omega": "omega", "chi": "chi", "phi": "phi"},
+    "APS": {"mu": "RX", "omega": "omega", "chi": "samRZ", "phi": "samRX"},
+}
+
+
+def _internal_bounds(motor_bounds, beamline):
+    """Return a copy of motor_bounds keyed by the internal angle names.
+
+    Beamline motor names (e.g. ``RX``, ``samRZ``, ``samRX`` at APS) are
+    accepted as aliases for ``mu``, ``chi`` and ``phi``.
+    """
+    bounds = dict(motor_bounds)
+    for internal, motor in _MOTOR_NAMES[beamline].items():
+        if motor != internal and motor in bounds:
+            if internal in bounds:
+                raise ValueError(
+                    f'motor_bounds contains both "{motor}" and "{internal}", '
+                    "which are the same motor"
+                )
+            bounds[internal] = bounds.pop(motor)
+    return bounds
+
 
 class Goniometer:
     """A class representing a Dark-Field X-ray Microscopy (DFXM) experimental setup.
@@ -23,9 +47,15 @@ class Goniometer:
         eta (:obj:`float`): Azimuth scattering angle in degrees. Default is 0 degrees.
         beamline (:obj:`str`): ``"ID03"`` (default) or ``"APS"`` for 20-ID-E.
             Grain maps retain the ImageD11/MIDAS frame in both cases. APS uses
-            positive rotations: mu = ZONDA Rx, omega = Labmotion Ry,
-            phi = Kohzu Rx, chi = Kohzu Rz, with Rx below Rz. APS detector
+            positive rotations about the APS laboratory axes (z along the
+            beam, y up) and the motor stack hexapod ``RX`` -> ``omega`` (Ry)
+            -> ``samRZ`` -> ``samRX``, with ``samRX`` on top. For APS,
+            ``motor_bounds`` takes these motor names (the ID03 names ``mu``,
+            ``chi`` and ``phi`` are accepted as aliases for ``RX``, ``samRZ``
+            and ``samRX``) and the results are reported with them. APS detector
             bounds use ``detector_y`` (vertical) and ``detector_x`` (horizontal).
+        motor_names (:obj:`dict`): Beamline motor name of each internal angle
+            ``mu``, ``omega``, ``chi``, ``phi``.
 
 
     .. code-block:: python
@@ -59,6 +89,11 @@ class Goniometer:
         self.motor_bounds = motor_bounds
         self.eta = eta
         self.beamline = beamline
+        self.motor_names = dict(_MOTOR_NAMES[beamline])
+        bounds = _internal_bounds(motor_bounds, beamline)
+        missing = [m for k, m in self.motor_names.items() if k not in bounds]
+        if missing:
+            raise ValueError(f"motor_bounds is missing {missing}")
         self._detector_vertical = "detector_y" if beamline == "APS" else "detector_z"
 
     def _get_hkls(self):
@@ -191,6 +226,7 @@ class Goniometer:
                     "theta": theta[success],
                     "eta": self.eta,
                 }
+                self._add_motor_names(g.dfxm)
             else:
                 g.dfxm = None
 
@@ -233,7 +269,9 @@ class Goniometer:
             :obj:`pandas.DataFrame`: DataFrame of the reflections found
                 by :func:`find_reflections()`. For each grain, the DataFrame contains
                 column in accordance with the keys in the :attr:`dfxm` dictionary
-                of the grain. APS detector columns are ``detector_y [mm]`` and
+                of the grain. At APS the angle columns are named after the
+                motors: ``RX``, ``omega``, ``samRZ`` and ``samRX``. APS detector
+                columns are ``detector_y [mm]`` and
                 ``detector_x [mm]``, measured from the direct beam.
         """
         if not hasattr(self.polycrystal.grains[0], "dfxm"):
@@ -244,10 +282,10 @@ class Goniometer:
                 "h",
                 "k",
                 "l",
-                "mu [dgr]",
-                "omega [dgr]",
-                "chi [dgr]",
-                "phi [dgr]",
+                f"{self.motor_names['mu']} [dgr]",
+                f"{self.motor_names['omega']} [dgr]",
+                f"{self.motor_names['chi']} [dgr]",
+                f"{self.motor_names['phi']} [dgr]",
                 "2 theta [dgr]",
                 "eta [dgr]",
                 f"{self._detector_vertical} [mm]",
@@ -384,8 +422,14 @@ class Goniometer:
                     "phi": goni_angles[3, success],
                     "residual": residual[success],
                 }
+                self._add_motor_names(g.symmetry_axis)
             else:
                 g.symmetry_axis = None
+
+    def _add_motor_names(self, result):
+        """Make the angles available under the beamline motor names as well."""
+        for internal, motor in self.motor_names.items():
+            result[motor] = result[internal]
 
 
 class _Braggez(object):
@@ -405,8 +449,10 @@ class _Braggez(object):
     z-axis, chi is a positive rotation about the x-axis, and phi is a positive rotation about
     the y-axis.
 
-    For APS, mu is positive about y in this internal frame, and phi is below chi.
-    In APS laboratory coordinates this is Rx(mu) Ry(omega) Rx(phi) Rz(chi).
+    For APS, mu is positive about y in this internal frame and the stacking is
+    unchanged (chi below phi). In APS laboratory coordinates this is
+    Rx(RX) Ry(omega) Rz(samRZ) Rx(samRX), where mu = hexapod RX, chi = samRZ and
+    phi = samRX. ``motor_bounds`` may use either set of names.
     Input UB matrices are always in the ImageD11/MIDAS frame.
 
     The target reflection is by default defined as lying in the xz-plane, with eta=0 (ez).
@@ -445,7 +491,7 @@ class _Braggez(object):
             raise ValueError('beamline must be "ID03" or "APS"')
         self.energy = energy
         self.wavelength = 12.398419874273968 / energy
-        self.motor_bounds = motor_bounds
+        self.motor_bounds = _internal_bounds(motor_bounds, beamline)
         self.beamline = beamline
 
         self._xhat = np.array([[1], [0], [0]])
@@ -458,7 +504,7 @@ class _Braggez(object):
             self._rotation_order = (0, 1, 2, 3)
         else:
             self._rotation_axes = (self._yhat, self._zhat, self._xhat, self._yhat)
-            self._rotation_order = (0, 1, 3, 2)
+            self._rotation_order = (0, 1, 2, 3)
 
         self._set_rotational_increments(epsilon)
         self.epsilon = epsilon
