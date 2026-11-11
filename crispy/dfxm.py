@@ -4,6 +4,30 @@ from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 from xfab import tools
 
+# Beamline motor name for each internal angle (mu, omega, chi, phi).
+_MOTOR_NAMES = {
+    "ID03": {"mu": "mu", "omega": "omega", "chi": "chi", "phi": "phi"},
+    "APS": {"mu": "RX", "omega": "omega", "chi": "samRZ", "phi": "samRX"},
+}
+
+
+def _internal_bounds(motor_bounds, beamline):
+    """Return a copy of motor_bounds keyed by the internal angle names.
+
+    Beamline motor names (e.g. ``RX``, ``samRZ``, ``samRX`` at APS) are
+    accepted as aliases for ``mu``, ``chi`` and ``phi``.
+    """
+    bounds = dict(motor_bounds)
+    for internal, motor in _MOTOR_NAMES[beamline].items():
+        if motor != internal and motor in bounds:
+            if internal in bounds:
+                raise ValueError(
+                    f'motor_bounds contains both "{motor}" and "{internal}", '
+                    "which are the same motor"
+                )
+            bounds[internal] = bounds.pop(motor)
+    return bounds
+
 
 class Goniometer:
     """A class representing a Dark-Field X-ray Microscopy (DFXM) experimental setup.
@@ -21,6 +45,17 @@ class Goniometer:
             (sample stage) and metres (detector translations). Keys are shown in the
             example below:
         eta (:obj:`float`): Azimuth scattering angle in degrees. Default is 0 degrees.
+        beamline (:obj:`str`): ``"ID03"`` (default) or ``"APS"`` for 20-ID-E.
+            Grain maps retain the ImageD11/MIDAS frame in both cases. APS uses
+            positive rotations about the APS laboratory axes (z along the
+            beam, y up) and the motor stack hexapod ``RX`` -> ``omega`` (Ry)
+            -> ``samRZ`` -> ``samRX``, with ``samRX`` on top. For APS,
+            ``motor_bounds`` takes these motor names (the ID03 names ``mu``,
+            ``chi`` and ``phi`` are accepted as aliases for ``RX``, ``samRZ``
+            and ``samRX``) and the results are reported with them. APS detector
+            bounds use ``detector_y`` (vertical) and ``detector_x`` (horizontal).
+        motor_names (:obj:`dict`): Beamline motor name of each internal angle
+            ``mu``, ``omega``, ``chi``, ``phi``.
 
 
     .. code-block:: python
@@ -36,13 +71,30 @@ class Goniometer:
 
     """
 
-    def __init__(self, polycrystal, energy, detector_distance, motor_bounds, eta=0):
+    def __init__(
+        self,
+        polycrystal,
+        energy,
+        detector_distance,
+        motor_bounds,
+        eta=0,
+        beamline="ID03",
+    ):
+        if beamline not in ("ID03", "APS"):
+            raise ValueError('beamline must be "ID03" or "APS"')
         self.polycrystal = polycrystal
         self.energy = energy
         self.wavelength = 12.398419874273968 / self.energy
         self.detector_distance = detector_distance
         self.motor_bounds = motor_bounds
         self.eta = eta
+        self.beamline = beamline
+        self.motor_names = dict(_MOTOR_NAMES[beamline])
+        bounds = _internal_bounds(motor_bounds, beamline)
+        missing = [m for k, m in self.motor_names.items() if k not in bounds]
+        if missing:
+            raise ValueError(f"motor_bounds is missing {missing}")
+        self._detector_vertical = "detector_y" if beamline == "APS" else "detector_z"
 
     def _get_hkls(self):
         """Find all h,k,l miller indices that can diffract at the given energy.
@@ -56,7 +108,9 @@ class Goniometer:
         """
         th_min = 0
         th_max = (
-            np.arctan(self.motor_bounds["detector_z"][1] / self.detector_distance) / 2.0
+            np.arctan(
+                self.motor_bounds[self._detector_vertical][1] / self.detector_distance
+            ) / 2.0
         )
         unit_cell = self.polycrystal.reference_cell.lattice_parameters
         sgno = self.polycrystal.reference_cell.symmetry
@@ -148,7 +202,7 @@ class Goniometer:
                 unreachable reflections have ``np.nan`` values in solution and residuals.
         """
         hkls = self._get_hkls()
-        bez = _Braggez(self.energy, self.motor_bounds)
+        bez = _Braggez(self.energy, self.motor_bounds, beamline=self.beamline)
 
         for g in self.polycrystal.grains:
             goni_angles, residual, success, theta = bez.align(
@@ -172,6 +226,7 @@ class Goniometer:
                     "theta": theta[success],
                     "eta": self.eta,
                 }
+                self._add_motor_names(g.dfxm)
             else:
                 g.dfxm = None
 
@@ -214,7 +269,10 @@ class Goniometer:
             :obj:`pandas.DataFrame`: DataFrame of the reflections found
                 by :func:`find_reflections()`. For each grain, the DataFrame contains
                 column in accordance with the keys in the :attr:`dfxm` dictionary
-                of the grain. see :func:`find_reflections()` for more details.
+                of the grain. At APS the angle columns are named after the
+                motors: ``RX``, ``omega``, ``samRZ`` and ``samRX``. APS detector
+                columns are ``detector_y [mm]`` and
+                ``detector_x [mm]``, measured from the direct beam.
         """
         if not hasattr(self.polycrystal.grains[0], "dfxm"):
             raise ValueError("No reflections available. Run find_reflections() first.")
@@ -224,15 +282,17 @@ class Goniometer:
                 "h",
                 "k",
                 "l",
-                "mu [dgr]",
-                "omega [dgr]",
-                "chi [dgr]",
-                "phi [dgr]",
+                f"{self.motor_names['mu']} [dgr]",
+                f"{self.motor_names['omega']} [dgr]",
+                f"{self.motor_names['chi']} [dgr]",
+                f"{self.motor_names['phi']} [dgr]",
                 "2 theta [dgr]",
                 "eta [dgr]",
-                "detector_z [mm]",
+                f"{self._detector_vertical} [mm]",
             ],
         )
+        if self.beamline == "APS":
+            tab["detector_x [mm]"] = pd.Series(dtype=float)
         i = 0
         for gid, g in enumerate(self.polycrystal.grains):
             if g.dfxm:
@@ -246,10 +306,10 @@ class Goniometer:
                         g.dfxm["eta"],
                     )
                     theta = g.dfxm["theta"][n]
-                    detector_z = (
+                    detector_radius = (
                         1000 * self.detector_distance * np.tan(2 * np.radians(theta))
                     )
-                    tab.loc[i] = [
+                    row = [
                         int(gid),
                         h,
                         k,
@@ -260,8 +320,12 @@ class Goniometer:
                         phi,
                         2 * theta,
                         eta,
-                        detector_z,
+                        detector_radius,
                     ]
+                    if self.beamline == "APS":
+                        row[-1] *= np.cos(np.radians(eta))
+                        row.append(-detector_radius * np.sin(np.radians(eta)))
+                    tab.loc[i] = row
                     i += 1
         return tab
 
@@ -273,7 +337,9 @@ class Goniometer:
         ftol=None,
         mask_unreachable=False,
     ):
-        """Find all Miller indices that can be aligned with the z-axis within motor bounds.
+        """Find Miller indices that can be aligned vertically within motor bounds.
+
+        Vertical is +z at ID03 and +y at APS, both +z in the grain-map frame.
 
         This allows for the identification of various oblique imaging geometries in
         which multiple reflections are reachable by pure z-axis rotations.
@@ -335,7 +401,7 @@ class Goniometer:
                 solution and residual arrays contain np.nan for unreachable lattice normals.
         """
         hkls = self._get_hkls()
-        bsym = _BraggSym(self.energy, self.motor_bounds)
+        bsym = _BraggSym(self.energy, self.motor_bounds, beamline=self.beamline)
 
         for g in self.polycrystal.grains:
             goni_angles, residual, success = bsym.align(
@@ -356,8 +422,14 @@ class Goniometer:
                     "phi": goni_angles[3, success],
                     "residual": residual[success],
                 }
+                self._add_motor_names(g.symmetry_axis)
             else:
                 g.symmetry_axis = None
+
+    def _add_motor_names(self, result):
+        """Make the angles available under the beamline motor names as well."""
+        for internal, motor in self.motor_names.items():
+            result[motor] = result[internal]
 
 
 class _Braggez(object):
@@ -376,6 +448,12 @@ class _Braggez(object):
     Here mu is a rotation about the negative y-axis, omega is a positive rotation about the
     z-axis, chi is a positive rotation about the x-axis, and phi is a positive rotation about
     the y-axis.
+
+    For APS, mu is positive about y in this internal frame and the stacking is
+    unchanged (chi below phi). In APS laboratory coordinates this is
+    Rx(RX) Ry(omega) Rz(samRZ) Rx(samRX), where mu = hexapod RX, chi = samRZ and
+    phi = samRX. ``motor_bounds`` may use either set of names.
+    Input UB matrices are always in the ImageD11/MIDAS frame.
 
     The target reflection is by default defined as lying in the xz-plane, with eta=0 (ez).
     This is also known as the simplified dfxm geometry.
@@ -397,6 +475,7 @@ class _Braggez(object):
             e.g. {"mu": (0, 20), "omega": (-22, 22), "chi": (-5, 5), "phi": (-5, 5)}
         epsilon (float): Small number used to compute the numerical derivatives during optimization
         verbose (bool): If True, print the results and iteration of the optimization
+        beamline (str): ``"ID03"`` (default) or ``"APS"`` for 20-ID-E.
 
     Attributes:
         energy (float): Energy of the X-ray beam in keV
@@ -407,14 +486,25 @@ class _Braggez(object):
 
     """
 
-    def __init__(self, energy, motor_bounds, epsilon=1e-6, verbose=False):
+    def __init__(self, energy, motor_bounds, epsilon=1e-6, verbose=False, beamline="ID03"):
+        if beamline not in ("ID03", "APS"):
+            raise ValueError('beamline must be "ID03" or "APS"')
         self.energy = energy
         self.wavelength = 12.398419874273968 / energy
-        self.motor_bounds = motor_bounds
+        self.motor_bounds = _internal_bounds(motor_bounds, beamline)
+        self.beamline = beamline
 
         self._xhat = np.array([[1], [0], [0]])
         self._yhat = np.array([[0], [1], [0]])
         self._zhat = np.array([[0], [0], [1]])
+
+        # Axes are in the grain-map frame; parameter order is mu, omega, chi, phi.
+        if beamline == "ID03":
+            self._rotation_axes = (-self._yhat, self._zhat, self._xhat, self._yhat)
+            self._rotation_order = (0, 1, 2, 3)
+        else:
+            self._rotation_axes = (self._yhat, self._zhat, self._xhat, self._yhat)
+            self._rotation_order = (0, 1, 2, 3)
 
         self._set_rotational_increments(epsilon)
         self.epsilon = epsilon
@@ -433,20 +523,25 @@ class _Braggez(object):
         self.dR_phiT = self.R_phi(-epsilon)
 
     def R_mu(self, mu):
-        return Rotation.from_rotvec((mu * (-self._yhat)).T)
+        return Rotation.from_rotvec((mu * self._rotation_axes[0]).T)
 
     def R_omega(self, omega):
-        return Rotation.from_rotvec((omega * self._zhat).T)
+        return Rotation.from_rotvec((omega * self._rotation_axes[1]).T)
 
     def R_chi(self, chi):
-        return Rotation.from_rotvec((chi * self._xhat).T)
+        return Rotation.from_rotvec((chi * self._rotation_axes[2]).T)
 
     def R_phi(self, phi):
-        return Rotation.from_rotvec((phi * (self._yhat)).T)
+        return Rotation.from_rotvec((phi * self._rotation_axes[3]).T)
+
+    def _rotations(self, x):
+        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
+        rotations = (self.R_mu(mu), self.R_omega(omega), self.R_chi(chi), self.R_phi(phi))
+        return [rotations[i] for i in self._rotation_order]
 
     def R(self, x):
-        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
-        return self.R_mu(mu) * self.R_omega(omega) * self.R_chi(chi) * self.R_phi(phi)
+        R1, R2, R3, R4 = self._rotations(x)
+        return R1 * R2 * R3 * R4
 
     def _arccos(self, ang, tol):
         """Simply to supress the annoying rounding warnings from numpy"""
@@ -499,11 +594,11 @@ class _Braggez(object):
             (:obj:`numpy.ndarray`): The aggregated cost.
             (:obj:`numpy.ndarray`): The gradient of the cost function, shape (4*N,)
         """
-        mu, omega, chi, phi = x.reshape(4, len(x) // 4)
-        R1 = self.R_mu(mu)
-        R2 = self.R_omega(omega)
-        R3 = self.R_chi(chi)
-        R4 = self.R_phi(phi)
+        R1, R2, R3, R4 = self._rotations(x)
+        increments = (self.dR_mu, self.dR_omega, self.dR_chi, self.dR_phi)
+        inverse = (self.dR_muT, self.dR_omegaT, self.dR_chiT, self.dR_phiT)
+        dR1, dR2, dR3, dR4 = [increments[i] for i in self._rotation_order]
+        dR1T, dR2T, dR3T, dR4T = [inverse[i] for i in self._rotation_order]
 
         # for speed optimization
         R12 = R1 * R2
@@ -518,22 +613,23 @@ class _Braggez(object):
         # second order central difference scheme
         N = nhat.shape[1]
         jac = np.zeros((4 * N,))
+        i1, i2, i3, i4 = self._rotation_order
 
-        jac[0:N] = self.cost_vector(
-            self.dR_mu * R1234, nhat, target
-        ) - self.cost_vector(self.dR_muT * R1234, nhat, target)
+        jac[i1 * N : (i1 + 1) * N] = self.cost_vector(
+            dR1 * R1234, nhat, target
+        ) - self.cost_vector(dR1T * R1234, nhat, target)
 
-        jac[N : 2 * N] = self.cost_vector(
-            R1 * self.dR_omega * R234, nhat, target
-        ) - self.cost_vector(R1 * self.dR_omegaT * R234, nhat, target)
+        jac[i2 * N : (i2 + 1) * N] = self.cost_vector(
+            R1 * dR2 * R234, nhat, target
+        ) - self.cost_vector(R1 * dR2T * R234, nhat, target)
 
-        jac[2 * N : 3 * N] = self.cost_vector(
-            R12 * self.dR_chi * R34, nhat, target
-        ) - self.cost_vector(R12 * self.dR_chiT * R34, nhat, target)
+        jac[i3 * N : (i3 + 1) * N] = self.cost_vector(
+            R12 * dR3 * R34, nhat, target
+        ) - self.cost_vector(R12 * dR3T * R34, nhat, target)
 
-        jac[3 * N :] = self.cost_vector(
-            R123 * self.dR_phi * R4, nhat, target
-        ) - self.cost_vector(R123 * self.dR_phiT * R4, nhat, target)
+        jac[i4 * N : (i4 + 1) * N] = self.cost_vector(
+            R123 * dR4 * R4, nhat, target
+        ) - self.cost_vector(R123 * dR4T * R4, nhat, target)
 
         jac = jac / (2 * self.epsilon)
 
@@ -589,7 +685,7 @@ class _Braggez(object):
         nhat = Q / np.linalg.norm(Q, axis=0)
         d = 1 / np.linalg.norm(Q, axis=0)
         theta = np.arcsin(self.wavelength / (2 * d))
-        target = self.R_mu(theta).apply(self._zhat.T).T
+        target = Rotation.from_rotvec((-theta * self._yhat).T).apply(self._zhat.T).T
 
         # implements arbitrary eta scattering angle
         R_eta = Rotation.from_rotvec(np.radians(eta) * np.array([1, 0, 0]))
@@ -759,6 +855,9 @@ class _BraggSym(_Braggez):
     the y-axis.
 
     The target reflection is always defined as the z-axis.
+
+    For APS, the axes and stacking order follow _Braggez. The target is still
+    internal +z, which is APS laboratory +y.
 
     The mathmatical problem is defined as follows:
         Let nhat be a vector on the unit sphere representing the target reflection in its

@@ -1,6 +1,7 @@
 import re
 
 import ImageD11.grain
+import ImageD11.unitcell
 import numpy as np
 import xfab
 import xfab.symmetry
@@ -172,6 +173,144 @@ class TDXRDMap(Polycrystal):
         for g, t in zip(grains, translations):
             g.translation = t
             g.ref_unitcell = reference_cell
+        return cls(grains)
+
+    @classmethod
+    def from_midas(cls, grainfile, lattice_parameters=None, symmetry=None):
+        """Load a single-phase MIDAS ``Grains.csv`` with fitted lattice parameters.
+
+        Columns are read by name. Orientations and positions retain the MIDAS
+        rotation-stage frame; no sample or laboratory frame rotation is applied.
+        MIDAS and ImageD11 both use crystal-to-sample orientation matrices and
+        the same reciprocal basis, in inverse angstroms without a 2*pi factor.
+
+        Each grain has a consecutive ``id``, its original ``midas_id``, and a
+        ``midas`` dictionary containing all source columns without conversion.
+        Positions and radii are in micrometres. The eFab/eKen columns are kept
+        in microstrain, separate from the strain computed from the fitted cell.
+
+        Args:
+            grainfile (:obj:`str`): Path to the MIDAS grain table.
+            lattice_parameters (:obj:`iterable`): Reference cell parameters
+                [a, b, c, alpha, beta, gamma], in angstroms and degrees.
+                Defaults to the reference lattice in the file header.
+            symmetry (:obj:`int`): Space group number. Defaults to the file header.
+
+        Returns:
+            :obj:`crispy.TDXRDMap`: The imported grain map.
+
+        Raises:
+            ValueError: If required columns or reference cell data are missing,
+                the table is empty, contains multiple phases, or has invalid grains.
+        """
+        columns = None
+        with open(grainfile) as f:
+            for line in f:
+                if not line.lstrip().startswith("%"):
+                    continue
+                header = line.lstrip().lstrip("%").strip()
+                if "O11" in header.split():
+                    columns = header.split()
+                    break
+                if header.startswith("NumPhases") and int(header.split()[1]) != 1:
+                    raise ValueError("MIDAS imports require a single phase")
+                if header.startswith("SpaceGroup:") and symmetry is None:
+                    symmetry = int(header.split(":", 1)[1])
+                if (
+                    header.startswith("Lattice Parameter:")
+                    and lattice_parameters is None
+                ):
+                    lattice_parameters = [
+                        float(x) for x in header.split(":", 1)[1].split()
+                    ]
+            if columns is None:
+                raise ValueError("Missing MIDAS column header")
+            rows = [
+                line
+                for line in f
+                if line.strip() and not line.lstrip().startswith("%")
+            ]
+
+        if not rows:
+            raise ValueError("MIDAS table contains no grains")
+        if lattice_parameters is None or symmetry is None:
+            raise ValueError(
+                "MIDAS reference lattice parameters and symmetry are required"
+            )
+        if symmetry not in range(1, 231):
+            raise ValueError("MIDAS symmetry must be a space group number from 1 to 230")
+        symmetry = int(symmetry)
+
+        id_column = "GrainID" if "GrainID" in columns else "ID"
+        orientation_columns = [
+            f"O{i}{j}" for i in range(1, 4) for j in range(1, 4)
+        ]
+        cell_columns = ["a", "b", "c", "alpha", "beta", "gamma"]
+        required = (
+            [id_column] + orientation_columns + ["X", "Y", "Z"] + cell_columns
+        )
+        if len(set(columns)) != len(columns) or any(
+            c not in columns for c in required
+        ):
+            raise ValueError("Missing or duplicate MIDAS grain columns")
+        data = np.loadtxt(rows, ndmin=2)
+        if data.shape[1] != len(columns):
+            raise ValueError("MIDAS data does not match the column header")
+
+        ids = data[:, columns.index(id_column)]
+        if (
+            not np.all(np.isfinite(ids))
+            or np.any(ids != np.floor(ids))
+            or len(np.unique(ids)) != len(ids)
+        ):
+            raise ValueError("MIDAS grain IDs must be unique integers")
+        if "PhaseNr" in columns:
+            phases = data[:, columns.index("PhaseNr")]
+            if not np.all(np.isfinite(phases)) or len(np.unique(phases)) != 1:
+                raise ValueError("MIDAS imports require a single phase")
+
+        orientations = data[:, [columns.index(c) for c in orientation_columns]]
+        orientations = orientations.reshape(-1, 3, 3)
+        # MIDAS tables may round orientation entries to six decimal places.
+        if (
+            not np.all(np.isfinite(orientations))
+            or not np.allclose(
+                orientations @ orientations.transpose(0, 2, 1),
+                np.eye(3),
+                atol=1e-5,
+                rtol=0,
+            )
+            or np.any(np.linalg.det(orientations) <= 0)
+        ):
+            raise ValueError("Invalid MIDAS orientation matrix")
+        translations = data[:, [columns.index(c) for c in ["X", "Y", "Z"]]]
+        if not np.all(np.isfinite(translations)):
+            raise ValueError("Invalid MIDAS grain position")
+        fitted_cells = data[:, [columns.index(c) for c in cell_columns]]
+        cells = np.vstack((lattice_parameters, fitted_cells))
+        if (
+            not np.all(np.isfinite(cells))
+            or np.any(cells[:, :3] <= 0)
+            or np.any(cells[:, 3:] <= 0)
+            or np.any(cells[:, 3:] >= 180)
+        ):
+            raise ValueError("Invalid MIDAS lattice parameters")
+        ca, cb, cg = np.cos(np.radians(cells[:, 3:])).T
+        if np.any(1 + 2 * ca * cb * cg - ca**2 - cb**2 - cg**2 <= 0):
+            raise ValueError("MIDAS lattice angles must define a positive volume")
+
+        reference_cell = ImageD11.unitcell.unitcell(lattice_parameters, symmetry)
+        grains = []
+        for row, u, t, cell, gid in zip(
+            data, orientations, translations, fitted_cells, ids
+        ):
+            B = ImageD11.unitcell.unitcell(cell).B
+            ubi = np.linalg.inv(u @ B)
+            g = ImageD11.grain.grain(ubi, translation=t)
+            g.ref_unitcell = reference_cell
+            g.midas_id = int(gid)
+            g.midas = dict(zip(columns, row))
+            grains.append(g)
         return cls(grains)
 
     def tesselate(self):
