@@ -205,6 +205,44 @@ using ImageD11. Internal ``grain.id`` values are consecutive array indices;
 memory and is not included by ImageD11's grain-file writer.
 
 
+APS 20-ID-E geometry
+=====================================================================
+
+Use ``beamline="APS"`` with the same grain maps and workflow:
+
+.. code-block:: python
+
+    motor_bounds = {
+        "mu": (-20, 20),       # ZONDA Rx, degrees
+        "omega": (-180, 180),  # Labmotion Ry, degrees
+        "phi": (-8, 8),        # Kohzu samRX, degrees
+        "chi": (-8, 8),        # Kohzu samRZ, degrees
+        "detector_y": (-0.04, 1.96),  # vertical, metres; example limits
+        "detector_x": (-0.169, 1.16),  # horizontal, metres; example limits
+    }
+    goniometer = crispy.dfxm.Goniometer(
+        grain_map, energy=30, detector_distance=4,
+        motor_bounds=motor_bounds, beamline="APS",
+    )
+    goniometer.find_reflections()
+    df = goniometer.table_of_reflections()
+
+APS uses +z along the beam and +y up. The model assumes right-handed positive
+rotations and Kohzu Rx below Rz, giving
+``R = Rx(mu) @ Ry(omega) @ Rx(phi) @ Rz(chi)`` in APS coordinates. The axis
+definitions and stacking order are set in ``_Braggez.__init__``. The default
+``beamline="ID03"`` retains the existing geometry.
+
+Grain positions and UB matrices remain in the ImageD11/MIDAS frame; do not
+permute them before passing them to the goniometer. Angles use the same assumed
+reference pose as the ID03 model. With only a MIDAS wedge W, APS ``mu = -W``.
+The model does not read motor metadata or calculate sample-centering moves.
+
+The reflection table retains ``mu``, ``omega``, ``chi`` and ``phi`` and reports
+detector offsets along APS x and y in millimetres. Eta is zero towards +y and
+positive towards -x. ``find_symmetry_axis()`` targets APS +y (vertical).
+
+
 Installation
 =====================================================================
 

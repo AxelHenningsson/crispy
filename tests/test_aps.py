@@ -118,8 +118,51 @@ class TestAPS(unittest.TestCase):
             self.assertGreaterEqual(angle, bounds[name][0])
             self.assertLessEqual(angle, bounds[name][1])
 
+    def test_find_reflections_and_detector_coordinates(self):
+        pc = self.grain_map()
+        ubi, positions = pc.ubi.copy(), pc.centroids.copy()
+        goni = crispy.dfxm.Goniometer(pc, 30, 4, self.bounds, eta=12, beamline="APS")
+        goni.find_reflections(maxiter=800, ftol=1e-10, alignment_tol=0.01)
+        result = pc.grains[0].dfxm
+        self.assertIsNotNone(result)
+        for i, hkl in enumerate(result["hkl"].T):
+            angles = np.radians([result[k][i] for k in ["mu", "omega", "chi", "phi"]])
+            q = self.aps_rotation(angles) @ self.axes @ pc.grains[0].ub @ hkl
+            outgoing = q + np.array([0, 0, 1 / goni.wavelength])
+            self.assertAlmostEqual(
+                np.linalg.norm(outgoing), 1 / goni.wavelength, places=3
+            )
+            self.assertAlmostEqual(np.degrees(np.arctan2(-q[0], q[1])), 12, places=1)
+        table = goni.table_of_reflections()
+        radius = 4000 * np.tan(np.radians(table["2 theta [dgr]"]))
+        np.testing.assert_allclose(
+            table["detector_y [mm]"], radius * np.cos(np.radians(12))
+        )
+        np.testing.assert_allclose(
+            table["detector_x [mm]"], -radius * np.sin(np.radians(12))
+        )
+        self.assertNotIn("detector_z [mm]", table)
+        np.testing.assert_array_equal(pc.ubi, ubi)
+        np.testing.assert_array_equal(pc.centroids, positions)
 
+    def test_find_symmetry_axis(self):
+        pc = self.grain_map(diffracting=False)
+        goni = crispy.dfxm.Goniometer(pc, 30, 4, self.bounds, beamline="APS")
+        goni.find_symmetry_axis(maxiter=800, ftol=1e-10, alignment_tol=0.01)
+        result = pc.grains[0].symmetry_axis
+        self.assertIsNotNone(result)
+        for i, hkl in enumerate(result["hkl"].T):
+            angles = np.radians([result[k][i] for k in ["mu", "omega", "chi", "phi"]])
+            q = self.aps_rotation(angles) @ self.axes @ pc.grains[0].ub @ hkl
+            np.testing.assert_allclose(q / np.linalg.norm(q), [0, 1, 0], atol=2e-4)
 
+    def test_invalid_beamline(self):
+        with self.assertRaisesRegex(ValueError, "beamline"):
+            crispy.dfxm._Braggez(30, self.bounds, beamline="unknown")
+        with self.assertRaisesRegex(ValueError, "beamline"):
+            crispy.dfxm.Goniometer(
+                self.grain_map(), 30, 4, self.bounds, beamline="unknown"
+            )
 
 
 if __name__ == "__main__":

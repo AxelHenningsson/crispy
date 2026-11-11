@@ -21,6 +21,11 @@ class Goniometer:
             (sample stage) and metres (detector translations). Keys are shown in the
             example below:
         eta (:obj:`float`): Azimuth scattering angle in degrees. Default is 0 degrees.
+        beamline (:obj:`str`): ``"ID03"`` (default) or ``"APS"`` for 20-ID-E.
+            Grain maps retain the ImageD11/MIDAS frame in both cases. APS uses
+            positive rotations: mu = ZONDA Rx, omega = Labmotion Ry,
+            phi = Kohzu Rx, chi = Kohzu Rz, with Rx below Rz. APS detector
+            bounds use ``detector_y`` (vertical) and ``detector_x`` (horizontal).
 
 
     .. code-block:: python
@@ -36,13 +41,25 @@ class Goniometer:
 
     """
 
-    def __init__(self, polycrystal, energy, detector_distance, motor_bounds, eta=0):
+    def __init__(
+        self,
+        polycrystal,
+        energy,
+        detector_distance,
+        motor_bounds,
+        eta=0,
+        beamline="ID03",
+    ):
+        if beamline not in ("ID03", "APS"):
+            raise ValueError('beamline must be "ID03" or "APS"')
         self.polycrystal = polycrystal
         self.energy = energy
         self.wavelength = 12.398419874273968 / self.energy
         self.detector_distance = detector_distance
         self.motor_bounds = motor_bounds
         self.eta = eta
+        self.beamline = beamline
+        self._detector_vertical = "detector_y" if beamline == "APS" else "detector_z"
 
     def _get_hkls(self):
         """Find all h,k,l miller indices that can diffract at the given energy.
@@ -56,7 +73,9 @@ class Goniometer:
         """
         th_min = 0
         th_max = (
-            np.arctan(self.motor_bounds["detector_z"][1] / self.detector_distance) / 2.0
+            np.arctan(
+                self.motor_bounds[self._detector_vertical][1] / self.detector_distance
+            ) / 2.0
         )
         unit_cell = self.polycrystal.reference_cell.lattice_parameters
         sgno = self.polycrystal.reference_cell.symmetry
@@ -148,7 +167,7 @@ class Goniometer:
                 unreachable reflections have ``np.nan`` values in solution and residuals.
         """
         hkls = self._get_hkls()
-        bez = _Braggez(self.energy, self.motor_bounds)
+        bez = _Braggez(self.energy, self.motor_bounds, beamline=self.beamline)
 
         for g in self.polycrystal.grains:
             goni_angles, residual, success, theta = bez.align(
@@ -214,7 +233,8 @@ class Goniometer:
             :obj:`pandas.DataFrame`: DataFrame of the reflections found
                 by :func:`find_reflections()`. For each grain, the DataFrame contains
                 column in accordance with the keys in the :attr:`dfxm` dictionary
-                of the grain. see :func:`find_reflections()` for more details.
+                of the grain. APS detector columns are ``detector_y [mm]`` and
+                ``detector_x [mm]``, measured from the direct beam.
         """
         if not hasattr(self.polycrystal.grains[0], "dfxm"):
             raise ValueError("No reflections available. Run find_reflections() first.")
@@ -230,9 +250,11 @@ class Goniometer:
                 "phi [dgr]",
                 "2 theta [dgr]",
                 "eta [dgr]",
-                "detector_z [mm]",
+                f"{self._detector_vertical} [mm]",
             ],
         )
+        if self.beamline == "APS":
+            tab["detector_x [mm]"] = pd.Series(dtype=float)
         i = 0
         for gid, g in enumerate(self.polycrystal.grains):
             if g.dfxm:
@@ -246,10 +268,10 @@ class Goniometer:
                         g.dfxm["eta"],
                     )
                     theta = g.dfxm["theta"][n]
-                    detector_z = (
+                    detector_radius = (
                         1000 * self.detector_distance * np.tan(2 * np.radians(theta))
                     )
-                    tab.loc[i] = [
+                    row = [
                         int(gid),
                         h,
                         k,
@@ -260,8 +282,12 @@ class Goniometer:
                         phi,
                         2 * theta,
                         eta,
-                        detector_z,
+                        detector_radius,
                     ]
+                    if self.beamline == "APS":
+                        row[-1] *= np.cos(np.radians(eta))
+                        row.append(-detector_radius * np.sin(np.radians(eta)))
+                    tab.loc[i] = row
                     i += 1
         return tab
 
@@ -273,7 +299,9 @@ class Goniometer:
         ftol=None,
         mask_unreachable=False,
     ):
-        """Find all Miller indices that can be aligned with the z-axis within motor bounds.
+        """Find Miller indices that can be aligned vertically within motor bounds.
+
+        Vertical is +z at ID03 and +y at APS, both +z in the grain-map frame.
 
         This allows for the identification of various oblique imaging geometries in
         which multiple reflections are reachable by pure z-axis rotations.
@@ -335,7 +363,7 @@ class Goniometer:
                 solution and residual arrays contain np.nan for unreachable lattice normals.
         """
         hkls = self._get_hkls()
-        bsym = _BraggSym(self.energy, self.motor_bounds)
+        bsym = _BraggSym(self.energy, self.motor_bounds, beamline=self.beamline)
 
         for g in self.polycrystal.grains:
             goni_angles, residual, success = bsym.align(
