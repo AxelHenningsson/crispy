@@ -9,8 +9,8 @@ class GrainMap:
     """Factory class for creating :class:`crispy.Polycrystal <crispy._polycrystal.Polycrystal>` objects.
 
     Creates :class:`crispy.Polycrystal <crispy._polycrystal.Polycrystal>` objects from
-    either a list of :obj:`ImageD11.grain.grain` objects or an HDF5 file containing
-    grain information. Supports both 3DXRD grain maps and lab-DCT grain volumes.
+    a list of :obj:`ImageD11.grain.grain` objects, an HDF5 file, or a MIDAS
+    ``Grains.csv`` file. Supports both 3DXRD grain maps and lab-DCT grain volumes.
 
 
     Example:
@@ -53,13 +53,15 @@ class GrainMap:
     Args:
         grain_data (:obj:`str` or :obj:`list` of :obj:`ImageD11.grain.grain`):
             Either an absolute path to an HDF5 file containing grain data (3DXRD map
-            or lab-DCT volume), or a list of ImageD11 grain objects. Example files
-            can be found in the `crispy.assets` module.
+            or lab-DCT volume), a MIDAS ``Grains.csv`` file, or a list of ImageD11
+            grain objects. Example files can be found in the `crispy.assets` module.
         group_name (:obj:`str`): Name of the HDF5 group containing grain information.
             Only used for 3DXRD HDF5 files. Defaults to "grains".
         lattice_parameters (:obj:`numpy.ndarray`): Crystal lattice parameters
-            [a, b, c, alpha, beta, gamma]. Defaults to None.
-        symmetry (:obj:`int`): Symmetry group of the phase. Defaults to None.
+            [a, b, c, alpha, beta, gamma]. For MIDAS, defaults to the reference
+            lattice in the file header. Defaults to None otherwise.
+        symmetry (:obj:`int`): Space group number. For MIDAS, defaults to the
+            file header. Defaults to None otherwise.
 
     Returns:
         Either :class:`crispy.TDXRDMap <crispy._tdxrd_map.TDXRDMap>` or
@@ -67,7 +69,7 @@ class GrainMap:
 
     Raises:
         ValueError: If grain_data is neither a list of grain objects nor a valid
-            HDF5 file path.
+            HDF5 or MIDAS CSV file path.
     """
 
     def __new__(
@@ -76,8 +78,10 @@ class GrainMap:
         if isinstance(grain_data, (list, np.ndarray)):
             return TDXRDMap(grain_data, group_name, lattice_parameters, symmetry)
         elif isinstance(grain_data, str):
+            if grain_data.endswith(".csv"):
+                return TDXRDMap.from_midas(grain_data, lattice_parameters, symmetry)
             if not grain_data.endswith(".h5"):
-                raise ValueError("File path does not end with .h5")
+                raise ValueError("File path does not end with .h5 or .csv")
             with h5py.File(grain_data, "r") as f:
                 if "LabDCT" in list(f.keys()):
                     return LabDCTVolume(grain_data)
@@ -88,7 +92,7 @@ class GrainMap:
         else:
             raise ValueError(
                 "grain_data must be an array of ImageD11.grain.grain objects or a path \
-                    to an HDF5 file."
+                    to an HDF5 or MIDAS CSV file."
             )
 
 

@@ -159,6 +159,52 @@ It is also possible to load a 3DXRD grain map from a file tesselate and visualiz
 .. image:: https://github.com/AxelHenningsson/crispy/blob/main/docs/source/images/readme_tdxrd.png?raw=true
 
 
+MIDAS grain maps
+=====================================================================
+
+Single-phase MIDAS ``Grains.csv`` files with fitted lattice parameters can
+be loaded directly:
+
+.. code-block:: python
+
+    import crispy
+
+    grain_map = crispy.GrainMap("Grains.csv")
+    grain = grain_map.grains[0]
+    print(grain.midas_id)                # original MIDAS grain ID
+    print(grain.midas["Confidence"])     # source columns, unchanged
+
+The reference lattice and space group are read from the file header. They can
+also be supplied using ``lattice_parameters`` and ``symmetry``. Each grain's
+UBI matrix is constructed from its orientation and fitted lattice parameters,
+preserving the lattice deformation.
+
+MIDAS and ImageD11 use the same reciprocal basis and crystal-to-sample matrix
+convention: ``UBI = inv(O @ B)``, with ``B`` in inverse angstroms, without a
+``2*pi`` factor. Orientations and positions remain in the MIDAS rotation-stage
+frame. No axis permutation or mounting rotation is applied.
+
+The laboratory axes are right handed: +x is downstream along the beam, +z is
+nominally up, and +y completes the frame. Positive omega rotates +x towards +y;
+eta is zero along +z and +90 degrees along -y. With MIDAS ``Wedge = W``, stage
+vectors transform to the laboratory as ``R_y(-W) @ R_z(omega) @ vector``. The
+stage frame equals the laboratory frame at zero omega only when W is zero.
+
+This matches crispy's default ID03 rotation with ``mu = W`` and
+``chi = phi = 0``. Other motor angles require the beamline's rotation order,
+signs and zero offsets;
+``chi`` is not interchangeable between the packages. The CSV does not provide
+this geometry or sample mounting offsets. Detector image flips and encoder
+sign corrections belong to the MIDAS reduction and are not reapplied on import.
+
+Positions and radii remain in micrometres. The ``grain.midas`` dictionary keeps
+all source columns in their original units, including ``eFab`` and ``eKen``
+in microstrain. These are separate from ``grain_map.strain``, which is computed
+using ImageD11. Internal ``grain.id`` values are consecutive array indices;
+``grain.midas_id`` preserves the source identity. MIDAS metadata is held in
+memory and is not included by ImageD11's grain-file writer.
+
+
 Installation
 =====================================================================
 
