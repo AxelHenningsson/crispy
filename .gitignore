@@ -27,7 +27,6 @@ share/python-wheels/
 MANIFEST
 
 
-sandbox/
 .vscode/
 
 tmp_profile_dump
